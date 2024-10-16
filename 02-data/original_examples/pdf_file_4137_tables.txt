@@ -1,0 +1,518 @@
+                           Infrared      Array      Sensor
+
+                                                                                          AMGU4241
+                           Grid-EYE        Unit    Type                           Model No.
+Installation Instructions
+
+
+  Please make sure to read this manual before installation.
+    | Safety Precautions Please make sure to follow                   |
+|:----------------------------------------------------------------|
+| Warning                                                         |
+| ● Insert cables deep enough for ensuring a wire connection.     |
+| Inadequate insertion may produce heat, causing burnout or fire. |
+| Must be followed                                                | Advance Check Items and Installation Requirements
+
+                                                        1. Avoid incorrect wire connections and short circuits.
+                                                        2. Wipe off stains using soft, dry cloth without scratching.
+                      | Warning          | None                                                           |
+|:-----------------|:---------------------------------------------------------------|
+| ● I              | nsert cables deep enough for ensuring a wire connection.       |
+| I                | nadequate insertion may produce heat, causing burnout or fire. |
+| Must be followed |                                                                |
+                                                          Avoid using thinners, alkaline detergents, acid detergents, cleansers,
+                                                          pesticides, etc. Their use may cause a failure.
+
+
+                                                                      | Detection Range                                            |
+|:-----------------------------------------------------------|
+| ▼Detection range (estimate) when the ceiling is 2.7 m high |
+| Operation lamp                                             |
+| Illuminates red when a human                               |
+| body is detected                                           |
+| m                                                          |
+| 6.1                                                        |
+| □3.6 m                                                     |
+| Note: The detection range                                  |
+| varies depending on the                                    |
+| installation height.                                       |
+| ● The ceiling height must be 2.7 m or lower.               |
+| The product cannot be used on a sloped ceiling.            |
+
+ | This product detects the presence of humans by measuring the temperature        | None   | None                                         | None                                         | None   | None   |
+| distribution in the detection area and detecting the movement of objects that   |        |                                              |                                              |        |        |
+| have a higher temperature than the background.                                  |        |                                              |                                              |        |        |
+| Avoid installation in the following places.                                     |        |                                              |                                              |        |        |
+| * A human body may not be detected when the difference between its surface      |        |                                              |                                              |        |        |
+| temperature and the room temperature is small.                                  |        |                                              |                                              |        |        |
+|:--------------------------------------------------------------------------------|:-------|:---------------------------------------------|:---------------------------------------------|:-------|:-------|
+| Near the air outlet of an air                                                   |        | A place with rapid temperature               |                                              |        |        |
+| conditioner, etc.                                                               |        | changes                                      |                                              |        |        |
+| A place with highly reflective                                                  |        | A place with an automated moving             |                                              |        |        |
+| floor surfaces                                                                  |        | object                                       |                                              |        |        |
+|                                                                                 |        | A place where the floor temperature          |                                              |        |        |
+|                                                                                 |        | is high due to sunlight, floor heating, etc. |                                              |        |        |
+|                                                                                 |        |                                              | A place where the floor temperature          |        |        |
+|                                                                                 |        |                                              | is high due to sunlight, floor heating, etc. |        |        || None   |    | None   |
+|:-------|:---|:-------|
+|        |    |        ||    |    |
+|----|----||    |    |
+|----|----|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                            | How to Mount                |
+|:----------------------------|
+| φ +5                        |
+| 100 mm                      |
+| 0                           |
+| Ceiling board thickness:    |
+| 30 mm or less               |
+| Depth above the ceiling     |
+| surface: 50 mm or more      |
+| Clamping metal fitting      |
+| Lower the fitting to fix by |
+| turning the screw with      |
+| a Philips screwdriver.      |
+| * Remove the protection     |
+| film attached to the sensor |
+| Claw part                   |
+| surface before mounting     |
+| the cover.                  |
+| Sensor                      |
+| Note: Do not touch the      |
+| sensor surface.             |
+| Removal                     |
+| groove                      |
+| Cover                       |
+| How to Remove the Cover     |
+| Turn right and left         |
+| Cover                       |
+| Screwdriver                 |
+| Removal groove              |
+| Ceiling surface             |
+| * Check the detection       |
+| range after installation.   |
+
+
+
+
+
+
+
+
+
+
+| Wiring Diagram                                                                    |
+|:----------------------------------------------------------------------------------|
+| ■ RS485 Communication line wiring                                                 |
+| Power                                                                             |
+| supply Input Feed Termination                                                     |
+| (DC24V)                                                                           |
+| Termination side                                                                  |
+| 入力 送り 終端 入力 送り 終端                                                     |
+| ＋−＋−E E ＋−＋−E E                                                               |
+| DC24V DC24V DC24V DC24V                                                           |
+| OND OND OND OND                                                                   |
+| 入力 送り 入力 送り                                                               |
+| Control                                                                           |
+| device                                                                            |
+| The termination-side device's                                                     |
+| feed and termination terminals                                                    |
+| D class grounding D class grounding                                               |
+| must be connected to each other.                                                  |
+| • Use shielded twisted pair cables.                                               |
+| • The shield must be grounded at one end. Ground terminals are for grounding only |
+| and require D class grounding.                                                    |
+| • Use transition wiring for device connections. (Branch wiring not applicable)    |
+| ■ Terminal arrangement                                                            |
+| DC24V GND DC24VGND ＋ − ＋ − E E                                                  |
+| Power Power Contact output                                                        |
+| supply supply RS485 RS485 Termination                                             |
+| (Input) (Feed)                                                                    |
+| (Input) (Feed)                                                                    |
+| ■ Applicable cables                                                               |
+| Power cable                                                                       |
+| φ0.65 toφ0.9 Cu (copper) Single wire only 10 mm                                   |
+| RS485 signal cable                                                                |
+| φ0.65 toφ0.9 CPEV cable                                                           ||    | None   |
+|:---|:-------|
+|    |        ||    |
+|:---|
+|    |
+|    ||    |
+|:---|
+|    |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                 | RS485 Address Setting                     |
+|:------------------------------------------|
+| Area mask setting                         |
+| switch (4-bit)                            |
+| Binary numbers Example of address setting |
+| Address: 1                                |
+| 32 16 8 4 2 1                             |
+| ON                                        |
+| ON                                        |
+| 1 2 3 4 5 6                               |
+| 1 2 3 4 5 6                               |
+| Address: 8                                |
+| ON                                        |
+| Address setting switch                    |
+| 1 2 3 4 5 6                               |
+| Reset switch (6-bit)                      |
+| Press the reset switch                    |
+| after setting changes.                    |
+| * Use binary numbers for address setting. |
+
+
+
+
+                                                                                               | O   | N   |    |    |    |    |    |    |    |    |    |    |    |
+|-----|-----|----|----|----|----|----|----|----|----|----|----|----|
+                     | Mask setting area   |
+|:--------------------|
+| No masking          |
+|                     |
+|                     |
+|                     |
+
+
+        | Area Mask Function                                                                                                                                        |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Setting the 4-bit switch enables the masking of the detection area. (The shaded area will not be detected.) Press the reset switch after setting changes. |
+| Setting Mask setting area Setting Mask setting area Setting Mask setting area                                                                             |
+| ON ON ON                                                                                                                                                  |
+| No masking                                                                                                                                                |
+| 1 2 3 4 1 2 3 4 1 2 3 4                                                                                                                                   |
+| ON ON ON                                                                                                                                                  |
+| 1 2 3 4 1 2 3 4 1 2 3 4                                                                                                                                   |
+| ON ON ON                                                                                                                                                  |
+| 1 2 3 4 1 2 3 4 1 2 3 4                                                                                                                                   |
+| X                                                                                                                                                         |
+| Coordinates                                                                                                                                               |
+| 0 1 2 3                                                                                                                                                   |
+| ON ON                                                                                                                                                     |
+| 0                                                                                                                                                         |
+| 1 2 3 4 1 2 3 4 Y 1                                                                                                                                       |
+| 2                                                                                                                                                         |
+| The operation                                                                                                                                             |
+| 3                                                                                                                                                         |
+| lamp side                                                                                                                                                 | | Setting   | Mask setting area   |
+|:----------|:--------------------|
+| ON        |                     |
+| 1 2 3 4   |                     |
+| ON        |                     |
+| 1 2 3 4   |                     |
+| ON        |                     |
+| 1 2 3 4   |                     |
+| ON        |                     |
+| 1 2 3 4   |                     | | Setting   | Mask setting area   |
+|:----------|:--------------------|
+| ON        |                     |
+| 1 2 3 4   |                     |
+| ON        |                     |
+| 1 2 3 4   |                     |
+| ON        |                     |
+| 1 2 3 4   |                     ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |
+|:---|:---|:---|
+|    |    |    |
+                                            |    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    | |    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |
+|:---|:---|:---|
+|    |    |    |
+
+
+
+
+                                            |    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    | |    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |
+|:---|:---|:---|
+|    |    |    |
+
+
+
+
+
+                                            |    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    | |    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    ||    |    |    |
+|:---|:---|:---|
+|    |    |    |
+
+
+
+
+                                            |    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    ||    |
+|:---|
+|    | |    |    |    |    |
+|:---|:---|:---|:---|
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    |
+
+
+
+
+
+
+            | Ratings/Specifications                                                                       |
+|:---------------------------------------------------------------------------------------------|
+| Items Specifications                                                                         |
+| Rated voltage 24 V DC                                                                        |
+| Detection range (at a position 1.6 m away from the ceiling) □3.6 m                           |
+| 1.7 m/s (6 km/h) or lower                                                                    |
+| (Rapid movements may not be detected                                                         |
+| Detection object movement speed depending on the temperature difference with                 |
+| the background)                                                                              |
+| Detection position accuracy ±500 mm (when seated)                                            |
+| Detectable number of people 8 or less (2 or less in □1.8 m)                                  |
+| Room temperature allowing human detection 10ºC to 29ºC (May not be detected due to clothing) |
+| Output coordinates 16 divisions (4×4)                                                        |
+| Operation lamp Illuminates red when a human body is detected                                 |
+| Contact output Outputs ON when a human body is detected (DC 24 V, 0.1 A or less)             |
+| Maximum wiring length 500 m or less                                                          |
+
+
+            | Items                                                       | Specifications                                                    |
+|:------------------------------------------------------------|:------------------------------------------------------------------|
+| Rated voltage                                               | 24 V DC                                                           |
+| Detection range (at a position 1.6 m away from the ceiling) | □3.6 m                                                            |
+| Detection object movement speed                             | 1.7 m/s (6 km/h) or lower                                         |
+|                                                             | (Rapid movements may not be detected                              |
+|                                                             | depending on the temperature difference with                      |
+|                                                             | the background)                                                   |
+| Detection position accuracy                                 | ±500 mm (when seated)                                             |
+| Detectable number of people                                 | 8 or less (2 or less in □1.8 m)                                   |
+| Room temperature allowing human detection                   | 10ºC to 29ºC (May not be detected due to clothing)                |
+| Output coordinates                                          | 16 divisions (4×4)                                                |
+| Operation lamp                                              | Illuminates red when a human body is detected                     |
+| Contact output                                              | Outputs ON when a human body is detected (DC 24 V, 0.1 A or less) |
+| Maximum wiring length                                       | 500 m or less                                                     |
+                                                                                  | Items                               | Specifications      |
+|:------------------------------------|:--------------------|
+| Communication method                | RS-485              |
+| Communication protocol              | MODBUS（RTU)        |
+| Baud rate                           | 38,400 bps          |
+| Start bit                           | 1-bit               |
+| Stop bit                            | 1-bit               |
+| Parity bit                          | 1-bit (Parity: odd) |
+| Communication address setting range | 1 to 63             |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    | State               | Possible causes                                                         | Check/Action                                                                                                                             |
+|:--------------------|:------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------|
+| Unable to           | Addresses are not set, or the address of a device coincides             | All the devices connected to the communication line of a control device must have different addresses.                                   |
+| communicate         | with that of other devices.                                             | Check the address setting status and specify an address different from the other devices.                                                |
+|                     |                                                                         | Press the reset switch after setting changes.                                                                                            |
+|                     |                                                                         | The setting changes are not effective until the reset switch is pressed.                                                                 |
+|                     | Communication cables are not correctly inserted or connected.           | Connect the communication cables correctly to the quick-connection terminals.                                                            |
+|                     | Communication settings do not agree with those of the control device.   | Check the communication specifications and set the control device to match. (Baud rate, start bit, stop bit, and parity bit)             |
+|                     | Termination-side device is incorrectly connected.                       | Check the connection status of the termination-side device and connect correctly.                                                        |
+|                     | Termination setting is not specified on the control device.             | Check the manual, etc. of the control device and specify the correct termination setting.                                                |
+| Unable to detect    | The temperature difference with the background temperature is small.    | The product's detection operation is carried out based on the principle of using the temperature difference with the                     |
+|                     |                                                                         | background, therefore a human body may not be detected when the difference between its surface temperature and                           |
+|                     |                                                                         | the background temperature is very small due to cold weather gear, etc.                                                                  |
+|                     | The background temperature is higher than that of human subjects.       | A human body cannot be detected when its temperature is lower than the background.                                                       |
+|                     | The detection area is not correctly arranged.                           | Check whether the installation allows for the correct orientation of the detection area (quadrangular pyramid shape).                    |
+|                     | High moving speed                                                       | A human body may not be detected when it moves fast.                                                                                     |
+|                     | A person remains still near the edge of an area.                        | The product recognizes moving processes within the detection area to detect a human body.If it stops moving immediately after            |
+|                     |                                                                         | entering the area and remains still, the product may not be able torecognize its movement and thus may not recognize it as a human body. |
+|                     | The installation height exceeds 2.7 m.                                  | If the installation height is too high, a human body will be further away from the product main body. As a result,                       |
+|                     |                                                                         | the size of the human body will appear relatively small and its temperature low, making detection more difficult.                        |
+|                     | The area mask setting is enabled.                                       | Area masking setting disables the detection of the masked area.                                                                          |
+|                     | The protection film is left unremoved on the main body.                 | Remove the protection film after installation.                                                                                           |
+| The detection state | A person remained still or did not move much for a long period of time. | The detection terminates when unable to recognize any movement for more than 90 minutes.                                                 |
+| does not last.      |                                                                         |                                                                                                                                          |
+|                     | A person remains still near the edge of an area.                        | The product recognizes moving processes within the detection area to detect a human body.                                                |
+|                     |                                                                         | If it stops moving immediately after entering the area and remains still, the product may not be able to recognize                       |
+|                     |                                                                         | its movement adequately and thus may revise its determination from a human body to an object.                                            |
+|                     | A person entered the area with another person in mutual                 | A group of people positioned close to each other may be recognized as one person.                                                        |
+|                     | proximity and remained still after separating.                          | A person is recognized as an object upon separating from another person in the area, and may not be                                      |
+|                     |                                                                         | determined as a human body if he/she remains still after the separation.                                                                 |
+| Erroneous           | Moving objects such as animals, moving devices, etc.                    | The product's detection operation is carried out based on the principle of using the temperature difference with the background,         |
+| detection           | are within the detection area.                                          | therefore moving objects that have a temperature difference with the background are difficult to distinguish from human bodies           |
+|                     |                                                                         | and thus may be erroneously detected.                                                                                                    |
+|                     | Residual heat on a chair, etc., is detected after a person has          | A chair in contact with a human body has the same temperature as the body and may thus be detected even after                            |
+|                     | gotten up and left.                                                     | the occupant has gotten up and left.It will not be detected once the temperature drops.                                                  |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Device Solutions Business Division, Automotive & Industrial Systems Company, Panasonic Corporation
+5 Ii, Awara-City, Fukui 919-0697, Japan
+                                                                                                    8A3 G97 0000 1
+               2013                                                                                    M0213M0
