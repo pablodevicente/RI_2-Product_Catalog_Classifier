@@ -45,7 +45,24 @@ if __name__ == "__main__":
         "Alarms-and-sirens": [
             "https://www.digikey.com/en/products/filter/alarms-buzzers-and-sirens/157",
             "https://www.digikey.com/en/products/filter/alarms-buzzers-and-sirens/157?s=N4IgrCBcoA5QLAGhDOkCMAGTBfHQ"
-        ]
+        ],
+        "Capacitors": [
+            "https://www.digikey.be/en/products/filter/aluminum-polymer-capacitors/69"
+            "https://www.digikey.be/en/products/filter/aluminum-polymer-capacitors/69?s=N4IgrCBcoA5QjAGhDOl4AYMF9tA",
+            "https://www.digikey.be/en/products/filter/aluminum-polymer-capacitors/69?s=N4IgrCBcoA5QzAGhDOkCMAGTBfHQ"
+        ],
+        "Anti-static, ESD Bags, Materials": [
+            "https://www.digikey.be/en/products/filter/anti-static-esd-bags-materials/605"    
+            "https://www.digikey.be/en/products/filter/anti-static-esd-bags-materials/605?s=N4IgrCBcoA5QTAGhDOkCMAGTBfHQ"
+            "https://www.digikey.be/en/products/filter/anti-static-esd-bags-materials/605?s=N4IgrCBcoA5QzAGhDOkCMAGTBfHQ"
+            "https://www.digikey.be/en/products/filter/anti-static-esd-bags-materials/605?s=N4IgrCBcoA5QLAGhDOkCMAGTBfHQ"
+        ],
+        "Microphones": [
+            "https://www.digikey.be/en/products/filter/microphones/158"    
+            "https://www.digikey.be/en/products/filter/microphones/158?s=N4IgrCBcoA5QTAGhDOkCMAGTBfHQ"
+            "https://www.digikey.be/en/products/filter/microphones/158?s=N4IgrCBcoA5QzAGhDOkCMAGTBfHQ"
+            "https://www.digikey.be/en/products/filter/microphones/158?s=N4IgrCBcoA5QLAGhDOkCMAGTBfHQ"
+        ],
     }
 
     # Call the main function and get the processed DataFrame
