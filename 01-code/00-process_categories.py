@@ -1,42 +1,24 @@
 from aux_download_pdfs import download_pdfs_from_page, check_pdfs_in_folder
 import pandas as pd
 
-# Function to process a group of URLs under a given label
-def process_category(label, urls, df_statistics):
-    save_folder = f'/media/pablo/windows_files/00 - Master/05 - Research&Thesis/02-data/pdfs/{label}'
-    print(f"Processing: {label}")
-    for url in urls:
-        df_statistics = download_pdfs_from_page(label, url, save_folder, df_statistics)
-
-    return df_statistics
-
-# Function to check through folders and delete corrupted files
-def process_corrupted(label, urls, df_statistics):
-    save_folder = f'/media/pablo/windows_files/00 - Master/05 - Research&Thesis/02-data/pdfs/{label}'
-    print(f"Processing corrupted pdfs: {label}")
-    df_statistics = check_pdfs_in_folder(save_folder,df_statistics)
-    
-    return df_statistics
+# Define the variable for the first part of the path
+base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs/'
 
 def main(categories):
-    # Create an empty DataFrame with the required columns
-    df_statistics = pd.DataFrame(columns=[
-        'Label', 'Total_found', 'Downloaded_Valid', 'Downloaded_Invalid', 'Downloaded_Exceptions', 
-        'Cleanup_Valid', 'Cleanup_Invalid', 'Cleanup_Exceptions'
-    ])
 
-    # Process each category
+   # Download pdfs from each link in the category
     for label, urls in categories.items():
-        df_statistics = process_category(label, urls, df_statistics)
+        save_folder = base_path + label
+        print(f"Processing: {label}")
 
+        download_pdfs_from_page(urls, save_folder)
 
     # Delete corrupted pdfs
     for label, urls in categories.items():
-        # df_statistics = process_corrupted(label, urls,df_statistics)
-        pass
+        save_folder = base_path + label
+        print(f"Processing corrupted pdfs: {label}")
 
-    # Return or display the resulting DataFrame
-    return df_statistics
+        check_pdfs_in_folder(save_folder)
 
 if __name__ == "__main__":
     # Dictionary to store categories and their URLs
@@ -67,7 +49,4 @@ if __name__ == "__main__":
     }
 
     # Call the main function and get the processed DataFrame
-    df_statistics = main(categories)
-
-    output_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/02-data/pdfs/df_statistics.xlsx'
-    df_statistics.to_excel(output_path, index=False)
+    main(categories)
