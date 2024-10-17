@@ -1,3 +1,4 @@
 # (Optional) Ignore only specific file types within the folder
 # For example, to ignore only .pdf files:
-02-data/*.pdf
+# 02-data/*.pdf
+02-data/
