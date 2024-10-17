@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from tqdm import tqdm  # Correct import
 import fitz  # PyMuPDF
-
+import socket
 
 def download_pdfs_from_page(urls, save_folder):
     
@@ -60,11 +60,17 @@ def download_pdfs_from_page(urls, save_folder):
                 
                     pbar.update(1)  # Update progress bar even if an error occurs
 
-            print(f"Total: {total_processed} / 100 | "
-                f"Downloaded: {total_success} ({(total_success/total_processed)*100:.2f}%) | "
-                f"Failed: {total_failed} ({(total_failed/total_processed)*100:.2f}%) | "
-                f"Exceptions: {total_exceptions} ({(total_exceptions/total_processed)*100:.2f}%)")
-            
+            try:
+                success_percentage = (total_success / total_processed) * 100 if total_processed != 0 else 0
+                failed_percentage = (total_failed / total_processed) * 100 if total_processed != 0 else 0
+                exception_percentage = (total_exceptions / total_processed) * 100 if total_processed != 0 else 0
+
+                print(f"Total: {total_processed} / 100 | "
+                    f"Downloaded: {total_success} ({success_percentage:.2f}%) | "
+                    f"Failed: {total_failed} ({failed_percentage:.2f}%) | "
+                    f"Exceptions: {total_exceptions} ({exception_percentage:.2f}%)")
+            except ZeroDivisionError:
+                print("No PDFs processed")
 
 def is_pdf_valid(file_path):
     try:
@@ -80,7 +86,7 @@ def is_pdf_valid(file_path):
     return False  # Not a valid PDF if no pages are found
 
 
-def check_pdfs_in_folder(label, folder_path):
+def check_pdfs_in_folder(folder_path):
     
     # Statistics
     total_files = 0
@@ -92,13 +98,26 @@ def check_pdfs_in_folder(label, folder_path):
         if filename.lower().endswith('.pdf'): 
             total_files += 1
             file_path = os.path.join(folder_path, filename)
-            
+
             if is_pdf_valid(file_path):
                 valid_files += 1
             else:
                 invalid_files += 1
 
-    print(f"\nTotal: {total_files} | "
-          f"Valid: {valid_files} ({(valid_files/total_files)*100:.2f}%) | "
-          f"Invalid: {invalid_files} ({(invalid_files/total_files)*100:.2f}%) | ")
-    
+    try:
+        valid_percentage = (valid_files / total_files) * 100 if total_files != 0 else 0
+        invalid_percentage = (invalid_files / total_files) * 100 if total_files != 0 else 0
+
+        print(f"Total: {total_files} | "
+            f"Valid: {valid_files} ({valid_percentage:.2f}%) | "
+            f"Invalid: {invalid_files} ({invalid_percentage:.2f}%)")
+    except ZeroDivisionError:
+        print("No files processed yet, so division by zero occurred.")
+
+def check_wifi_connection():
+    try:
+        # Try to connect to a public DNS server
+        socket.create_connection(("8.8.8.8", 53), timeout=3)
+        return True
+    except OSError:
+        return False
