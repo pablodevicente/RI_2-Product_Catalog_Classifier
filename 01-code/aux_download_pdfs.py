@@ -5,12 +5,22 @@ from urllib.parse import urljoin
 from tqdm import tqdm  # Correct import
 import fitz  # PyMuPDF
 import socket
+import re
+import requests
+import logging
+from requests.exceptions import ConnectionError
+
+
+# Configure the logger
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 
 def download_pdfs_from_page(urls, save_folder):
     
-    #if the path allready exists, we have downloaded everything in that label.
-    if not os.path.exists(save_folder):
-        os.makedirs(save_folder)
+    if not os.path.exists(save_folder) or len(os.listdir(save_folder)) <= 10: # if the path exists but has les than x files then download
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder)
 
         for url in urls:
 
@@ -19,16 +29,28 @@ def download_pdfs_from_page(urls, save_folder):
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
             response = requests.get(url, headers=headers)
             
-            if response.status_code != 200:
-                print(f"Failed to retrieve webpage: {response.status_code}")
-                return
+            try:
+                response = requests.get(url, headers=headers)
+                if response.status_code != 200:
+                    logger.error(f"Failed to retrieve webpage: {response.status_code}")
+                    return
+                response.raise_for_status()  # Raise HTTPError for bad responses
+            except ConnectionError:
+                logger.error("No route to host. Please check your network connection.")
+            except requests.exceptions.HTTPError as err:
+                logger.error(f"HTTP error occurred: {err}")
+            except Exception as e:
+                logger.error(f"An error occurred: {e}")
+            else:
+                # Process the response if everything went well
+                logger.info("Request was successful.")
 
             # Parse the webpage content
             soup = BeautifulSoup(response.content, 'html.parser')
 
-            # Find all <a> tags with href attributes that contain '.pdf'
             pdf_links = []
-            for link in soup.find_all('a', href=True):
+            # Find all <a> tags with href attributes that contain '.pdf'
+            for link in soup.find_all('a', href=True):  # find all <a> tags with href attribute
                 href = link['href']
                 if '.pdf' in href:
                     # Handle relative URLs that start with //
@@ -37,17 +59,19 @@ def download_pdfs_from_page(urls, save_folder):
                     pdf_url = urljoin(url, href)
                     pdf_links.append(pdf_url)
 
+            # Find PDFs embedded in JavaScript or JSON
+            # This uses a regular expression to search for any '.pdf' in the entire HTML content -> does not find any additional pdf, all duplicates
+            # potential_pdfs = re.findall(r'\"(https?://[^\"]+\.pdf)\"', response.text)
+            # pdf_links.extend(potential_pdfs)
+
             # Statistics
             total_processed = len(pdf_links)
-            total_success = 0
-            total_failed = 0
-            total_exceptions = 0
-
-            # Set up the progress bar
+            total_success,total_failed,total_exceptions = 0,0,0
+ 
             with tqdm(total=total_processed, desc="Downloading PDFs from url", unit="pdf") as pbar:
                 for pdf_link in pdf_links:
                     try:
-                        pdf_response = requests.get(pdf_link)
+                        pdf_response = requests.get(pdf_link, timeout=3)  # Set timeout to 10 seconds
                         if pdf_response.status_code == 200:
                             pdf_filename = os.path.join(save_folder, os.path.basename(pdf_link))
                             with open(pdf_filename, 'wb') as f:
@@ -55,10 +79,15 @@ def download_pdfs_from_page(urls, save_folder):
                             total_success += 1 
                         else:
                             total_failed += 1  
+                    except requests.exceptions.Timeout:
+                        #print(f"Timeout occurred while downloading: {pdf_link}")
+                        total_exceptions += 1
                     except Exception as e:
+                        #print(f"An error occurred while downloading: {pdf_link}, Error: {e}")
                         total_exceptions += 1  
-                
+                    
                     pbar.update(1)  # Update progress bar even if an error occurs
+
 
             try:
                 success_percentage = (total_success / total_processed) * 100 if total_processed != 0 else 0
@@ -135,18 +164,14 @@ def create_urls (urls):
             "?s=N4IgrCBcoA5QLAGhDOkCMAGTBfHQ"
         ]
         
-        # Create the list of full URLs
+        # Create the list of full URLs (including the base one)
         new_urls = [base_url] + [base_url + query for query in additional_queries]
 
-        # Check if the label exists in the catalog
+        # Ensure the label is present in the catalog and append URLs as a list
         if label in catalog:
-            # Append the new URLs to the existing list
-            catalog[label].extend(new_urls)
+            catalog[label].extend(new_urls)  # Append to existing list
         else:
-            # Create a new entry for the label if it doesn't exist
-            catalog[label] = new_urls
-
-
+            catalog[label] = new_urls  # Create new entry if label doesn't exist
     catalog = { }
 
     # Iterate over the list and call the function for each URL
