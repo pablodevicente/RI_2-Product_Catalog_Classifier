@@ -1,51 +1,74 @@
 from aux_download_pdfs import download_pdfs_from_page, check_pdfs_in_folder, check_wifi_connection, create_urls
 import pandas as pd
+import logging
+import os
 
 # Define the variable for the first part of the path
 base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs/'
 
-def main(categories,clean=False):
+# Configure the logger
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
+def main(categories, clean=False):
+    """
+    Main function to download PDFs and optionally clean corrupted files.
+    
+    Args:
+        categories (dict): Dictionary where keys are labels (categories) and values are lists of URLs.
+        clean (bool): If True, will also check and clean corrupted PDFs after download.
+    
+    Returns:
+        None
+    """
+    
+    # Check Wi-Fi connection
     if check_wifi_connection():
-        print("Wi-Fi is connected.")
+        logger.info("Wi-Fi is connected.")
     else:
-        print("Wi-Fi is not connected.")
-
-   # Download pdfs from each link in the category
+        logger.error("Wi-Fi is not connected. Exiting execution.")
+        return  # Exit if no internet connection
+    
+    # Download PDFs for each category
     for label, urls in categories.items():
-        save_folder = base_path + label
-        print(f"Processing: {label}")
-
+        save_folder = os.path.join(base_path, label)  # Create save path for each label
+        logger.info(f"Processing label: {label} with {len(urls)} URLs.")
+        
+        # Download PDFs from the URLs
         download_pdfs_from_page(urls, save_folder)
 
+    # Clean corrupted PDFs if the 'clean' flag is set
     if clean:
-        # Delete corrupted pdfs
-        for label, urls in categories.items():
-            save_folder = base_path + label
-            print(f"Processing corrupted pdfs: {label}")
-
+        logger.info("Cleaning corrupted PDFs process initiated.")
+        
+        for label in categories.keys():
+            save_folder = os.path.join(base_path, label)  # Folder to check for corrupted PDFs
+            logger.info(f"Processing corrupted PDFs for label: {label}.")
+            
+            # Check for corrupted PDFs and handle them
             check_pdfs_in_folder(save_folder)
+
 
 if __name__ == "__main__":
     urls = [
-        "https://www.digikey.com/en/products/filter/controllers/controller-accessories/816",
+            "https://www.digikey.com/en/products/filter/controllers/controller-accessories/816",
             "https://www.digikey.com/en/products/filter/industrial-lighting/task-lighting/1061",
             "https://www.digikey.com/en/products/filter/batteries-non-rechargeable-primary/90",
             "https://www.digikey.com/en/products/filter/batteries-rechargeable-secondary/91",
             "https://www.digikey.com/en/products/filter/battery-chargers/85",
-            "https://www.digikey.be/en/products/filter/battery-packs/89",
+            #"https://www.digikey.be/en/products/filter/battery-packs/89", #6 instances
             "https://www.digikey.be/en/products/filter/microphones/158",
             "https://www.digikey.be/en/products/filter/speakers/156",
             "https://www.digikey.com/en/products/filter/alarms-buzzers-and-sirens/157",
             "https://www.digikey.be/en/products/filter/anti-static-esd-bags-materials/605",
             "https://www.digikey.be/en/products/filter/boxes/594",
-            "https://www.digikey.be/en/products/filter/card-racks/588",
+            #"https://www.digikey.be/en/products/filter/card-racks/588", #1 instance
             "https://www.digikey.be/en/products/filter/rack-accessories/598",
             "https://www.digikey.be/en/products/filter/circular-cable-assemblies/448",
             "https://www.digikey.be/en/products/filter/rack-accessories/598",
             "https://www.digikey.be/en/products/filter/circular-cable-assemblies/448",
             "https://www.digikey.be/en/products/filter/fiber-optic-cables/449",
-            "https://www.digikey.be/en/products/filter/jumper-wires-pre-crimped-leads/453",
+            "https://www.digikey.be/en/products/filter/jumper-wires-pre-crimped-leads/453", #15 instances
             "https://www.digikey.be/en/products/filter/coaxial-cables-rf/475",
             "https://www.digikey.be/en/products/filter/multiple-conductor-cables/473",
             "https://www.digikey.be/en/products/filter/single-conductor-cables-hook-up-wire/474",
