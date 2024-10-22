@@ -7,7 +7,7 @@ import os
 base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs/'
 
 # Configure the logger
-logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def main(categories, clean=False):
@@ -24,70 +24,35 @@ def main(categories, clean=False):
     
     # Check Wi-Fi connection
     if check_wifi_connection():
-        logger.info("Wi-Fi is connected.")
+        logger.debug("Wi-Fi is connected.")
     else:
-        logger.error("Wi-Fi is not connected. Exiting execution.")
-        return  # Exit if no internet connection
+        logger.debug("Wi-Fi is not connected. Exiting execution.")
+        return  
     
-    # Download PDFs for each category
-    for label, urls in categories.items():
-        save_folder = os.path.join(base_path, label)  # Create save path for each label
-        logger.info(f"Processing label: {label} with {len(urls)} URLs.")
-        
-        # Download PDFs from the URLs
-        download_pdfs_from_page(urls, save_folder)
-
-    # Clean corrupted PDFs if the 'clean' flag is set
     if clean:
-        logger.info("Cleaning corrupted PDFs process initiated.")
-        
-        for label in categories.keys():
-            save_folder = os.path.join(base_path, label)  # Folder to check for corrupted PDFs
-            logger.info(f"Processing corrupted PDFs for label: {label}.")
+        # Download PDFs for each category
+        for label, urls in categories.items():
+            save_folder = os.path.join(base_path, label)  # Create save path for each label
+            logger.debug(f"Processing label: {label} with {len(urls)} URLs.")
             
-            # Check for corrupted PDFs and handle them
-            check_pdfs_in_folder(save_folder)
+            # Download PDFs from the URLs
+            download_pdfs_from_page(urls, save_folder)
+
+    logger.debug("Cleaning corrupted PDFs process initiated.")
+    for label in categories.keys():
+        logger.info(f"Processing corrupted PDFs for label: {label}.")
+        save_folder = os.path.join(base_path, label)  # Folder to check for corrupted PDFs
+        check_pdfs_in_folder(save_folder)         # Check for corrupted PDFs and handle them
 
 
 if __name__ == "__main__":
-    urls = [
-            "https://www.digikey.com/en/products/filter/controllers/controller-accessories/816",
-            "https://www.digikey.com/en/products/filter/industrial-lighting/task-lighting/1061",
-            "https://www.digikey.com/en/products/filter/batteries-non-rechargeable-primary/90",
-            "https://www.digikey.com/en/products/filter/batteries-rechargeable-secondary/91",
-            "https://www.digikey.com/en/products/filter/battery-chargers/85",
-            #"https://www.digikey.be/en/products/filter/battery-packs/89", #6 instances
-            "https://www.digikey.be/en/products/filter/microphones/158",
-            "https://www.digikey.be/en/products/filter/speakers/156",
-            "https://www.digikey.com/en/products/filter/alarms-buzzers-and-sirens/157",
-            "https://www.digikey.be/en/products/filter/anti-static-esd-bags-materials/605",
-            "https://www.digikey.be/en/products/filter/boxes/594",
-            #"https://www.digikey.be/en/products/filter/card-racks/588", #1 instance
-            "https://www.digikey.be/en/products/filter/rack-accessories/598",
-            "https://www.digikey.be/en/products/filter/circular-cable-assemblies/448",
-            "https://www.digikey.be/en/products/filter/rack-accessories/598",
-            "https://www.digikey.be/en/products/filter/circular-cable-assemblies/448",
-            "https://www.digikey.be/en/products/filter/fiber-optic-cables/449",
-            "https://www.digikey.be/en/products/filter/jumper-wires-pre-crimped-leads/453", #15 instances
-            "https://www.digikey.be/en/products/filter/coaxial-cables-rf/475",
-            "https://www.digikey.be/en/products/filter/multiple-conductor-cables/473",
-            "https://www.digikey.be/en/products/filter/single-conductor-cables-hook-up-wire/474",
-            "https://www.digikey.be/en/products/filter/accessories/479",
-            "https://www.digikey.be/en/products/filter/cable-ties-and-zip-ties/482",
-            "https://www.digikey.be/en/products/filter/protective-hoses-solid-tubing-sleeving/480",
-            "https://www.digikey.be/en/products/filter/aluminum-polymer-capacitors/69",
-            "https://www.digikey.be/en/products/filter/aluminum-electrolytic-capacitors/58",
-            "https://www.digikey.be/en/products/filter/tantalum-capacitors/59",
-            "https://www.digikey.be/en/products/filter/circuit-breakers/143",
-            "https://www.digikey.be/en/products/filter/electrical-specialty-fuses/155",
-            "https://www.digikey.be/en/products/category/transient-voltage-suppressors-tvs/2040",
-            "https://www.digikey.be/en/products/filter/printers-label-makers/887",
-            "https://www.digikey.be/en/products/category/ac-power-connectors/2026",
-            "https://www.digikey.be/en/products/filter/backplane-connectors/backplane-connector-housings/372",
-            "https://www.digikey.be/en/products/category/banana-and-tip-connectors/2001",
-            "https://www.digikey.be/en/products/category/barrel-connectors/2002",
-            "https://www.digikey.be/en/products/category/blade-type-power-connectors/2003"
-    ]
+
+    # Read URLs from a text file into a list
+    urls_path = os.path.join(base_path, "../urls.txt")  # Folder to check for corrupted PDFs
+
+    # Open the file and read the URLs line by line
+    with open(urls_path, "r") as file:
+        urls = [line.strip() for line in file.readlines() if line.strip()]  # Remove extra spaces and newlines
 
     categories = create_urls(urls)
     # Call the main function and get the processed DataFrame
