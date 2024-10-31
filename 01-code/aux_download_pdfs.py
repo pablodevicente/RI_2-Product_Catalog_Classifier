@@ -206,13 +206,16 @@ def create_urls(urls):
 
         # List of additional query parameters to append to the base URL
         additional_queries = [
+            "?s=N4IgrCBcoA5QjAGhDOl4AYMF9tA",
             "?s=N4IgrCBcoA5QTAGhDOkCMAGTBfHQ",
             "?s=N4IgrCBcoA5QzAGhDOkCMAGTBfHQ",
-            "?s=N4IgrCBcoA5QLAGhDOkCMAGTBfHQ"
+            "?s=N4IgrCBcoA5QLAGhDOkCMAGTBfHQ",
+            "?s=N4IgrCBcoA5WAaEM6QIwAYMF9tA",
+            "?s=N4IgrCBcoA5QbAGhDOkCMAGTBfHQ"
         ]
         
         # Generate a list of full URLs (including the base URL)
-        new_urls = [base_url] + [base_url + query for query in additional_queries]
+        new_urls = [base_url + query for query in additional_queries]
 
         # Log the process of creating new URLs
         logger.debug(f"Generated URLs for label '{label}': {new_urls}")
