@@ -6,8 +6,8 @@ from aux_pdf_to_text import process_folder
 
 #base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs/'
 #output_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs_txt/'
-base_path = "../02-data/pdfs/0-testing/"
-output_path = "../02-data/txts/0-testing/"
+base_path = "02-data/pdfs/multiple-conductor-cables/"
+output_path = "02-data/txts/multiple-conductor-cables/"
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)

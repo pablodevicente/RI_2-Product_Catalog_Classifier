@@ -76,8 +76,8 @@ def extract_images_from_pdf_fitz(pdf_path, pdf_name, output_folder):
             img_path = os.path.join(output_folder, f"{pdf_name}_page{page_num + 1}_img{img_index + 1}.{img_ext}")
             with open(img_path, "wb") as img_file:
                 img_file.write(img_data)
-            print(f"Saved image to {img_path}")
-
+            logger.debug(f"Saved image to {img_path}")
+    logger.debug(f"Images processed from file {pdf_name}")
     pdf.close()
 
 
