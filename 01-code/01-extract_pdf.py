@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import logging
 from tqdm import tqdm
-from aux_pdf_to_text import process_folder
+from aux_extract_pdf import process_folder
 
 #base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs/'
 #output_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs_txt/'

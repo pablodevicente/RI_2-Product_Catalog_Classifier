@@ -10,6 +10,7 @@ import logging
 import hashlib
 import json
 import magic
+import pandas as pd
 
 # Configure the logger
 logging.basicConfig(level=logging.ERROR, format='%(levelname)s - %(message)s')
@@ -237,3 +238,89 @@ def create_urls(urls):
     logger.debug(f"Final URL catalog: {catalog}")
     
     return catalog
+
+
+def count_files_in_folders(base_path, extension):
+    """
+    Count the number of files with a specific extension in each folder.
+
+    Args:
+        base_path (str): The directory to scan.
+        extension (str): The file extension to count (e.g., ".pdf" or ".txt").
+
+    Returns:
+        dict: A dictionary where the keys are folder names and the values are the file counts.
+    """
+    folder_file_count = {}
+
+    # Walk through the directory
+    for root, dirs, files in os.walk(base_path):
+        for folder in dirs:
+            # Get the path of the folder
+            folder_path = os.path.join(root, folder)
+
+            # Count the number of files with the specified extension in the folder
+            num_files = len([file for file in os.listdir(folder_path)
+                             if os.path.isfile(os.path.join(folder_path, file)) and file.endswith(extension)])
+
+            # Store the folder name and file count in the dictionary
+            folder_file_count[folder] = num_files
+
+    return folder_file_count
+
+
+def generate_file_count_dataframe(pdf_path, txt_path, output_csv_path=None):
+    """
+    Generates a DataFrame with counts of PDF and text files in folders.
+
+    Args:
+        pdf_path (str): Path to the directory containing PDF folders.
+        txt_path (str): Path to the directory containing text file folders.
+        output_csv_path (str, optional): Path to save the CSV file. If None, the CSV is not saved.
+
+    Returns:
+        pd.DataFrame: A DataFrame with folder names, PDF counts, and text file counts.
+    """
+    # Count PDF and text files in respective folders
+    pdfs_counts = count_files_in_folders(pdf_path, ".pdf")
+    txt_counts = count_files_in_folders(txt_path, ".txt")
+
+    # Create a pandas DataFrame from the PDF counts dictionary
+    df = pd.DataFrame(list(pdfs_counts.items()), columns=['Folder', 'Pdf Count'])
+
+    # Add Txt Count by matching the folder names from txt_counts
+    df['Txt Count'] = df['Folder'].map(txt_counts)
+
+    # Sort the DataFrame by 'Pdf Count' in descending order
+    df_sorted = df.sort_values(by='Pdf Count', ascending=False)
+
+    # Save the sorted DataFrame to a CSV file if an output path is specified
+    if output_csv_path:
+        df_sorted.to_csv(output_csv_path, index=False)
+
+    return df_sorted
+
+
+def find_missing_files(pdf_path, txt_path):
+    """
+    Finds files that don't appear in both pdf_path and txt_path directories.
+    Compares the file names without extensions.
+
+    Args:
+        pdf_path (str): Directory containing PDF files.
+        txt_path (str): Directory containing TXT files.
+
+    Returns:
+        missing_in_txt (list): List of PDFs that don't have a corresponding TXT file.
+        missing_in_pdf (list): List of TXTs that don't have a corresponding PDF file.
+    """
+    # Get the list of PDF files and remove their extensions
+    pdf_files = {os.path.splitext(f)[0] for f in os.listdir(pdf_path) if f.endswith(".pdf")}
+    # Get the list of TXT files and remove their extensions
+    txt_files = {os.path.splitext(f)[0] for f in os.listdir(txt_path) if f.endswith(".txt")}
+
+    # Find PDFs without corresponding TXT files and vice versa
+    missing_in_txt = pdf_files - txt_files  # PDFs that don't have TXT counterparts
+    missing_in_pdf = txt_files - pdf_files  # TXTs that don't have PDF counterparts
+
+    return missing_in_txt, missing_in_pdf
