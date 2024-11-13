@@ -1,11 +1,7 @@
-import pdfplumber
 import pandas as pd
-from pdfplumber.utils import extract_text, get_bbox_overlap, obj_to_bbox
-import tabulate
 import os
 import logging
 from tqdm import tqdm
-from PIL import Image
 import fitz
 
 base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs/'
@@ -37,18 +33,6 @@ def extract_tables_from_pdf(pdf):
             markdown = df.drop(0).to_markdown(index=False)
             all_tables.append(markdown)
     return "\n\n".join(all_tables)
-
-def extract_images_from_pdf_pdfplumber(pdf, pdf_name, output_folder): ## deprecated. fitz works infinitelly better
-
-    for page_num, page in enumerate(pdf.pages, start=1):
-        for img_index, image in enumerate(page.images):
-            # Extract image properties
-            x0, y0, x1, y1 = image["x0"], image["y0"], image["x1"], image["y1"]
-            # Crop the image region from the page
-            cropped_image = page.within_bbox((x0, y0, x1, y1)).to_image()
-            # Save as a file
-            cropped_image.save(f"{output_folder}"f"{pdf_name}_page{page_num}_img{img_index + 1}.png", format="PNG")
-
 
 def extract_images_from_pdf_fitz(pdf_path, pdf_name, output_folder):
     """
@@ -84,6 +68,8 @@ def extract_images_from_pdf_fitz(pdf_path, pdf_name, output_folder):
 def process_pdf(pdf_name, pdf_path, output_folder):
     """
     Processes a single PDF file to extract text, tables, and images.
+    Extracts the text and tables and images to individual files
+    Uses fitz for image selection
 
     Args:
         pdf_name (str): Name of the PDF file without extension.

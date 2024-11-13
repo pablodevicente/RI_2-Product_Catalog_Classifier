@@ -6,8 +6,8 @@ from aux_extract_pdf import process_folder
 
 #base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs/'
 #output_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs_txt/'
-base_path = "02-data/pdfs/multiple-conductor-cables/"
-output_path = "02-data/txts/multiple-conductor-cables/"
+base_path = "02-data/pdfs/"
+output_path = "02-data/txts/"
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -56,5 +56,5 @@ def compare_folders(input_folder, output_folder):
         logging.error(f"Unexpected error during folder comparison: {str(e)}")
 
 
-#compare_folders(base_path, output_path)
-process_folder(base_path, output_path)
+compare_folders(base_path, output_path)
+#process_folder(base_path, output_path)
