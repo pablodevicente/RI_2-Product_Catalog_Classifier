@@ -3,6 +3,7 @@ import os
 import logging
 from tqdm import tqdm
 from aux_extract_pdf import process_pdf
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 #base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs/'
 #output_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs_txt/'
@@ -34,7 +35,7 @@ def process_folder(input_folder_path, output_folder_path):
             pdf_path = os.path.join(input_folder_path, pdf_file) # /02-data/pdfs/label_x/pdf_file_y.pdf
             pdf_name = os.path.splitext(pdf_file)[0]  # pdf_file_y
 
-            process_pdf(pdf_name, pdf_path, output_folder_path)
+            process_pdf(pdf_name, pdf_path, output_folder_path,**model_kwargs)
 
             logging.debug(f"Transcribed PDF saved at: {output_folder_path}")
 
@@ -43,7 +44,6 @@ def process_folder(input_folder_path, output_folder_path):
         logging.debug(f"File system error: {str(e)}")
     except Exception as e:
         logging.debug(f"Unexpected error during transcription: {str(e)}")
-
 
 def compare_folders(input_folder, output_folder):
     """
@@ -87,6 +87,37 @@ def compare_folders(input_folder, output_folder):
     except Exception as e:
         logging.error(f"Unexpected error during folder comparison: {str(e)}")
 
+
+def load_model(table_gpt):
+    model_name = table_gpt
+    # Another configuration at x10 parameters "tablegpt/TableGPT2-72B"
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name, torch_dtype="auto", device_map="auto"
+    )
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    example_prompt_template = """Given access to a pandas dataframes, answer the user question.
+
+    /*
+    "{var_name}.head(5).to_string(index=False)" as follows:
+    {df_info}
+    */
+
+    Question: {user_question}
+    """
+    question = "Provide a detail description for each of the rows"
+
+    # Return all arguments as a dictionary
+    return {
+        "model": model,
+        "tokenizer": tokenizer,
+        "prompt_template": example_prompt_template,
+        "question": question,
+    }
+
+table_gpt = "tablegpt/TableGPT2-7B"
+model_kwargs = load_model(table_gpt)
 
 compare_folders(base_path, output_path)
 #process_folder(base_path, output_path)

@@ -23,19 +23,150 @@ def extract_text_from_pdf(pdf):
             all_text.append(page_text)
     return "\n".join(all_text)
 
-def extract_tables_from_pdf(pdf):
+"""
+Functions related to table extraction, preprocessing, categorizacion and table_to_text
+Done at the same time as the processing of the pdf because of reasons, but could be done in a different step 
+(convert df to markdown, write onto file and the markdown to df for easier handling didnt seem efficient)
+"""
+
+def extract_tables_from_pdf(pdf,**kwargs):
     """
     Extracts tables from each page in the PDF and converts them to markdown format.
     """
     all_tables = []
+
     for page in pdf.pages:
         for table in page.find_tables():
+
+            # Step 1: Extract the dataframe into pandas df format
             df = pd.DataFrame(table.extract())
             df.columns = df.iloc[0]  # Use the first row as header
-            markdown = df.drop(0).to_markdown(index=False)
-            all_tables.append(markdown)
-    return "\n\n".join(all_tables)
+            # Step 2: Clean the dataframe
+            df_clean = clean_table(df)
 
+            # Check if the DataFrame is empty
+            if df_clean.empty:
+                # logger.DEBUG("DataFrame is empty. Skipping further processing.")
+                pass
+            else:
+
+                # Step 3: Filter the dataframe into one of two types
+                typing = categorize_dataframe(df_clean)
+
+                if typing == 0:                    # call table_gpt
+
+                    prompt = kwargs["example_prompt_template"].format(
+                        var_name="df",
+                        df_info=df.head(5).to_string(index=False),
+                        user_question=kwargs["question"],
+                    )
+
+                    messages = [
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": prompt},
+                    ]
+                    text = kwargs["tokenizer"].apply_chat_template(
+                        messages, tokenize=False, add_generation_prompt=True
+                    )
+                    model_inputs = kwargs["tokenizer"]([text], return_tensors="pt").to(kwargs["model"].device)
+
+                    generated_ids = kwargs["model"].generate(**model_inputs, max_new_tokens=512)
+                    generated_ids = [
+                        output_ids[len(input_ids):]
+                        for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+                    ]
+
+                    response = kwargs["tokenizer"].batch_decode(generated_ids, skip_special_tokens=True)[0]
+
+                    all_tables.append(response)
+
+                else:
+                    print("----------1")
+                    pass
+                    # call llm to describe single row
+
+    return "\n".join(all_tables)
+
+
+def clean_table(df):
+    """
+    Cleans a table (DataFrame) by applying various transformations:
+    - Removes horizontal tables. -- not implemented
+    - Removes duplicate columns (case-insensitive).
+    - Removes columns containing only underscores.
+    - Removes columns with field content exceeding 200 characters. -- originally 100, but i may get some more
+    - Removes rows/columns with more than 30% NaN values. --  mnnn not really taking out rows, didnt work well
+    - Removes columns where the first value matches the column name.
+
+    Parameters:
+    - df: Pandas DataFrame representing the table.
+
+    Returns:
+    - A cleaned DataFrame.
+    """
+    # Step 1: Remove horizontal tables
+    # if len(df.columns) > len(df) * 2:  # Assuming horizontal if columns are more than twice the rows
+    #    return None  # Skip horizontal tables
+
+    # Step 2: Remove duplicate columns (case-insensitive)
+    df = df.loc[:, ~df.columns.str.lower().duplicated()]
+
+    # Step 3: Remove columns containing only underscores
+    df = df.loc[:, ~(df.apply(lambda col: col.str.fullmatch(r"_+").all(), axis=0))]
+
+    # Step 4: Remove columns where field content exceeds 200 characters
+    df = df.loc[:, ~(df.apply(lambda col: col.astype(str).map(len).max() > 200, axis=0))]
+
+    # Step 5.0 : Replace empty strings for NaN values
+    df = df.replace(r"^\s*$", pd.NA, regex=True)
+
+    # Step 5: Remove rows/columns with more than 30% NaN values
+    threshold = 0.3
+
+        # Step 5.1: Drop columns with more than 30% NaN values
+    col_thresh = int((1 - threshold) * len(df))  # Minimum non-NaN values required
+    df = df.dropna(axis=1, thresh=col_thresh)
+
+        # Step 5.2: Drop rows with more than 30% NaN values
+    # didnt work to well
+
+        # Step 5.3: if one column. Delete NaNs
+    if df.shape[1] == 1:
+        df = df.dropna(axis=0)
+
+    # Check if the DataFrame is empty after Step 5
+    if not df.empty:
+        # Step 6: Remove columns where the first value matches the column name
+        matches = (df.iloc[0].str.lower() == df.columns.str.lower())
+
+        # Count how many values in the first row match the column names
+        match_count = matches.sum()
+
+        # If more than 30% of the values match, remove the first row
+        if match_count / len(df.columns) > 0.3:
+            df = df.drop(index=0)
+
+    return df.reset_index(drop=True)  # Reset index for clean DataFrame
+
+def categorize_dataframe(df):
+    """
+    Categorizes a DataFrame based on its dimensions. (Made a function for easier alteration)
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame to categorize.
+
+    Returns:
+        int: 0 if the DataFrame has more than 5 rows or more than 2 columns (both included),
+             1 otherwise.
+    """
+    if df.shape[0] > 5 and df.shape[1] > 2:
+        return 0
+    else:
+        return 1
+
+"""
+Image extraction functions, not using all of them, some dead code
+"""
 def extract_images_from_pdf_fitz(pdf_path, pdf_name, output_folder):
     """
     Extracts images from each page in the PDF and saves them in the specified folder.
@@ -66,8 +197,11 @@ def extract_images_from_pdf_fitz(pdf_path, pdf_name, output_folder):
     logger.debug(f"Images processed from file {pdf_name}")
     pdf.close()
 
+"""
+Main function, just calls all other methods
+"""
 
-def process_pdf(pdf_name, pdf_path, output_folder):
+def process_pdf(pdf_name, pdf_path, output_folder,**model_kwargs):
     """
     Processes a single PDF file to extract text, tables, and images.
     Extracts the text and tables and images to individual files
@@ -95,11 +229,9 @@ def process_pdf(pdf_name, pdf_path, output_folder):
         with open(text_output_path, "w") as text_file:
             text_file.write(text_content)
 
-        # Step 2: Extract tables and save to tables.txt
-        tables_content = extract_tables_from_pdf(pdf)
-        tables_output_path = os.path.join(pdf_output_folder, "tables.txt")
-        with open(tables_output_path, "w") as tables_file:
-            tables_file.write(tables_content)
+        # Step 2: Extract tables, translate onto text and save to text.txt
+        tables_content = extract_tables_from_pdf(pdf,**model_kwargs)
+        text_file.write(tables_content)
 
         # Step 3: Extract and save images
         extract_images_from_pdf_fitz(pdf_path, pdf_name, pdf_output_folder)

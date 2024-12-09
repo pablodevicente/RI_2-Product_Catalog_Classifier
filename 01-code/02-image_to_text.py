@@ -130,7 +130,7 @@ def process_images(folder_path, function, **kwargs):
 # Pre-filter images
 process_images(txt_path, pre_filter)
 
-# Classifier filtering (you can implement a similar function)
+# Classifier filtering
 process_images(txt_path, classifier_filter)
 
 # Import llama model
