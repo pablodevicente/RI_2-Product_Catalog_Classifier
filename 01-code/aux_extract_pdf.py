@@ -41,6 +41,7 @@ def extract_tables_from_pdf(pdf,**kwargs):
             # Step 1: Extract the dataframe into pandas df format
             df = pd.DataFrame(table.extract())
             df.columns = df.iloc[0]  # Use the first row as header
+
             # Step 2: Clean the dataframe
             df_clean = clean_table(df)
 
@@ -167,18 +168,17 @@ def categorize_dataframe(df):
 """
 Image extraction functions, not using all of them, some dead code
 """
-def extract_images_from_pdf_fitz(pdf_path, pdf_name, output_folder):
+def extract_images_from_pdf_fitz(pdf_path, pdf_name, pdf_folder):
     """
     Extracts images from each page in the PDF and saves them in the specified folder.
 
     Args:
-        pdf_path (str): Path to the PDF file.
+        pdf (pdfplumber.PDF): The PDF object to read.
         pdf_name (str): Base name for the output files.
-        output_folder (str): Folder where extracted images will be saved.
+        pdf_folder (str): Folder where extracted images will be saved.
     """
-    os.makedirs(output_folder, exist_ok=True)  # Ensure the output folder exists
+    pdf = fitz.open(pdf_path) ## i know i just closed it but i need to open it with fitz. mismatch that i do not wanna resolve
 
-    pdf = fitz.open(pdf_path)
     for page_num in range(len(pdf)):
         page = pdf[page_num]
         images = page.get_images(full=True)
@@ -190,10 +190,11 @@ def extract_images_from_pdf_fitz(pdf_path, pdf_name, output_folder):
             img_ext = base_image["ext"]
 
             # Define the output path and save the image data
-            img_path = os.path.join(output_folder, f"{pdf_name}_page{page_num + 1}_img{img_index + 1}.{img_ext}")
+            img_path = os.path.join(pdf_folder, f"{pdf_name}_page{page_num + 1}_img{img_index + 1}.{img_ext}")
             with open(img_path, "wb") as img_file:
                 img_file.write(img_data)
             logger.debug(f"Saved image to {img_path}")
+
     logger.debug(f"Images processed from file {pdf_name}")
     pdf.close()
 
@@ -201,42 +202,46 @@ def extract_images_from_pdf_fitz(pdf_path, pdf_name, output_folder):
 Main function, just calls all other methods
 """
 
-def process_pdf(pdf_name, pdf_path, output_folder,**model_kwargs):
+def process_pdf(pdf_path, **model_kwargs):
     """
     Processes a single PDF file to extract text, tables, and images.
     Extracts the text and tables and images to individual files
     Uses fitz for image selection
 
     Args:
-        pdf_name (str): Name of the PDF file without extension.
-        pdf_path (str): The path to the PDF file.
+        pdf_path (str): The path to the PDF file. --> ../02-data/pdfs/circuit-breakers/GFI_breaker/CFI_breaker.pdf
         output_folder (str): Folder to save extracted data for each PDF.
 
     Returns:
         None
     """
     try:
-        # Define the PDF-specific output folder
-        pdf_output_folder = os.path.join(output_folder, pdf_name)
-        os.makedirs(pdf_output_folder, exist_ok=True)  # Create the folder if it doesn't exist
 
-        # Open the PDF
+        # Get the parent folder --> ../02-data/pdfs/circuit-breakers/GFI_breaker/
+        pdf_folder = os.path.dirname(pdf_path)
+        # Get the name of the pdf (without extension -.pdf) --> GFI_breaker
+        pdf_name_without_ext = os.path.splitext(os.path.basename(pdf_path))[0]
+
+        # Open the PDF -> object
         pdf = pdfplumber.open(pdf_path)
 
         # Step 1: Extract text and save to text.txt
         text_content = extract_text_from_pdf(pdf)
-        text_output_path = os.path.join(pdf_output_folder, "text.txt")
+        text_output_path = os.path.join(pdf_folder, "text.txt")
         with open(text_output_path, "w") as text_file:
             text_file.write(text_content)
 
         # Step 2: Extract tables, translate onto text and save to text.txt
+        ## need to do it now, if i save it onto a file, i would have to re-read the file .txt to divide tables later.
+        ## This could introduce inconsistencies
         tables_content = extract_tables_from_pdf(pdf,**model_kwargs)
         text_file.write(tables_content)
 
-        # Step 3: Extract and save images
-        extract_images_from_pdf_fitz(pdf_path, pdf_name, pdf_output_folder)
-
         pdf.close()
+
+        # Step 3: Extract and save images
+        extract_images_from_pdf_fitz(pdf_path, pdf_name_without_ext, pdf_folder)
+
         logging.debug(f"Successfully processed {pdf_path}.")
 
     except Exception as e:

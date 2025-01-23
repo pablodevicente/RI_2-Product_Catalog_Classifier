@@ -10,7 +10,7 @@ base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Rese
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def main(categories, debug=False):
+def download(categories, debug=False):
     """
     Main function to download PDFs and optionally clean corrupted files.
     
@@ -33,9 +33,21 @@ def main(categories, debug=False):
     for label, urls in categories.items():
         save_folder = os.path.join(base_path, label)  # Create save path for each label
         logger.debug(f"Processing label: {label} with {len(urls)} URLs.")
-        
-        # Download PDFs from the URLs
-        download_pdfs_from_page(urls, save_folder)
+
+        for url in urls:
+            # Extract the PDF name from the URL
+            pdf_name = os.path.splitext(os.path.basename(url))[0]
+
+            # Create a subfolder for each PDF
+            pdf_folder = os.path.join(save_folder, pdf_name)
+            os.makedirs(pdf_folder, exist_ok=True)  # Ensure the folder exists
+
+            # Define the full path to save the PDF
+            pdf_path = os.path.join(pdf_folder, f"{pdf_name}.pdf")
+
+            # Download the PDF and save it
+            logger.debug(f"Downloading PDF from URL: {url} to {pdf_path}")
+            download_pdfs_from_page(url, pdf_path)
 
     logger.debug("Cleaning corrupted PDFs process initiated.")
     for label in categories.keys():
@@ -52,4 +64,4 @@ if __name__ == "__main__":
 
     categories = create_urls(urls)
     # Call the main function and get the processed DataFrame
-    main(categories)
+    download(categories)

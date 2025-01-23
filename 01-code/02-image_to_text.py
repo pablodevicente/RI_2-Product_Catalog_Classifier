@@ -4,6 +4,9 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from PIL import Image
 from transformers import BitsAndBytesConfig
+from tensorflow.keras.models import load_model
+import numpy as np
+from tensorflow.keras.preprocessing import image
 
 txt_path = "../02-data/txts/"
 destination_path = "../02-data/0-testing/images"
@@ -45,13 +48,26 @@ def pre_filter(image_path):
         logger.error(f"Error processing {image_path}: {e}")
         return False
 
-def classifier_filter(image_path):
+def classifier_filter(image_path,model):
     ## CALL endpoint for classifier --> look into aux_classifier_training
-    ## opt1 : train and call deployed model
-    ## opt2 : call endpoint, limited
 
-    ##delete images that are classified as not_product
-    pass
+    img1 = image.load_img(image_path, target_size=(150, 150))
+
+    # Convert image to array and add batch dimension
+    Y = image.img_to_array(img1)
+    X = np.expand_dims(Y, axis=0)
+
+    # Make prediction
+    val = model.predict(X)[0][0]  # Get the scalar value from the output
+    print(val)
+
+    # Interpret the prediction based on a threshold (e.g., 0.5) ## >>0.5 == not_product
+    if val >= 0.5:
+        logger.debug(f"img : {image_path} not a product, deleting")
+        os.remove(image_path)
+    else: ## product
+        logger.debug(f"img : {image_path} is a product")
+        pass
 
 def image_to_llm(image_path, file_handle, model, tokenizer, prompt, max_new_tokens):
     """
@@ -131,7 +147,9 @@ def process_images(folder_path, function, **kwargs):
 process_images(txt_path, pre_filter)
 
 # Classifier filtering
-process_images(txt_path, classifier_filter)
+# Load the model from the file --> look into aux_train_classifier.ipynb
+classifier_model = load_model("../02-data/02-classifier/model.keras")
+process_images(txt_path, classifier_filter,model = classifier_model)
 
 # Import llama model
 llama_model = "qresearch/llama-3.1-8B-vision-378"
