@@ -83,11 +83,10 @@ def extract_tables_from_pdf(pdf, **kwargs):
                     all_tables.append(response)
 
                 else:
-
                     logger.debug("Using qwn for table description")
+
                     response = generate_qwn_description(df_clean, model_qwn)
                     all_tables.append(response)
-                    # call llm to describe single row
 
     return "\n".join(all_tables)
 
