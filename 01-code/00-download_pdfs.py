@@ -4,7 +4,7 @@ import logging
 import os
 
 # Define the variable for the first part of the path
-base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs/'
+base_path = '/02-data/01-pdfs/'
 
 # Configure the logger
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')

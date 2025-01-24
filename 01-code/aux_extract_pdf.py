@@ -4,13 +4,33 @@ import logging
 from tqdm import tqdm
 import fitz
 import pdfplumber
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-
-base_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs/'
+base_path = '/02-data/01-pdfs/'
 output_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs_txt/'
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+def preload_model(model_gpt="tablegpt/TableGPT2-7B",model_qwn="Qwen/Qwen2.5-7B-Instruct"):
+    """
+    Preloads the model and tokenizer for table-to-text transformation.
+
+    Args:
+        model_name (str): The name of the Hugging Face model to load.
+
+    Returns:
+        model: The preloaded Hugging Face model.
+        tokenizer: The preloaded tokenizer for the model.
+    """
+    model_gpt = AutoModelForCausalLM.from_pretrained(
+        model_gpt, torch_dtype="auto", device_map="auto"
+    )
+    model_qwn = AutoModelForCausalLM.from_pretrained(
+        model_qwn, torch_dtype="auto", device_map="auto"
+    )
+
+    return {"model_gpt": model_gpt, "model_qwn": model_qwn}
 
 def extract_text_from_pdf(pdf):
     """
@@ -26,14 +46,16 @@ def extract_text_from_pdf(pdf):
 """
 Functions related to table extraction, preprocessing, categorizacion and table_to_text
 Done at the same time as the processing of the pdf because of reasons, but could be done in a different step 
-(convert df to markdown, write onto file and the markdown to df for easier handling didnt seem efficient)
 """
 
-def extract_tables_from_pdf(pdf,**kwargs):
+def extract_tables_from_pdf(pdf, **kwargs):
     """
     Extracts tables from each page in the PDF and converts them to markdown format.
+    pdf is an object here
     """
     all_tables = []
+    model_gpt = kwargs["model_gpt"]
+    model_qwn = kwargs["model_qwn"]
 
     for page in pdf.pages:
         for table in page.find_tables():
@@ -47,47 +69,27 @@ def extract_tables_from_pdf(pdf,**kwargs):
 
             # Check if the DataFrame is empty
             if df_clean.empty:
-                # logger.DEBUG("DataFrame is empty. Skipping further processing.")
-                pass
+                logger.debug("DataFrame is empty. Skipping further processing.")
+
             else:
 
                 # Step 3: Filter the dataframe into one of two types
                 typing = categorize_dataframe(df_clean)
 
-                if typing == 0:                    # call table_gpt
+                if typing == 0: # big table, call table_gpt
+                    logger.debug("Using tablegpt for table description")
 
-                    prompt = kwargs["example_prompt_template"].format(
-                        var_name="df",
-                        df_info=df.head(5).to_string(index=False),
-                        user_question=kwargs["question"],
-                    )
-
-                    messages = [
-                        {"role": "system", "content": "You are a helpful assistant."},
-                        {"role": "user", "content": prompt},
-                    ]
-                    text = kwargs["tokenizer"].apply_chat_template(
-                        messages, tokenize=False, add_generation_prompt=True
-                    )
-                    model_inputs = kwargs["tokenizer"]([text], return_tensors="pt").to(kwargs["model"].device)
-
-                    generated_ids = kwargs["model"].generate(**model_inputs, max_new_tokens=512)
-                    generated_ids = [
-                        output_ids[len(input_ids):]
-                        for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
-                    ]
-
-                    response = kwargs["tokenizer"].batch_decode(generated_ids, skip_special_tokens=True)[0]
-
+                    response = generate_tablegpt_description(df_clean, model_gpt)
                     all_tables.append(response)
 
                 else:
-                    print("----------1")
-                    pass
+
+                    logger.debug("Using qwn for table description")
+                    response = generate_qwn_description(df_clean, model_qwn)
+                    all_tables.append(response)
                     # call llm to describe single row
 
     return "\n".join(all_tables)
-
 
 def clean_table(df):
     """
@@ -165,8 +167,99 @@ def categorize_dataframe(df):
     else:
         return 1
 
+def generate_tablegpt_description(df, model, max_new_tokens=512):
+    """
+    Generates a technical description for the rows of a dataframe.
+
+    Args:
+        model: The preloaded Hugging Face model.
+        tokenizer: The preloaded tokenizer for the model.
+        df (DataFrame): The pandas dataframe to describe.
+        max_new_tokens (int): The maximum number of tokens to generate.
+
+    Returns:
+        str: The generated description.
+    """
+    # Define the prompt template
+    prompt_template = """You are provided with a dataframe containing structured data. Your task is to generate a technical description for each row.
+    /*
+    The dataframe is shown below:
+    "{var_name}.head(5).to_string(index=False)" is as follows:
+    {df_info}
+    */
+
+    Task: Describe in a technical manner each row of the dataframe in detail. There is no need to include code. Only the description
+    """
+    table_gpt = "tablegpt/TableGPT2-7B"
+    tokenizer = AutoTokenizer.from_pretrained(table_gpt) ##unfortunatelly there is a bug where you cannot pass the tokenizer as arg.
+    #Also, most documentation is in fvking chinese so there is no way im reading that
+
+    # Format the prompt
+    df_info = df.head(5).to_string(index=False)  # Use the first 5 rows for brevity --> remove later
+    prompt = prompt_template.format(var_name="df", df_info=df_info)
+
+    # Prepare the conversation structure
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt},
+    ]
+
+    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+    # Tokenize the input and send to model
+    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+    generated_ids = model.generate(**model_inputs, max_new_tokens=max_new_tokens)
+
+    # Decode the generated text
+    generated_ids = [
+        output_ids[len(input_ids):]
+        for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+    ]
+    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    return response
+
+
+def generate_qwn_description(df,model):
+
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B-Instruct") ##pf, could refactor it. if the model changes its gonna be a pain to trace it
+
+    # Serialize the DataFrame to a readable format
+    df_serialized = df.to_string(index=False)  # Convert to a tabular string without the index
+
+    # Prepare the prompt with the serialized DataFrame
+    prompt = (
+        "You are provided with a dataframe containing structured data. Your task is to generate a technical description:\n\n"
+        f"{df_serialized}\n\n"
+        "Describe in a technical manner each row of the table in detail. There is no need to include code. Only the description."
+    )
+
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt},
+    ]
+
+    # Tokenize the prompt using the chat template
+    text = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True,
+    )
+    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+
+    # Generate the model output
+    generated_ids = model.generate(
+        **model_inputs,
+        max_new_tokens=512,
+    )
+    generated_ids = [
+        output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+    ]
+    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    return response
+
+
 """
-Image extraction functions, not using all of them, some dead code
+Image extraction function
 """
 def extract_images_from_pdf_fitz(pdf_path, pdf_name, pdf_folder):
     """
@@ -202,14 +295,14 @@ def extract_images_from_pdf_fitz(pdf_path, pdf_name, pdf_folder):
 Main function, just calls all other methods
 """
 
-def process_pdf(pdf_path, **model_kwargs):
+def process_pdf(pdf_path, **kwargs):
     """
     Processes a single PDF file to extract text, tables, and images.
     Extracts the text and tables and images to individual files
     Uses fitz for image selection
 
     Args:
-        pdf_path (str): The path to the PDF file. --> ../02-data/pdfs/circuit-breakers/GFI_breaker/CFI_breaker.pdf
+        pdf_path (str): The path to the PDF file. --> ../02-data/01-pdfs/circuit-breakers/GFI_breaker/CFI_breaker.pdf
         output_folder (str): Folder to save extracted data for each PDF.
 
     Returns:
@@ -217,12 +310,12 @@ def process_pdf(pdf_path, **model_kwargs):
     """
     try:
 
-        # Get the parent folder --> ../02-data/pdfs/circuit-breakers/GFI_breaker/
+        # Get the parent folder --> ../02-data/01-pdfs/circuit-breakers/GFI_breaker/
         pdf_folder = os.path.dirname(pdf_path)
         # Get the name of the pdf (without extension -.pdf) --> GFI_breaker
         pdf_name_without_ext = os.path.splitext(os.path.basename(pdf_path))[0]
 
-        # Open the PDF -> object
+        # Step 0: Open the PDF -> object
         pdf = pdfplumber.open(pdf_path)
 
         # Step 1: Extract text and save to text.txt
@@ -234,7 +327,7 @@ def process_pdf(pdf_path, **model_kwargs):
         # Step 2: Extract tables, translate onto text and save to text.txt
         ## need to do it now, if i save it onto a file, i would have to re-read the file .txt to divide tables later.
         ## This could introduce inconsistencies
-        tables_content = extract_tables_from_pdf(pdf,**model_kwargs)
+        tables_content = extract_tables_from_pdf(pdf,**kwargs)
         text_file.write(tables_content)
 
         pdf.close()
@@ -247,3 +340,4 @@ def process_pdf(pdf_path, **model_kwargs):
     except Exception as e:
         logging.debug(f"Error processing PDF {pdf_path}: {str(e)}")
         return ""
+
