@@ -1,11 +1,24 @@
-# (Optional) Ignore only specific file types within the folder
-# For example, to ignore only .pdf files:
-# 02-data/*.pdf
-# Ignore the 02-data folder
-02-data/
+# Ignore everything in the 02-data folder
+02-data/*
+
+# Include the specific folder 0-testing within 01-pdfs
+!02-data/01-pdfs/0-testing
+
+# Ensure the parent directories are included
+!02-data/01-pdfs/
+!02-data/
 
 # Ignore the venv folder (Python virtual environment)
 venv/
 
+# JetBrains IDE settings
+.idea/
+
+# VsCode IDE settings
+.vscode/
+
 # Ignore the 03-model folder
 03-model/
+
+# Ignore __pycache__ folders
+__pycache__/

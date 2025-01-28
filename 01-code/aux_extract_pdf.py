@@ -297,24 +297,28 @@ Main function, just calls all other methods
 def process_pdf(pdf_path, **kwargs):
     """
     Processes a single PDF file to extract text, tables, and images.
-    Extracts the text and tables and images to individual files
-    Uses fitz for image selection
+    Extracts the text and tables and images to individual files.
+    Uses pdfplumber for text and tabula for tables.
 
     Args:
-        pdf_path (str): The path to the PDF file. --> ../02-data/01-pdfs/circuit-breakers/GFI_breaker/CFI_breaker.pdf
-        output_folder (str): Folder to save extracted data for each PDF.
+        pdf_path (str): The path to the PDF file.
+        **kwargs: Additional keyword arguments for table extraction.
 
     Returns:
         None
     """
     try:
+        # Set up logging
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-        # Get the parent folder --> ../02-data/01-pdfs/circuit-breakers/GFI_breaker/
+        # Get the parent folder
         pdf_folder = os.path.dirname(pdf_path)
-        # Get the name of the pdf (without extension -.pdf) --> GFI_breaker
+        # Get the name of the pdf (without extension)
         pdf_name_without_ext = os.path.splitext(os.path.basename(pdf_path))[0]
 
-        # Step 0: Open the PDF -> object
+        logging.debug(f"Processing PDF: {pdf_path}")
+
+        # Step 0: Open the PDF
         pdf = pdfplumber.open(pdf_path)
 
         # Step 1: Extract text and save to text.txt
@@ -323,20 +327,30 @@ def process_pdf(pdf_path, **kwargs):
         with open(text_output_path, "w") as text_file:
             text_file.write(text_content)
 
-        # Step 2: Extract tables, translate onto text and save to text.txt
-        ## need to do it now, if i save it onto a file, i would have to re-read the file .txt to divide tables later.
-        ## This could introduce inconsistencies
-        tables_content = extract_tables_from_pdf(pdf,**kwargs)
-        text_file.write(tables_content)
+        logging.debug("Text extracted and saved successfully.")
 
-        pdf.close()
+        # Step 2: Extract tables and save to tables.txt
+        tables_content = extract_tables_from_pdf(pdf, **kwargs)
+        tables_output_path = os.path.join(pdf_folder, "tables.txt")
+        with open(tables_output_path, "w") as tables_file:
+            tables_file.write(tables_content)
+
+        logging.debug("Tables extracted and saved successfully.")
 
         # Step 3: Extract and save images
         extract_images_from_pdf_fitz(pdf_path, pdf_name_without_ext, pdf_folder)
 
+        logging.debug("Images extracted and saved successfully.")
+
+        pdf.close()
+
         logging.debug(f"Successfully processed {pdf_path}.")
 
     except Exception as e:
-        logging.debug(f"Error processing PDF {pdf_path}: {str(e)}")
-        return ""
+        logging.error(f"Error processing PDF {pdf_path}: {str(e)}")
+        raise  # Re-raise the exception for higher-level handling
 
+    finally:
+        logging.shutdown()
+
+    return

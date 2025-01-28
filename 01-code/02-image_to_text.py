@@ -3,13 +3,10 @@ import logging
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from PIL import Image
+import numpy as np
 from transformers import BitsAndBytesConfig
 from tensorflow.keras.models import load_model
-import numpy as np
 from tensorflow.keras.preprocessing import image
-
-txt_path = "../02-data/txts/"
-destination_path = "../02-data/0-testing/images"
 
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -120,15 +117,36 @@ def process_images(folder_path, function, **kwargs):
     - function (callable): Function to apply to each image.
     - kwargs: Additional arguments for the processing function.
     """
-    folders = os.listdir(folder_path)
-    for subfolder in folders:
-        subfolder_path = os.path.join(txt_path, subfolder)
-        for root, _, files in os.walk(subfolder_path):
-            output_file = None
-            try:
+
+    # List all labels (subfolders) in the base folder
+    labels = os.listdir(folder_path)
+
+    # Iterate through each label
+    for label in labels:
+        label_path = os.path.join(folder_path, label)  # e.g., ../02-data/01-pdfs/accessories
+
+        # Skip if it's not a directory
+        if not os.path.isdir(label_path):
+            continue
+
+        # List all PDF folders inside the label folder
+        pdf_folders = os.listdir(label_path)
+
+        # Iterate through each PDF folder
+        for pdf_folder in pdf_folders:
+            pdf_folder_path = os.path.join(label_path, pdf_folder)  # e.g., ../02-data/01-pdfs/accessories/pdf_folder1
+
+            # Skip if it's not a directory
+            if not os.path.isdir(pdf_folder_path):
+                continue
+
+            # Traverse through the PDF folder and its subdirectories
+            for root, _, files in os.walk(pdf_folder_path):
+                # Process each file in the current directory
                 for file in files:
+                    # Check if the file is an image (JPEG, JPG, or PNG)
                     if file.lower().endswith(('.jpeg', '.jpg', '.png')):
-                        image_path = os.path.join(root, file)
+                        image_path = os.path.join(root, file)  # Full path to the image file
 
                         # Open output file if processing with image_to_llm
                         if output_file is None and "file_handle" in kwargs:
@@ -143,13 +161,16 @@ def process_images(folder_path, function, **kwargs):
                 if output_file:
                     output_file.close()
 
+
+pdf_path = "../02-data/01-pdfs/"
+
 # Pre-filter images
-process_images(txt_path, pre_filter)
+process_images(pdf_path, pre_filter)
 
 # Classifier filtering
 # Load the model from the file --> look into aux_train_classifier.ipynb
 classifier_model = load_model("../02-data/02-classifier/model.keras")
-process_images(txt_path, classifier_filter,model = classifier_model)
+process_images(pdf_path, classifier_filter,model = classifier_model)
 
 # Import llama model
 llama_model = "qresearch/llama-3.1-8B-vision-378"
@@ -157,7 +178,7 @@ llama_instance, tokenizer_instance = import_model(llama_model)
 prompt_used = "USER: <image>\nDescribe in a technical manner the elements in the image\nASSISTANT:"
 
 # Generate descriptions with the LLM
-process_images(txt_path, image_to_llm,
+process_images(pdf_path, image_to_llm,
     file_handle=None,
     model=llama_instance,
     tokenizer=tokenizer_instance,
