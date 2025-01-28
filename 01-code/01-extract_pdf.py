@@ -5,7 +5,7 @@ from tqdm import tqdm
 from aux_extract_pdf import process_pdf,preload_model
 import argparse
 
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def process_label(input_label_path, **kwargs):
@@ -20,32 +20,32 @@ def process_label(input_label_path, **kwargs):
         OSError: If there is an issue reading or writing files or directories.
     """
     try:
-        logging.debug(f"Starting to process label folder: {input_label_path}")
+        logging.info(f"Starting to process label folder: {input_label_path}")
 
         # List all subfolders (PDF labels) within the label folder
         pdf_labels = [f for f in os.listdir(input_label_path) if os.path.isdir(os.path.join(input_label_path, f))]
-        logging.debug(f"Found {len(pdf_labels)} subfolders in label folder: {input_label_path}")
+        logging.info(f"Found {len(pdf_labels)} subfolders in label folder: {input_label_path}")
 
         for pdf_file_name in pdf_labels:
             pdf_folder_path = os.path.join(input_label_path, pdf_file_name)  # ../02-data/01-pdfs/circuit-breakers/D_1110_en
-            logging.debug(f"Processing subfolder: {pdf_folder_path}")
+            logging.info(f"Processing subfolder: {pdf_folder_path}")
 
             if os.path.isdir(pdf_folder_path):
                 # Find the PDF file in the current subfolder
                 pdf_files = [f for f in os.listdir(pdf_folder_path) if f.lower().endswith(".pdf")]
                 if pdf_files:
                     pdf_path = os.path.join(pdf_folder_path, pdf_files[0])  # ../02-data/01-pdfs/circuit-breakers/D_1110_en/D_1110_en.pdf
-                    logging.debug(f"Found PDF file: {pdf_path}. Starting processing.")
+                    logging.info(f"Found PDF file: {pdf_path}. Starting processing.")
 
                     # Process the PDF
                     process_pdf(pdf_path, **kwargs)
-                    logging.debug(f"Completed processing of PDF: {pdf_path}")
+                    logging.info(f"Completed processing of PDF: {pdf_path}")
                 else:
-                    logging.debug(f"No PDF files found in subfolder: {pdf_folder_path}")
+                    logging.info(f"No PDF files found in subfolder: {pdf_folder_path}")
             else:
-                logging.debug(f"Skipping invalid or non-directory subfolder: {pdf_folder_path}")
+                logging.info(f"Skipping invalid or non-directory subfolder: {pdf_folder_path}")
 
-        logging.debug(f"Completed processing all subfolders in label folder: {input_label_path}")
+        logging.info(f"Completed processing all subfolders in label folder: {input_label_path}")
 
     except OSError as e:
         logging.error(f"File system error while processing label folder {input_label_path}: {str(e)}")
@@ -65,19 +65,19 @@ def check_folders(input_folder, **kwargs):
         None: Logs results of the comparison or errors encountered.
     """
     try:
-        logging.debug(f"Starting to process the input folder: {input_folder}")
+        logging.info(f"Starting to process the input folder: {input_folder}")
 
         # Iterate through each subfolder (label)
         for label in os.listdir(input_folder):
             input_path = os.path.join(input_folder, label)
 
             if os.path.isdir(input_path):
-                logging.debug(f"Processing label: {label} (Path: {input_path})")
+                logging.info(f"Processing label: {label} (Path: {input_path})")
                 process_label(input_path, **kwargs)  # Call process_label for the label
             else:
-                logging.debug(f"Skipping non-directory item: {label} (Path: {input_path})")
+                logging.info(f"Skipping non-directory item: {label} (Path: {input_path})")
 
-        logging.debug(f"Completed processing all labels in folder: {input_folder}")
+        logging.info(f"Completed processing all labels in folder: {input_folder}")
 
     except OSError as e:
         logging.error(f"File system error during label processing: {str(e)}")

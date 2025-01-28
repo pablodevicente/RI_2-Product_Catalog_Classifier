@@ -67,7 +67,7 @@ def extract_tables_from_pdf(pdf, **kwargs):
 
             # Check if the DataFrame is empty
             if df_clean.empty:
-                logger.debug("DataFrame is empty. Skipping further processing.")
+                logging.info("DataFrame is empty. Skipping further processing.")
 
             else:
 
@@ -75,13 +75,13 @@ def extract_tables_from_pdf(pdf, **kwargs):
                 typing = categorize_dataframe(df_clean)
 
                 if typing == 0: # big table, call table_gpt
-                    logger.debug("Using tablegpt for table description")
+                    logging.info("Using tablegpt for table description")
 
                     response = generate_tablegpt_description(df_clean, model_gpt)
                     all_tables.append(response)
 
                 else:
-                    logger.debug("Using qwn for table description")
+                    logging.info("Using qwn for table description")
 
                     response = generate_qwn_description(df_clean, model_qwn)
                     all_tables.append(response)
@@ -283,9 +283,9 @@ def extract_images_from_pdf_fitz(pdf_path, pdf_name, pdf_folder):
             img_path = os.path.join(pdf_folder, f"{pdf_name}_page{page_num + 1}_img{img_index + 1}.{img_ext}")
             with open(img_path, "wb") as img_file:
                 img_file.write(img_data)
-            logger.debug(f"Saved image to {img_path}")
+            logging.info(f"Saved image to {img_path}")
 
-    logger.debug(f"Images processed from file {pdf_name}")
+    logging.info(f"Images processed from file {pdf_name}")
     pdf.close()
 
 """

@@ -35,11 +35,11 @@ def pre_filter(image_path, **kwargs):
             aspect_ratio = width / height
 
             if pixel_count < MIN_PIXELS or not (MIN_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO):
-                logger.debug(f"Deleting {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
+                logger.info(f"Deleting {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
                 os.remove(image_path)
                 return True  # Image was deleted
             else:
-                logger.debug(f"Keeping {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
+                logger.info(f"Keeping {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
                 return False  # Image was kept
     except Exception as e:
         logger.error(f"Error processing {image_path}: {e}")
@@ -63,10 +63,10 @@ def classifier_filter(image_path, **kwargs):
 
     # Interpret the prediction based on a threshold (e.g., 0.5) ## >>0.5 == not_product
     if val >= 0.5:
-        logger.debug(f"img : {image_path} not a product, deleting")
+        logger.info(f"img : {image_path} not a product, deleting")
         os.remove(image_path)
     else: ## product
-        logger.debug(f"img : {image_path} is a product")
+        logger.info(f"img : {image_path} is a product")
         pass
 
 def image_to_llm(image_path, **kwargs):
