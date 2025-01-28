@@ -6,11 +6,9 @@ import fitz
 import pdfplumber
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-base_path = '/02-data/01-pdfs/'
-output_path = '/media/pablo/windows_files/00 - Master/05 - Research&Thesis/R2-Research_Internship_2/02-data/pdfs_txt/'
-
-logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
+# Get the logger (it inherits the configuration from the main script)
 logger = logging.getLogger(__name__)
+
 
 def preload_model(model_gpt="tablegpt/TableGPT2-7B",model_qwn="Qwen/Qwen2.5-7B-Instruct"):
     """
@@ -308,9 +306,6 @@ def process_pdf(pdf_path, **kwargs):
         None
     """
     try:
-        # Set up logging
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
         # Get the parent folder
         pdf_folder = os.path.dirname(pdf_path)
         # Get the name of the pdf (without extension)
@@ -349,8 +344,5 @@ def process_pdf(pdf_path, **kwargs):
     except Exception as e:
         logging.error(f"Error processing PDF {pdf_path}: {str(e)}")
         raise  # Re-raise the exception for higher-level handling
-
-    finally:
-        logging.shutdown()
 
     return

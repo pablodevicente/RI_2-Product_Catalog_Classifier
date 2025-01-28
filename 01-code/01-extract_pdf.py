@@ -5,7 +5,7 @@ from tqdm import tqdm
 from aux_extract_pdf import process_pdf,preload_model
 import argparse
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def process_label(input_label_path, **kwargs):
@@ -85,7 +85,7 @@ def check_folders(input_folder, **kwargs):
         logging.error(f"Unexpected error during label processing: {str(e)}")
 
 
-def main(base_path="../02-data/01-pdfs/"):
+def main(base_path):
     """
     Main function to extract PDF data and process it using preloaded models.
 
@@ -107,6 +107,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "base_path",
         type=str,
+        nargs="?",  # Makes the argument optional
+        default="../02-data/01-pdfs/00-testing",
         help="The base path to the folder containing PDF files."
     )
     args = parser.parse_args()
