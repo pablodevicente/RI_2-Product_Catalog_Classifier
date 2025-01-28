@@ -1,4 +1,11 @@
 # (Optional) Ignore only specific file types within the folder
 # For example, to ignore only .pdf files:
 # 02-data/*.pdf
+# Ignore the 02-data folder
 02-data/
+
+# Ignore the venv folder (Python virtual environment)
+venv/
+
+# Ignore the 03-model folder
+03-model/
