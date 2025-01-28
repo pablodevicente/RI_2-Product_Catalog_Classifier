@@ -8,7 +8,7 @@ import argparse
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def process_label(input_label_path, kwargs):
+def process_label(input_label_path, **kwargs):
     """
     Transcribes all PDFs within the input folder and saves the transcribed text in the corresponding output.
 
