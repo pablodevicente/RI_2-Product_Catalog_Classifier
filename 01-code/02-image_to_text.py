@@ -17,7 +17,7 @@ MIN_PIXELS = 1000
 MIN_ASPECT_RATIO = 0.2  # width / height. 200 px / 1000 px
 MAX_ASPECT_RATIO = 5.0
 
-def pre_filter(image_path):
+def pre_filter(image_path, **kwargs):
     """
     Checks image properties and deletes images that do not meet specified criteria.
 
@@ -45,8 +45,11 @@ def pre_filter(image_path):
         logger.error(f"Error processing {image_path}: {e}")
         return False
 
-def classifier_filter(image_path,model):
-    ## CALL endpoint for classifier --> look into aux_classifier_training
+def classifier_filter(image_path, **kwargs):
+
+    model = kwargs.get('model')
+    if model is None:
+        raise ValueError("The 'model' argument is required for classifier_filter.")
 
     img1 = image.load_img(image_path, target_size=(150, 150))
 
@@ -66,7 +69,7 @@ def classifier_filter(image_path,model):
         logger.debug(f"img : {image_path} is a product")
         pass
 
-def image_to_llm(image_path, file_handle, model, tokenizer, prompt, max_new_tokens):
+def image_to_llm(image_path, **kwargs):
     """
     Processes an image using a language model and writes the description to the file.
 
@@ -78,6 +81,13 @@ def image_to_llm(image_path, file_handle, model, tokenizer, prompt, max_new_toke
     - prompt (str): Prompt to pass to the model.
     - max_new_tokens (int): Maximum tokens for the response.
     """
+    # Extract the arguments from kwargs
+    model = kwargs.get('model')
+    file_handle = kwargs.get('file_handle')
+    tokenizer = kwargs.get('tokenizer')
+    prompt = kwargs.get('prompt')
+    max_new_tokens = kwargs.get('max_new_tokens', 200)  # Default to 200 if not provided
+
     try:
         # Call the model and get the text description
         text_description = model.answer_question(
@@ -118,48 +128,25 @@ def process_images(folder_path, function, **kwargs):
     - kwargs: Additional arguments for the processing function.
     """
 
-    # List all labels (subfolders) in the base folder
-    labels = os.listdir(folder_path)
+    if not os.path.isdir(folder_path):
+        raise ValueError(f"The provided folder path does not exist: {folder_path}")
 
-    # Iterate through each label
-    for label in labels:
-        label_path = os.path.join(folder_path, label)  # e.g., ../02-data/01-pdfs/accessories
+    for root, _, files in os.walk(folder_path):
+        # Define the path for the output text file (only once per document)
+        file_path = os.path.join(root, "images_to_txt.txt")
 
-        # Skip if it's not a directory
-        if not os.path.isdir(label_path):
-            continue
+        # Open the file once
+        with open(file_path, "w") as opened_file:
+            # Pass the opened file as an argument
+            kwargs["file_handle"] = opened_file
 
-        # List all PDF folders inside the label folder
-        pdf_folders = os.listdir(label_path)
+            for file in files:
+                # Check if the file is an image (JPEG, JPG, or PNG)
+                if file.lower().endswith(('.jpeg', '.jpg', '.png')):
+                    image_path = os.path.join(root, file)  # Full path to the image file
 
-        # Iterate through each PDF folder
-        for pdf_folder in pdf_folders:
-            pdf_folder_path = os.path.join(label_path, pdf_folder)  # e.g., ../02-data/01-pdfs/accessories/pdf_folder1
-
-            # Skip if it's not a directory
-            if not os.path.isdir(pdf_folder_path):
-                continue
-
-            # Traverse through the PDF folder and its subdirectories
-            for root, _, files in os.walk(pdf_folder_path):
-                # Process each file in the current directory
-                for file in files:
-                    # Check if the file is an image (JPEG, JPG, or PNG)
-                    if file.lower().endswith(('.jpeg', '.jpg', '.png')):
-                        image_path = os.path.join(root, file)  # Full path to the image file
-
-                        # Open output file if processing with image_to_llm
-                        if output_file is None and "file_handle" in kwargs:
-                            output_file_path = os.path.join(root, "images_to_txt")
-                            output_file = open(output_file_path, "w")
-
-                        # Pass arguments dynamically to the function
-                        if "file_handle" in kwargs:
-                            kwargs["file_handle"] = output_file
-                        function(image_path, **kwargs)
-            finally:
-                if output_file:
-                    output_file.close()
+                    # Call the function with the image path and opened file
+                    function(image_path, **kwargs)
 
 
 pdf_path = "../02-data/01-pdfs/"
@@ -168,9 +155,8 @@ pdf_path = "../02-data/01-pdfs/"
 process_images(pdf_path, pre_filter)
 
 # Classifier filtering
-# Load the model from the file --> look into aux_train_classifier.ipynb
-classifier_model = load_model("../02-data/02-classifier/model.keras")
-process_images(pdf_path, classifier_filter,model = classifier_model)
+classifier_model = load_model("../02-data/02-classifier/model.keras") # Load the model from the file --> look into aux_train_classifier.ipynb
+process_images(pdf_path, classifier_filter, model=classifier_model)
 
 # Import llama model
 llama_model = "qresearch/llama-3.1-8B-vision-378"
@@ -179,7 +165,6 @@ prompt_used = "USER: <image>\nDescribe in a technical manner the elements in the
 
 # Generate descriptions with the LLM
 process_images(pdf_path, image_to_llm,
-    file_handle=None,
     model=llama_instance,
     tokenizer=tokenizer_instance,
     prompt=prompt_used,
