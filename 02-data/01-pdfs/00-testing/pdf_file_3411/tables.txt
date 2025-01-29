@@ -1,0 +1,238 @@
+The first row describes an actuator called a Push plunger, which has an exposed terminal type of AZ4001 and an L socket type of AZ4601. This actuator is designed to push or move objects in a linear motion.
+
+The second row describes an actuator called a Roller plunger, which has an exposed terminal type of AZ4002 and an L socket type of AZ4602. This actuator is designed to provide smooth movement by using rollers to reduce friction.
+
+The third row describes an actuator called a Cross roller plunger, which has an exposed terminal type of AZ4003 and an L socket type of AZ4603. This actuator is designed to provide high precision movement by using cross rollers to guide the motion.
+
+The fourth row describes an actuator called a Roller arm, which has an exposed terminal type of AZ4004 and an L socket type of AZ4604. This actuator is designed to provide articulated movement by using a series of connected rollers.
+
+The fifth row describes an actuator called an Adjustable rod, which has an exposed terminal type of AZ4007 and an L socket type of AZ4607. This actuator is designed to provide adjustable length movement by using a threaded rod that can be screwed in or out to change its length.
+### Specifications
+
+- **L Socket with Cord (1 m):**
+  - **Type:** L-shaped wall socket
+  - **Cord Length:** 1 meter
+  - **Design:** Features an L-shape for convenient placement and ease of use, suitable for various mounting angles.
+  - **Connection:** Equipped with a standard electrical plug for direct connection to a power outlet.
+  - **Usage:** Ideal for temporary or portable applications where flexibility in positioning is required.
+
+- **L Socket with Cord (2 m):**
+  - **Type:** L-shaped wall socket
+  - **Cord Length:** 2 meters
+  - **Design:** Similar to the 1-meter version but with a longer cord for increased mobility and flexibility.
+  - **Connection:** Standard electrical plug for secure and reliable power delivery.
+  - **Usage:** Suitable for applications requiring more space for movement, such as workstations, desk lamps, or temporary equipment setups.
+
+- **L Socket with Cord (3 m):**
+  - **Type:** L-shaped wall socket
+  - **Cord Length:** 3 meters
+  - **Design:** Longer version of the L socket, providing enhanced flexibility and reach.
+  - **Connection:** Equipped with a robust electrical plug for dependable power supply.
+  - **Usage:** Ideal for extended applications like multi-purpose rooms, office setups, or any environment where extended reach is necessary.
+
+- **L Socket with Cord (5 m):**
+  - **Type:** L-shaped wall socket
+  - **Cord Length:** 5 meters
+  - **Design:** The longest option, offering maximum flexibility and range of motion.
+  - **Connection:** Features a durable electrical plug designed for long-term use.
+  - **Usage:** Best suited for large spaces, workshops, or areas where extensive mobility is essential, such as construction sites or industrial environments.
+1. **Lamp rating: 6V DC**
+   - This row indicates that the lamp is rated for operation at a direct current (DC) voltage of 6 volts. It is designed to function efficiently and safely within this specific voltage range, ensuring optimal performance and longevity.
+
+2. **Lamp rating: 12V DC**
+   - This row specifies that the lamp is rated for a direct current (DC) voltage of 12 volts. The lamp is configured to operate optimally within this voltage range, providing a balance between power consumption and operational efficiency.
+
+3. **Lamp rating: 24V to 48V DC**
+   - This row denotes that the lamp can be operated within a wide range of direct current (DC) voltages from 24 volts to 48 volts. This flexible voltage range allows for greater adaptability and compatibility with various power supply systems, enhancing the lamp's versatility and application flexibility.
+
+4. **Lamp rating: 6V DC**
+   - Similar to the first row, this row indicates that the lamp is rated for operation at a direct current (DC) voltage of 6 volts. The lamp is designed to perform reliably and efficiently within this voltage range, ensuring consistent performance and minimal power consumption.
+
+5. **Lamp rating: 12V DC**
+   - This row specifies that the lamp is rated for a direct current (DC) voltage of 12 volts. The lamp is configured to operate optimally within this voltage range, providing efficient and reliable performance.
+
+6. **Lamp rating: 24V to 48V DC**
+   - This row denotes that the lamp can be operated within a wide range of direct current (DC) voltages from 24 volts to 48 volts. The lamp’s ability to function across this broad voltage range enhances its adaptability and compatibility with different power supply systems, making it suitable for various applications.
+The provided dataframe contains structured data related to cord lengths and their corresponding part numbers. Each row details a specific cord length along with its equivalent measurement in feet and the associated part number.
+
+1. **Row 1**: This row indicates a cord length of 2 meters, which is approximately 6.562 feet, and the part number for this cord is AZ38, with a quantity of 2 units.
+
+2. **Row 2**: This row specifies a cord length of 3 meters, which is approximately 9.843 feet, and the part number for this cord is AZ38, with a quantity of 3 units.
+
+3. **Row 3**: This row details a cord length of 5 meters, which is approximately 16.404 feet, and the part number for this cord is AZ38, with a quantity of 5 units.
+### Technical Description
+
+#### Row 1:
+**Standards:** UL Recognized Product  
+**Applicable Product:** This product meets Underwriters Laboratories (UL) safety standards and has been assigned the file number E122222. The product is rated for a current of 5 amperes (5A) and a voltage of 250 volts alternating current (AC). It is suitable for all types of applications except those involving socket and cord combinations.
+
+#### Row 2:
+**Standards:** CSA Certified Product  
+**Applicable Product:** This product complies with Canadian Standards Association (CSA) safety standards and has been assigned the file number LR55880. The product is rated for a current of 5 amperes (5A) and a voltage of 250 volts alternating current (AC). It is suitable for all types of applications except those involving socket and cord combinations.
+### Rated Control Voltage
+The table lists the rated control voltages for the device, specifying three different voltage types: AC and DC. The device is designed to operate under two different AC voltage ratings—125V AC and 250V AC—and one DC voltage rating of 30V DC.
+
+### Resistive Load (cos φ = 1)
+For resistive loads where the power factor (cos φ) is 1, the table indicates that the maximum current capacity is 5A. This applies to all three voltage types: 125V AC, 250V AC, and 30V DC. A power factor of 1 means that the load is purely resistive, with no reactive component, ensuring that the current and voltage are in phase.
+
+### Inductive Load (cos φ = 0.4)
+When dealing with inductive loads where the power factor (cos φ) is 0.4, the maximum current capacity drops to 3A for all three voltage types: 125V AC, 250V AC, and 30V DC. An inductive load introduces a phase shift between the current and voltage, reducing the effective current-carrying capability compared to resistive loads.
+### Technical Description of Dataframe Columns
+
+1. **Initial Contact Resistance, max.**
+   - This parameter specifies the maximum allowable resistance between the contacts at the initial stage of operation. It ensures that the electrical connection is as efficient as possible and minimizes energy loss during the initial contact phase.
+
+2. **Contact Material**
+   - The type of material used for the contacts determines their wear resistance, conductivity, and overall performance. Common materials include copper, silver, gold, and various alloys, each offering different advantages depending on the application requirements.
+
+3. **Initial Insulation Resistance (At 500V DC)**
+   - This value indicates the resistance offered by the insulating material when a 500V direct current is applied. High initial insulation resistance is crucial for ensuring reliable operation and preventing electrical shorts or failures.
+
+4. **Initial Breakdown Voltage**
+   - The initial breakdown voltage represents the minimum voltage required to cause a breakdown or arcing across the contacts. This parameter is critical for assessing the device's ability to withstand transient voltage spikes without damage.
+
+5. **Shock Resistance**
+   - This metric measures the device's capability to withstand mechanical shocks without compromising its operational integrity. It is typically expressed in terms of g-forces and provides insight into the robustness of the device under dynamic conditions.
+
+6. **Vibration Resistance**
+   - Vibration resistance assesses how well the device can perform in environments characterized by continuous or periodic mechanical vibrations. It is often specified in terms of frequency and amplitude to ensure long-term reliability.
+
+7. **Expected Life (min. Operations)**
+   - This parameter indicates the anticipated number of operational cycles before the device reaches end-of-life. It is a key indicator of the device’s durability and reliability under normal usage conditions.
+
+8. **Ambient Temperature**
+   - The ambient temperature specifies the range of environmental temperatures in which the device can operate effectively without degradation in performance. This is critical for ensuring proper function in varying environmental conditions.
+
+9. **Ambient Humidity**
+   - Ambient humidity refers to the moisture content in the surrounding air, which can affect the performance and longevity of the device. High humidity levels can lead to corrosion and reduced insulation resistance, necessitating this specification to ensure optimal performance.
+
+10. **Max. Operating Speed**
+    - This parameter defines the highest speed at which the device can operate while maintaining its functional integrity and performance. It is essential for applications where speed and efficiency are critical factors.
+The first row describes an actuator type called "Push plunger" which has a maximum operating force of 6.86 N and a release force of 0.69 N. The pretravel distance is 1.039 mm and the overtravel distance is 0.15 mm. The differential movement is 4.157 mm.
+
+The second row also describes an actuator type called "Roller plunger" which has a maximum operating force of 6.86 N and a release force of 0.69 N. The pretravel distance is 1.039 mm and the overtravel distance is 0.15 mm. The differential movement is 4.157 mm.
+
+The third row describes an actuator type called "Cross roller plunger" which has a maximum operating force of 6.86 N and a release force of 0.69 N. The pretravel distance is 1.039 mm and the overtravel distance is 0.15 mm. The differential movement is 4.157 mm.
+
+The fourth row describes an actuator type called "Roller arm" which has a maximum operating force of 4.41 N and a release force of 0.24 N. The pretravel distance is 15°±3° and the overtravel distance is 3°.
+
+The fifth row describes an actuator type called "Adjustable rod" which has a maximum operating force of 4.41 N to 1.11 N and a release force of 0.24 N to 0.06 N. The pretravel distance is 15°±3° and the overtravel distance is 3°.
+The dataframe provides information on the protective construction, switch body, and L socket type for various ratings. Here is a detailed technical description of each row:
+
+1. **IEC**:
+   - This row indicates the International Electrotechnical Commission (IEC) standard rating for the protective construction of the switch body. No specific values are provided, suggesting that the IEC standard might not be applicable or relevant for this particular product.
+
+2. **IP64**:
+   - The Ingress Protection (IP) rating for this entry is 64, indicating robust protection against dust and water jets. Specifically, it means that the device is completely protected against ingress of dust and can withstand powerful water jets from all directions without harmful effects.
+
+3. **IP65**:
+   - The Ingress Protection (IP) rating for this entry is 65, indicating robust protection against dust and water jets directed at the enclosure. It ensures complete protection against dust and can withstand powerful water jets from any direction without harmful effects.
+
+4. **IP66**:
+   - The Ingress Protection (IP) rating for this entry is 66, indicating robust protection against dust and powerful water jets directed at the enclosure. It ensures complete protection against dust and can withstand high-pressure, high-velocity water jets without harmful effects.
+1. **Rated Operating Voltage: 6V DC, Operating Voltage Range: 5 to 15V DC**
+   - The device is rated for a nominal operating voltage of 6 volts direct current (DC). It can function effectively within an operating voltage range of 5 to 15 volts DC, indicating a margin of tolerance that allows for some variation in input power without affecting performance.
+
+2. **Rated Operating Voltage: 12V DC, Operating Voltage Range: 9 to 28V DC**
+   - The equipment is designed to operate at a standard voltage of 12 volts DC. However, it can handle a broader range of input voltages from 9 to 28 volts DC, which provides flexibility in power supply options and helps ensure reliable operation under varying conditions.
+
+3. **Rated Operating Voltage: 24 to 48V DC, Operating Voltage Range: 20 to 55V DC**
+   - This device has a rated operating voltage range of 24 to 48 volts DC, indicating its optimal performance within this specific voltage band. It is also capable of operating within a wider range of 20 to 55 volts DC, offering a significant degree of adaptability to different power supply scenarios while maintaining consistent functionality.
+The provided dataframe consists of two rows, each containing three columns of floating-point numbers. The structure and values of each row are described as follows:
+
+**Row 1:**
+- Column 1: 0.606
+- Column 2: 4.9
+- Column 3: 0.193
+
+**Row 2:**
+- Column 1: 3.6
+- Column 2: 0.142
+Row 1:
+- Contains two columns, with the first column labeled "3" and the second column labeled "2".
+- The value in the first column is "1", which is the only data point provided for this column.
+
+Row 2:
+- Consists of two empty cells, indicating that there is no data present for either column in this row.
+1. The first row of the dataframe describes a cord with a black color.
+2. The second row of the dataframe describes a cord with a red color.
+3. The third row of the dataframe describes a cord with a white color.
+1. The first row describes a cord with a black color.
+2. The second row describes a cord with a red color.
+3. The third row describes a cord with a white color.
+### QL (1)
+- **Description**: This row indicates the identification or designation of the component being described, specifically labeled as "QL (1)".
+
+### 22.5
+- **Description**: This value likely represents a specific measurement or parameter related to the component, possibly indicating a nominal size or dimension.
+
+### Standard Packaging
+- **Description**: Indicates that the component is packaged according to standard specifications, implying uniformity and adherence to established packaging guidelines.
+
+### A condition
+- **Description**: This phrase suggests a condition or status related to the component, though it is not fully specified here. It could refer to a particular state or requirement for the component.
+
+### Note: The stripping of the cord is based on a length for dimension A as standard and should be stripped accordingly.
+- **Description**: This note provides instructions for the correct method of stripping the cord. It specifies that the cord should be stripped based on the standard length for dimension A, ensuring consistency and proper handling during assembly or installation.
+
+### (2)
+- **Description**: This placeholder or section marker may indicate a break or transition between different types of information or descriptions within the document.
+
+### (3)
+- **Description**: Similarly, this placeholder or section marker likely denotes another break or transition between different sections of the document.
+
+### L socket direction
+- **Description**: This row describes the orientation or alignment of the L-shaped socket. It appears to be providing details about how terminals are positioned relative to the socket's geometry.
+
+### 1 3 AZ3806 A B
+- **Description**: This line indicates that Terminal (1) and Terminal (A) are aligned in a specific configuration, possibly in an electrical circuit diagram or assembly guide.
+
+### 2
+- **Description**: This number likely serves as a continuation or identifier for the next set of terminal configurations.
+
+### Terminal (1) and (A) direction are aligned.
+- **Description**: This statement confirms that Terminal (1) and Terminal (A) are aligned in the same direction, which is important for proper electrical connection and functionality.
+
+### 1 3 AZ3806
+- **Description**: This line repeats the terminal identifiers, likely for clarity or reference.
+
+### 2
+- **Description**: Continuation of the identifier for the next set of configurations.
+
+### Terminal (3) and (A) direction are aligned.
+- **Description**: Confirms that Terminal (3) and Terminal (A) are aligned in the same direction, again ensuring proper electrical connection.
+
+### 
+The provided dataframe contains two rows and two columns. Each row is described as follows:
+
+1. **Row 1:**
+   - **Column 1:** The value in this cell is `None`, indicating a null or missing value.
+   - **Column 2:** The value in this cell is `.630`, which is a floating-point number representing a specific numerical value.
+
+2. **Row 2:**
+   - **Column 1:** The value in this cell is `(2)`, which appears to be a numeric value enclosed in parentheses, possibly indicating a label or a specific format.
+   - **Column 2:** The value in this cell is `None`, indicating a null or missing value.
+The dataframe contains a single column labeled "Wire name" with associated values that describe the type and dimensions of a wire. 
+
+1. **Row 1:**
+   - **Wire name:** None
+   - **Value:** Conductor
+   This row indicates that the wire being described is a conductor, which is the primary component through which electrical current flows.
+
+2. **Row 2:**
+   - **Wire name:** Vinyl cabtire cord (VCTF)
+   - **Value:** 0.75 mm²
+   This row specifies that the wire is of the vinyl cabtire cord (VCTF) type and has a cross-sectional area of 0.75 square millimeters. VCTF is a type of flexible cable often used in automotive applications due to its durability and resistance to abrasion and chemicals. The 0.75 mm² cross-sectional area suggests a wire capable of carrying a moderate amount of current.
+The table provides the rated operating voltage and corresponding current ratings for a device, organized in a structured format.
+
+**Row 1: Rated Operating Voltage 6V**
+- **6V DC:** The device operates at 6V DC with a current draw of 2.5 mA.
+
+**Row 2: Rated Operating Voltage 12V**
+- **12V DC:** The device operates at 12V DC with a current draw of 2.6 mA.
+- **24 to 48V DC:** The device does not operate within this voltage range as indicated by the dash (–).
+
+**Row 3: Rated Operating Voltage 24V**
+- **24 to 48V DC:** The device operates within this voltage range with a current draw of 1.6 mA.
+- **12V DC:** The device does not operate within this voltage range as indicated by the dash (–).
+- **6V DC:** The device does not operate within this voltage range as indicated by the dash (–).
