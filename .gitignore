@@ -1,12 +1,5 @@
 # Ignore everything in the 02-data folder
-02-data/*
-
-# Include the specific folder 0-testing within 01-pdfs
-!02-data/01-pdfs/0-testing
-
-# Ensure the parent directories are included
-!02-data/01-pdfs/
-!02-data/
+#02-data/*
 
 # Ignore the venv folder (Python virtual environment)
 venv/

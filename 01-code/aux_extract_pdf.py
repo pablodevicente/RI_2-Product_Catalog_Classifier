@@ -9,7 +9,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 # Get the logger (it inherits the configuration from the main script)
 logger = logging.getLogger(__name__)
 
-
 def preload_model(model_gpt="tablegpt/TableGPT2-7B",model_qwn="Qwen/Qwen2.5-7B-Instruct"):
     """
     Preloads the model and tokenizer for table-to-text transformation.
