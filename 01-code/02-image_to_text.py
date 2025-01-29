@@ -131,7 +131,15 @@ def process_images(folder_path, function, **kwargs):
     for root, _, files in os.walk(folder_path):
         logging.info(f"Processing folder: {root}")
 
-        # Define the path for the output text file (only once per document)
+        # Filter only image files
+        image_files = [file for file in files if file.lower().endswith(('.jpeg', '.jpg', '.png'))]
+
+        # Only proceed if there are images in the folder
+        if not image_files:
+            logging.info(f"No images found in {root}. Skipping file creation.")
+            continue  # Skip this folder
+
+        # Define the path for the output text file
         file_path = os.path.join(root, "images_to_txt.txt")
         logging.info(f"Output file for this folder: {file_path}")
 
@@ -142,20 +150,16 @@ def process_images(folder_path, function, **kwargs):
             # Pass the opened file as an argument
             kwargs["file_handle"] = opened_file
 
-            for file in files:
-                # Check if the file is an image (JPEG, JPG, or PNG)
-                if file.lower().endswith(('.jpeg', '.jpg', '.png')):
-                    image_path = os.path.join(root, file)  # Full path to the image file
-                    logging.info(f"Processing image: {image_path}")
+            for file in image_files:
+                image_path = os.path.join(root, file)  # Full path to the image file
+                logging.info(f"Processing image: {image_path}")
 
-                    # Call the function with the image path and opened file
-                    try:
-                        function(image_path, **kwargs)
-                        logging.info(f"Successfully processed image: {image_path}")
-                    except Exception as e:
-                        logging.error(f"Error processing image {image_path}: {e}")
-                else:
-                    logging.warning(f"Skipping non-image file: {file}")
+                # Call the function with the image path and opened file
+                try:
+                    function(image_path, **kwargs)
+                    logging.info(f"Successfully processed image: {image_path}")
+                except Exception as e:
+                    logging.error(f"Error processing image {image_path}: {e}")
 
     logging.info(f"Finished processing all images in folder: {folder_path}")
 
