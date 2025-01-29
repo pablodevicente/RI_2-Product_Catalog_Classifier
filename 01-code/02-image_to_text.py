@@ -84,10 +84,12 @@ def image_to_llm(image_path, **kwargs):
     prompt = kwargs.get('prompt')
     max_new_tokens = kwargs.get('max_new_tokens', 200)  # Default to 200 if not provided
 
+    image = Image.open(image_path)
+
     try:
         # Call the model and get the text description
         text_description = model.answer_question(
-            image_path, prompt, tokenizer, max_new_tokens=max_new_tokens, do_sample=True, temperature=0.3
+            image, prompt, tokenizer, max_new_tokens=max_new_tokens, do_sample=True, temperature=0.3
         )
         file_handle.write(f"{text_description}\n\n")
     except Exception as e:
