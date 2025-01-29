@@ -8,15 +8,6 @@ from transformers import BitsAndBytesConfig
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 
-# Set up logging configuration
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-# Define the minimum pixel threshold and acceptable aspect ratio range
-MIN_PIXELS = 1000
-MIN_ASPECT_RATIO = 0.2  # width / height. 200 px / 1000 px
-MAX_ASPECT_RATIO = 5.0
-
 def pre_filter(image_path, **kwargs):
     """
     Checks image properties and deletes images that do not meet specified criteria.
@@ -46,28 +37,33 @@ def pre_filter(image_path, **kwargs):
         return False
 
 def classifier_filter(image_path, **kwargs):
+    """
+    Classifies an image using a provided model and filters it based on the prediction.
 
+    Parameters:
+    - image_path (str): Path to the image file.
+    - kwargs: Additional arguments, including the 'model' for classification.
+    """
     model = kwargs.get('model')
     if model is None:
         raise ValueError("The 'model' argument is required for classifier_filter.")
 
+    # Load and preprocess the image
     img1 = image.load_img(image_path, target_size=(150, 150))
-
-    # Convert image to array and add batch dimension
     Y = image.img_to_array(img1)
     X = np.expand_dims(Y, axis=0)
 
     # Make prediction
-    val = model.predict(X)[0][0]  # Get the scalar value from the output
-    print(val)
+    val = model.predict(X, verbose=0)[0][0]  # Get the scalar value from the output. verbose=0 restricts output
+    logging.info(f"Prediction value for {image_path}: {val}")
 
-    # Interpret the prediction based on a threshold (e.g., 0.5) ## >>0.5 == not_product
+    # Interpret the prediction based on a threshold (e.g., 0.5)
     if val >= 0.5:
-        logger.info(f"img : {image_path} not a product, deleting")
+        logging.info(f"Image {image_path} is NOT a product (prediction: {val}). Deleting...")
         os.remove(image_path)
-    else: ## product
-        logger.info(f"img : {image_path} is a product")
-        pass
+        logging.info(f"Deleted image: {image_path}")
+    else:
+        logging.info(f"Image {image_path} is a product (prediction: {val}). Keeping...")
 
 def image_to_llm(image_path, **kwargs):
     """
@@ -123,20 +119,26 @@ def process_images(folder_path, function, **kwargs):
     Processes image files in labeled folders, applying a given function to each image.
 
     Parameters:
-    - txt_path (str): Path to the root directory containing label folders.
+    - folder_path (str): Path to the root directory containing label folders.
     - function (callable): Function to apply to each image.
     - kwargs: Additional arguments for the processing function.
     """
-
     if not os.path.isdir(folder_path):
         raise ValueError(f"The provided folder path does not exist: {folder_path}")
 
+    logging.info(f"Starting image processing in folder: {folder_path}")
+
     for root, _, files in os.walk(folder_path):
+        logging.info(f"Processing folder: {root}")
+
         # Define the path for the output text file (only once per document)
         file_path = os.path.join(root, "images_to_txt.txt")
+        logging.info(f"Output file for this folder: {file_path}")
 
         # Open the file once
         with open(file_path, "w") as opened_file:
+            logging.info(f"Opened file for writing: {file_path}")
+
             # Pass the opened file as an argument
             kwargs["file_handle"] = opened_file
 
@@ -144,12 +146,30 @@ def process_images(folder_path, function, **kwargs):
                 # Check if the file is an image (JPEG, JPG, or PNG)
                 if file.lower().endswith(('.jpeg', '.jpg', '.png')):
                     image_path = os.path.join(root, file)  # Full path to the image file
+                    logging.info(f"Processing image: {image_path}")
 
                     # Call the function with the image path and opened file
-                    function(image_path, **kwargs)
+                    try:
+                        function(image_path, **kwargs)
+                        logging.info(f"Successfully processed image: {image_path}")
+                    except Exception as e:
+                        logging.error(f"Error processing image {image_path}: {e}")
+                else:
+                    logging.warning(f"Skipping non-image file: {file}")
+
+    logging.info(f"Finished processing all images in folder: {folder_path}")
 
 
-pdf_path = "../02-data/01-pdfs/"
+# Set up logging configuration
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Define the minimum pixel threshold and acceptable aspect ratio range
+MIN_PIXELS = 1000
+MIN_ASPECT_RATIO = 0.2  # width / height. 200 px / 1000 px
+MAX_ASPECT_RATIO = 5.0
+
+pdf_path = "../02-data/01-pdfs/00-testing"
 
 # Pre-filter images
 process_images(pdf_path, pre_filter)

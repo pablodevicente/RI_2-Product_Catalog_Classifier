@@ -5,7 +5,7 @@ from tqdm import tqdm
 from aux_extract_pdf import process_pdf,preload_model
 import argparse
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
 def process_label(input_label_path, **kwargs):
@@ -73,7 +73,8 @@ def check_folders(input_folder, **kwargs):
 
             if os.path.isdir(input_path):
                 logging.info(f"Processing label: {label} (Path: {input_path})")
-                process_label(input_path, **kwargs)  # Call process_label for the label
+                if label == "00-testing":
+                    process_label(input_path, **kwargs)  # Call process_label for the label
             else:
                 logging.info(f"Skipping non-directory item: {label} (Path: {input_path})")
 
@@ -108,7 +109,7 @@ if __name__ == "__main__":
         "base_path",
         type=str,
         nargs="?",  # Makes the argument optional
-        default="../02-data/01-pdfs/00-testing",
+        default="../02-data/01-pdfs/",
         help="The base path to the folder containing PDF files."
     )
     args = parser.parse_args()

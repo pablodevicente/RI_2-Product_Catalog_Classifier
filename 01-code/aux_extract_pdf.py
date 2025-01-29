@@ -221,7 +221,8 @@ def generate_qwn_description(df,model):
     tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B-Instruct") ##pf, could refactor it. if the model changes its gonna be a pain to trace it
 
     # Serialize the DataFrame to a readable format
-    df_serialized = df.to_string(index=False)  # Convert to a tabular string without the index
+    df_reduced = df.head(5)  # Use only the first 5 rows (shouldnt be longer anyway)
+    df_serialized = df_reduced.to_json(orient="split")  # Faster and more compact
 
     # Prepare the prompt with the serialized DataFrame
     prompt = (
