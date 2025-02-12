@@ -1,0 +1,54 @@
+### Description of Dataframe Rows
+
+**Row 0:**
+- **Hexagonal Locknut:** A type of fastener characterized by its hexagonal shape, which allows for easy installation and removal using a wrench. This component is designed to provide a secure fit by locking against the threads of the bolt or stud it engages with, often used in applications requiring high torque retention.
+
+**Row 1:**
+- **Internal Thread:** Refers to a threading feature found within a cylindrical or tubular component that allows for the engagement with external threads (such as those on bolts or screws). Internal threads are commonly found in nuts, washers, and other fastening devices, facilitating a secure connection between parts.
+Row 0 of the dataframe contains a single entry under the "Properties" column, which is "Temperature range". This property indicates the span or interval over which temperature values vary, typically expressed in degrees (e.g., Celsius or Fahrenheit). The "Temperature range" can be used to describe the thermal conditions within a specific environment or system, such as the operational temperature limits of a device, the climate conditions in a geographical area, or the temperature fluctuations observed over a given period.
+The provided dataframe contains four rows and one column, each row representing different pipe thread specifications. Here is a detailed technical description for each row:
+
+1. **Row 0**: This row describes an NPT (National Pipe Thread) fitting with a nominal size of 3/8 inch. The thread size is 22, indicating the number of threads per inch. The body diameter is 6 mm, the depth of the threads is 5 mm, and the maximum pressure rating is 100 psi. The material and finish are specified as PANPTSW/G, which likely indicates a specific type of plastic or alloy with a particular surface treatment.
+
+2. **Row 1**: This row details an NPT fitting with a nominal size of 1/2 inch. It has 27 threads per inch, a body diameter of 6 mm, a thread depth of 6 mm, and a maximum pressure rating of 100 psi. The material and finish are again specified as PANPTSW/G.
+
+3. **Row 2**: This row pertains to an NPT fitting with a nominal size of 3/4 inch. The thread size is 36, indicating 36 threads per inch. The body diameter is 7 mm, the thread depth is 7 mm, and the maximum pressure rating is 100 psi. The material and finish are specified as PANPTSW/G.
+
+4. **Row 3**: This row describes an NPT fitting with a nominal size of 1 inch. The thread size is 42, indicating 42 threads per inch. The body diameter is 7 mm, the thread depth is 7 mm, and the maximum pressure rating is 100 psi. The material and finish are specified as PANPTSW/G.
+The provided dataframe consists of a single column labeled "A" and four rows indexed at 0, 1, 2, and 3. Each row contains detailed information about pipe thread specifications and additional parameters.
+
+**Row 0:**
+- **Thread Type:** NPT (National Pipe Thread)
+- **Thread Size:** 3/8"
+- **Thread Size Code:** 22
+- **Thread Size in Decimal Inches:** 0.375"
+- **Pressure Class:** 100
+- **Temperature Rating:** 238°F
+- **Thread Type Identifier:** PANPT/G
+
+**Row 1:**
+- **Thread Type:** NPT (National Pipe Thread)
+- **Thread Size:** 1/2"
+- **Thread Size Code:** 27
+- **Thread Size in Decimal Inches:** 0.500"
+- **Pressure Class:** 100
+- **Temperature Rating:** 212°F
+- **Thread Type Identifier:** PANPT/G
+
+**Row 2:**
+- **Thread Type:** NPT (National Pipe Thread)
+- **Thread Size:** 3/4"
+- **Thread Size Code:** 36
+- **Thread Size in Decimal Inches:** 0.750"
+- **Pressure Class:** 100
+- **Temperature Rating:** 234°F
+- **Thread Type Identifier:** PANPT/G
+
+**Row 3:**
+- **Thread Type:** NPT (National Pipe Thread)
+- **Thread Size:** 1"
+- **Thread Size Code:** 42
+- **Thread Size in Decimal Inches:** 1.000"
+- **Pressure Class:** 100
+- **Temperature Rating:** 210°F
+- **Thread Type Identifier:** PANPT/G

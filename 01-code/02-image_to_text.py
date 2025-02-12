@@ -26,11 +26,11 @@ def pre_filter(image_path, **kwargs):
             aspect_ratio = width / height
 
             if pixel_count < MIN_PIXELS or not (MIN_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO):
-                logger.info(f"Deleting {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
+                logger.debug(f"Deleting {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
                 os.remove(image_path)
                 return True  # Image was deleted
             else:
-                logger.info(f"Keeping {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
+                logger.debug(f"Keeping {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
                 return False  # Image was kept
     except Exception as e:
         logger.error(f"Error processing {image_path}: {e}")
@@ -55,15 +55,15 @@ def classifier_filter(image_path, **kwargs):
 
     # Make prediction
     val = model.predict(X, verbose=0)[0][0]  # Get the scalar value from the output. verbose=0 restricts output
-    logging.info(f"Prediction value for {image_path}: {val}")
+    logging.debug(f"Prediction value for {image_path}: {val}")
 
     # Interpret the prediction based on a threshold (e.g., 0.5)
     if val >= 0.5:
-        logging.info(f"Image {image_path} is NOT a product (prediction: {val}). Deleting...")
+        logging.debug(f"Image {image_path} is NOT a product (prediction: {val}). Deleting...")
         os.remove(image_path)
-        logging.info(f"Deleted image: {image_path}")
+        logging.debug(f"Deleted image: {image_path}")
     else:
-        logging.info(f"Image {image_path} is a product (prediction: {val}). Keeping...")
+        logging.debug(f"Image {image_path} is a product (prediction: {val}). Keeping...")
 
 def image_to_llm(image_path, **kwargs):
     """
@@ -128,42 +128,40 @@ def process_images(folder_path, function, **kwargs):
     if not os.path.isdir(folder_path):
         raise ValueError(f"The provided folder path does not exist: {folder_path}")
 
-    logging.info(f"Starting image processing in folder: {folder_path}")
-
     for root, _, files in os.walk(folder_path):
-        logging.info(f"Processing folder: {root}")
+        logging.debug(f"Processing folder: {root}")
 
         # Filter only image files
         image_files = [file for file in files if file.lower().endswith(('.jpeg', '.jpg', '.png'))]
 
         # Only proceed if there are images in the folder
         if not image_files:
-            logging.info(f"No images found in {root}. Skipping file creation.")
+            logging.debug(f"No images found in {root}. Skipping file creation.")
             continue  # Skip this folder
 
         # Define the path for the output text file
         file_path = os.path.join(root, "images_to_txt.txt")
-        logging.info(f"Output file for this folder: {file_path}")
+        logging.debug(f"Output file for this folder: {file_path}")
 
         # Open the file once
         with open(file_path, "w") as opened_file:
-            logging.info(f"Opened file for writing: {file_path}")
+            logging.debug(f"Opened file for writing: {file_path}")
 
             # Pass the opened file as an argument
             kwargs["file_handle"] = opened_file
 
             for file in image_files:
                 image_path = os.path.join(root, file)  # Full path to the image file
-                logging.info(f"Processing image: {image_path}")
+                logging.debug(f"Processing image: {image_path}")
 
                 # Call the function with the image path and opened file
                 try:
                     function(image_path, **kwargs)
-                    logging.info(f"Successfully processed image: {image_path}")
+                    logging.debug(f"Successfully processed image: {image_path}")
                 except Exception as e:
                     logging.error(f"Error processing image {image_path}: {e}")
 
-    logging.info(f"Finished processing all images in folder: {folder_path}")
+    logging.debug(f"Finished processing all images in folder: {folder_path}")
 
 
 # Set up logging configuration
@@ -175,10 +173,11 @@ MIN_PIXELS = 1000
 MIN_ASPECT_RATIO = 0.2  # width / height. 200 px / 1000 px
 MAX_ASPECT_RATIO = 5.0
 
-pdf_path = "../02-data/01-pdfs/00-testing"
+pdf_path = "../02-data/01-pdfs/accessories"
 
 # Pre-filter images
 process_images(pdf_path, pre_filter)
+logging.info("Finished pre-filtering images")
 
 # Classifier filtering
 classifier_model = load_model("../02-data/02-classifier/model.keras") # Load the model from the file --> look into aux_train_classifier.ipynb

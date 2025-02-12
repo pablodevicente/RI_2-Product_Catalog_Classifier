@@ -9,6 +9,51 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 # Get the logger (it inherits the configuration from the main script)
 logger = logging.getLogger(__name__)
 
+def process_label(input_label_path, **kwargs):
+    """
+    Transcribes all PDFs within the input folder and saves the transcribed text in the corresponding output.
+
+    Args:
+        input_label_path (str): The root folder containing a label. Example: "../02-data/01-pdfs/circuit-breakers"
+        kwargs (dict): Dictionary of keyword args with model information.
+
+    Raises:
+        OSError: If there is an issue reading or writing files or directories.
+    """
+    try:
+        logging.info(f"Starting to process label folder: {input_label_path}")
+
+        # List all subfolders (PDF labels) within the label folder
+        pdf_labels = [f for f in os.listdir(input_label_path) if os.path.isdir(os.path.join(input_label_path, f))]
+        logging.info(f"Found {len(pdf_labels)} subfolders in label folder: {input_label_path}")
+
+        for pdf_file_name in pdf_labels:
+            pdf_folder_path = os.path.join(input_label_path, pdf_file_name)  # ../02-data/01-pdfs/circuit-breakers/D_1110_en
+            logging.info(f"Processing subfolder: {pdf_folder_path}")
+
+            if os.path.isdir(pdf_folder_path):
+                # Find the PDF file in the current subfolder
+                pdf_files = [f for f in os.listdir(pdf_folder_path) if f.lower().endswith(".pdf")]
+                if pdf_files:
+                    pdf_path = os.path.join(pdf_folder_path, pdf_files[0])  # ../02-data/01-pdfs/circuit-breakers/D_1110_en/D_1110_en.pdf
+                    logging.info(f"Found PDF file: {pdf_path}. Starting processing.")
+
+                    # Process the PDF
+                    process_pdf(pdf_path, **kwargs)
+                    logging.info(f"Completed processing of PDF: {pdf_path}")
+                else:
+                    logging.info(f"No PDF files found in subfolder: {pdf_folder_path}")
+            else:
+                logging.info(f"Skipping invalid or non-directory subfolder: {pdf_folder_path}")
+
+        logging.info(f"Completed processing all subfolders in label folder: {input_label_path}")
+
+    except OSError as e:
+        logging.error(f"File system error while processing label folder {input_label_path}: {str(e)}")
+    except Exception as e:
+        logging.error(f"Unexpected error during processing of label folder {input_label_path}: {str(e)}")
+
+
 def preload_model(model_gpt="tablegpt/TableGPT2-7B",model_qwn="Qwen/Qwen2.5-7B-Instruct"):
     """
     Preloads the model and tokenizer for table-to-text transformation.

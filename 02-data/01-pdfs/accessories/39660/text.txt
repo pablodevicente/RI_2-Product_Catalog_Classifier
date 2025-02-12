@@ -1,0 +1,77 @@
+A.
+System
+Overview
+PHYSICAL INFRASTRUCTURE SYSTEMS
+B.
+Copper
+Systems
+Thermal Transfer Marker Plates
+C.
+• Non-adhesive marker plates offer crisp, clear legends • Available in a variety of colors and sizes Fiber
+with superior legibility • Use with Panduit RMR4BL resin thermal transfer ribbon SyO sp teti mc s
+• Attachable in a horizontal or vertical orientation
+D.
+Power
+over
+Ethernet
+E.
+Zone
+Cabling
+F.
+Print-On Area Labels Std. Std. Wireless
+Width Height Width Per Pkg. Ctn.
+Part Number Part Description In. mm In. mm In. mm Roll Qty. Qty.
+M300X100Y6T Yellow, thermal transfer marker plate. 3.00 76.20 1.00 25.40 1.80 45.70 500 1 4
+G.
+M300X100Y7T White, thermal transfer marker plate. 3.00 76.20 1.00 25.40 1.80 45.70 500 1 4 Outlets
+M300X050Y6T Yellow, thermal transfer marker plate. 3.00 76.20 .50 12.70 1.80 45.70 500 1 4
+M300X050Y7T White, thermal transfer marker plate. 3.00 76.20 .50 12.70 1.80 45.70 500 1 4
+M200X100Y6T Yellow, thermal transfer marker plate. 2.00 50.80 1.00 25.40 .80 20.30 500 1 4 H.
+Media
+M200X100Y7T White, thermal transfer marker plate. 2.00 50.80 1.00 25.40 .80 20.30 500 1 4
+Distribution
+M200X050Y6T Yellow, thermal transfer marker plate. 2.00 50.80 .50 12.70 1.07 27.30 500 1 4
+M200X050Y7T White, thermal transfer marker plate. 2.00 50.80 .50 12.70 1.07 27.30 500 1 4
+I.
+Physical
+Infrastructure
+Management
+J.
+Patch Cord Color Bands Overhead&
+Underfloor
+Routing
+• Removable band snaps on and off individual cables • Available in 10 standard colors that match Panduit
+allowing the same patch cord to be used for connectivity providing an aesthetically pleasing solution K.
+Surface
+different applications • Compatible with all Panduitpatch cords, existing and new Raceway
+• Can be installed next to each other allowing multiple installations can be color-coded as networks change
+color bands to be used on one cable, offering endless L.
+color-coding options Cabinets,
+• Internal grooves secure color bands in place on cable Racks&
+Cable
+providing easy identification at the connection
+Management
+Std.
+M.
+Pkg. Grounding&
+PartNumber PartDescription Color Qty. Bonding
+PCBANDBL-Q Snaps onto individual patch cable for additional Black 25
+color coding.
+PCBANDBU-Q Blue 25
+PCBANDWH-Q White 25 N.
+Industrial
+PCBANDEI-Q Electric Ivory 25
+PCBANDIG-Q International Gray 25
+PCBANDOR-Q Orange 25 O.
+PCBANDRD-Q Red 25 Labeling&
+Identification
+PCBANDGR-Q Green 25
+PCBANDYL-Q Yellow 25
+P.
+PCBANDVL-Q Violet 25 Cable
+Management
+Patch cords available on pages B.14, B.21, B.30, B.42, B.46 of SA-NCCB51.
+Accessories
+Q.
+Index
+www.panduit.com For service and technical support, call 866-405-6654 (outside the U.S.and Canada, see catalog back cover). B.91

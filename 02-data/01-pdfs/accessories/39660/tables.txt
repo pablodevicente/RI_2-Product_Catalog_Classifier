@@ -1,0 +1,13 @@
+1. The first row describes a yellow, thermal transfer marker plate with a part number M300X100Y6T. It has a width of 3 inches and a height of 1 inch. The print-on area is 1.8 inches wide and the package quantity is 500 per carton.
+2. The second row describes a white, thermal transfer marker plate with a part number M300X100Y7T. It also has a width of 3 inches and a height of 1 inch. The print-on area is 1.8 inches wide and the package quantity is 500 per carton.
+3. The third row describes a yellow, thermal transfer marker plate with a part number M300X050Y6T. It has a width of 3 inches and a height of 0.5 inches. The print-on area is 1.8 inches wide and the package quantity is 500 per carton.
+4. The fourth row describes a white, thermal transfer marker plate with a part number M300X050Y7T. It also has a width of 3 inches and a height of 0.5 inches. The print-on area is 1.8 inches wide and the package quantity is 500 per carton.
+Row 1: The first row contains a PCB component with part number PCBANDBL-Q, which has a black color and comes in a standard package quantity of 25.
+
+Row 2: The second row contains a PCB component with part number PCBANDBU-Q, which has a blue color and comes in a standard package quantity of 25.
+
+Row 3: The third row contains a PCB component with part number PCBANDWH-Q, which has a white color and comes in a standard package quantity of 25.
+
+Row 4: The fourth row contains a PCB component with part number PCBANDEI-Q, which has an electric ivory color and comes in a standard package quantity of 25.
+
+Row 5: The fifth row contains a PCB component with part number PCBANDIG-Q, which has an international gray color and comes in a standard package quantity of 25.
