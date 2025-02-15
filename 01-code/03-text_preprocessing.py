@@ -44,33 +44,45 @@ def concat_txt(folder_path):
                 logging.error(f"Error processing {root}: {e}")
                 return None  # or handle the error as needed
 
-def process_nlp(file,path):
+def keep_alpha_numeric(input_text: str) -> str:
+    """ Remove any character except alphanumeric characters and newlines """
+    return ''.join(c for c in input_text if c.isalnum() or c in {' ', '\n'})
+
+
+def process_nlp(file: str, path: str):
     """
-    Applies NLP preprocessing to all 'pdf.txt' files in the given folder structure
-    and overwrites the original files with the processed text.
+    Applies NLP preprocessing to a given text and saves the processed output to a file.
 
     Parameters:
-    - folder_path (str): Path to the root directory containing labeled folders.
+    - file (str): The input text to preprocess.
+    - path (str): The output file path to save the processed text.
     """
 
     preprocess_functions = [
-        txtp.to_lower, txtp.keep_alpha_numeric, txtp.remove_email,
+        txtp.to_lower, keep_alpha_numeric, txtp.remove_email,
         txtp.remove_phone_number, txtp.remove_itemized_bullet_and_numbering,
         txtp.remove_stopword, txtp.remove_url, txtp.remove_punctuation, txtp.lemmatize_word
     ]
 
-    try:
-        preprocessed_text = txtp.preprocess_text(file, preprocess_functions)
+    if not isinstance(file, str):
+        raise ValueError(f"Expected file to be a string, but got {type(file)}")
 
-        # Save the processed text to disk
+    preprocessed_text = file
+
+    for func in preprocess_functions:
+        try:
+            result = func(preprocessed_text)
+            if isinstance(result, str) and result.strip():  # Ensure it's a valid non-empty string
+                preprocessed_text = result
+        except Exception as e:
+            logging.DEBUG(f"Skipping {func.__name__} due to error: {e}")
+
+    try:
         with open(path, "w", encoding="utf-8") as output_file:
             output_file.write(preprocessed_text)
-
         logging.info(f"Successfully saved preprocessed text to {path}")
-
     except Exception as e:
-        logging.error(f"Error processing text: {e}")
-
+        logging.error(f"Error saving processed text: {e}")
 
 def cleanup_txt_files(folder_path):
     """
@@ -127,7 +139,7 @@ def process_txt(folder_path):
 
 
 # Set up logging configuration
-logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 pdf_path = "../02-data/01-pdfs/accessories"
