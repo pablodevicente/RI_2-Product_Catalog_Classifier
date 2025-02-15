@@ -1,0 +1,135 @@
+screw plug 10xx15 pazzzz
+screw plug polyamide pa6 gf30
+connecting thread metric as per en 60423
+properties
+ for secure sealing of unused
+threaded or clearance hole
+temperature range 40 c
+100 c
+protection grade ip54
+ip66  ip68 possible when using an
+additionally mounted sealing ring
+features
+ral 9005
+a l h da part no
+vpe
+m12x15 6 10 15 100 101215pasw
+jacob gmbh  elektrotechnische fabrik  gottliebdaimlerstraße 11  71394 kernen  telefon 07151 40110  fax 07151 401149  email jacobjacobgmbhde
+a l h da part no
+vpe
+m16x15 6 105 20 100 101615pasw
+m20x15 6 105 24 100 102015pasw
+m25x15 8 13 30 100 102515pasw
+m32x15 8 135 37 100 103215pasw
+m40x15 8 14 46 50 104015pasw
+m50x15 10 165 56 50 105015pasw
+m63x15 12 17 70 50 106315pasw
+ral 7035
+a l h da part no
+vpe
+m12x15 6 10 15 100 101215pa7035
+m16x15 6 105 20 100 101615pa7035
+m20x15 6 105 24 100 102015pa7035
+m25x15 8 13 30 100 102515pa7035
+m32x15 8 135 37 100 103215pa7035
+m40x15 8 14 46 50 104015pa7035
+m50x15 10 165 56 50 105015pa7035
+m63x15 12 17 70 50 106315pa7035
+ral 7001
+a l h da part no
+vpe
+m12x15 6 10 15 100 101215 pa
+m16x15 6 105 20 100 101615 pa
+m20x15 6 105 24 100 102015 pa
+m25x15 8 13 30 100 102515 pa
+m32x15 8 135 37 100 103215 pa
+m40x15 8 14 46 50 104015 pa
+m50x15 10 165 56 50 105015 pa
+m63x15 12 17 70 50 106315 pa
+jacob gmbh  elektrotechnische fabrik  gottliebdaimlerstraße 11  71394 kernen  telefon 07151 40110  fax 07151 401149  email jacobjacobgmbhde
+the provided dataframe consists of two rows each describing a distinct feature or component
+
+1 row 0 screw plug
+    this row denotes the presence of a screw plug which is a type of fastener typically used to seal openings in various structures such as pipes containers or electrical enclosures the screw plug is designed to be screwed into a corresponding threaded opening providing a secure and watertight seal it can be made from a variety of materials including metal plastic or composite materials depending on the application requirements
+
+2 row 1 connecting thread
+    this row describes a connecting thread which refers to a helical ridge or groove that allows for the interlocking of parts facilitating assembly and disassembly connecting threads are commonly found on screws bolts nuts and other fasteners enabling them to securely join components together these threads are engineered to specific standards eg metric imperial to ensure compatibility and proper engagement between mating parts
+row 0
+ properties this column describes the temperature range that a device or material can withstand it specifies the minimum and maximum temperatures over which the subject is expected to function correctly and maintain its structural integrity
+
+row 1
+ properties this column denotes the protection grade which is an indicator of the level of protection provided by a device or enclosure against foreign objects such as dust and water and electrical hazards commonly represented using an ip ingress protection rating system this grade ensures that the device meets specific standards for safety and durability in various environments
+the provided dataframe contains a single column labeled a and one row indexed at 0 the data within this single cell is a structured string that appears to be a technical specification or part designation here is a detailed technical description of the content
+
+ column label a
+ row index 0
+ data content m12x15 6 10 15 100 101215pasw
+
+technical breakdown
+ m12x15 this indicates a metric thread specification where m denotes a metric thread 12 is the nominal diameter in millimeters and 15 is the pitch distance between threads in millimeters
+ 6 likely represents a tolerance class for the thread where 6 could refer to a specific tolerance grade as defined in relevant standards eg iso 286
+ 10 may denote a dimensional specification such as a length bore size or another linear dimension associated with the component
+ 15 could represent another dimensional value possibly related to thickness diameter or another critical dimension depending on the context
+ 100 might indicate a property value such as tensile strength yield strength or another material characteristic
+ 101215pasw this appears to be a combination of a measurement or specification followed by a descriptor
+   101215 could be a specific measurement value possibly in millimeters or another unit of length
+   pa likely stands for prestress applied indicating that the component has been subjected to prestressing
+   sw often stands for short whip which might describe a feature or application of the component
+
+in summary this single row likely describes a specific mechanical component with detailed technical specifications including thread details dimensions material properties and additional descriptors relevant to its design and application
+the provided dataframe consists of a single column labeled a with five rows indexed from 0 to 4 each row contains a string that appears to be a technical specification for different types of fasteners likely bolts or screws formatted as follows
+
+1 row 0 the entry m16x15 6 105 20 100 101615pasw describes a bolt or screw with a nominal diameter d of 16 mm and a pitch p of 15 mm it has a thread length l of 6 mm a major diameter d of 105 mm a tensile strength rm of 20 nmm² and a yield strength reh of 100 nmm² the material property hrc is 101615 and it is surface treated with pasw
+
+2 row 1 the entry m20x15 6 105 24 100 102015pasw describes a similar fastener but with a larger nominal diameter d of 20 mm and a pitch p of 15 mm its thread length l is 6 mm major diameter d is 105 mm tensile strength rm is 24 nmm² and yield strength reh is 100 nmm² the material hardness hrc is 102015 and it is also surface treated with pasw
+
+3 row 2 the entry m25x15 8 13 30 100 102515pasw describes a fastener with a nominal diameter d of 25 mm and a pitch p of 15 mm it has a thread length l of 8 mm a major diameter d of 13 mm a tensile strength rm of 30 nmm² and a yield strength reh of 100 nmm² the material hardness hrc is 10251
+the provided dataframe contains a single column labeled a and consists of five rows each describing a specific type of threaded fastener here is a detailed technical description of each row
+
+1 row 0
+    thread size m12x15
+    nominal diameter d 12 mm
+    pitch p 15 mm
+    minimum engagement length lmin 6 mm
+    maximum engagement length lmax 10 mm
+    nominal tensile strength rm 150 nmm²
+    material code 101215
+    manufacturers part number pn pa7035
+
+2 row 1
+    thread size m16x15
+    nominal diameter d 16 mm
+    pitch p 15 mm
+    minimum engagement length lmin 6 mm
+    maximum engagement length lmax 105 mm
+    nominal tensile strength rm 200 nmm²
+    material code 101615
+    manufacturers part number pn pa7035
+
+3 row 2
+    thread size m20x15
+    nominal diameter d 20 mm
+    pitch p 15 mm
+    minimum engagement length lmin 6 mm
+    maximum engagement length lmax 105 mm
+    nominal tensile strength rm 240 nmm²
+    material code 102015
+    manufacturers part number pn pa7035
+
+4 row 3
+    thread size m25x15
+    nominal diameter d 25 mm
+    pitch p 15 mm
+    minimum engagement length lmin 
+the provided dataframe contains a single column labeled a and consists of five rows each row represents a distinct fastener specification detailing various parameters and characteristics here is a technical description of each row
+
+1 row 0 this row describes a fastener with the designation m12x15 the fastener has a nominal diameter d of 12 millimeters and a pitch p of 15 millimeters the dimensions listed are likely for thread engagement or other specific measurements 6 10 15 100 and 101215 pa the pa at the end probably denotes a particular finish or coating applied to the fastener
+
+2 row 1 this row specifies a fastener with the designation m16x15 it features a nominal diameter d of 16 millimeters and a pitch p of 15 millimeters the associated dimensions are 6 105 20 100 and 101615 pa again pa indicates the type of finish or coating
+
+3 row 2 this entry details a fastener designated m20x15 the nominal diameter d is 20 millimeters and the pitch p is 15 millimeters the listed dimensions are 6 105 24 100 and 102015 pa the pa at the end signifies the finish or coating
+
+4 row 3 this row describes a fastener with the designation m25x15 it has a nominal diameter d of 25 millimeters and a pitch p of 15 millimeters the dimensions provided are 8 13 30 100 and 102515 pa pa denotes the finish or coating
+
+5 row 4 this final row specifies a fastener with the designation m32x15 the nominal diameter d is 32 millimeters and the pitch p is 15 millimeters the associated dimensions are 8 135 37 10
+

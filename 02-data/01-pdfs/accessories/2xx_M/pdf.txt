@@ -1,0 +1,50 @@
+hexagonal locknut 2xx m
+hexagonal locknut brass cuzn39pb3 nickelplated
+internal thread pg as per din 40430
+properties
+ for secure tightening of cable
+glands and accessories
+temperature range 60 c
+200 c
+features
+a sw1 h part no
+vpe
+pg 7 15 28 100 207 m
+pg 9 18 28 100 209 m
+pg 11 21 3 100 211 m
+jacob gmbh  elektrotechnische fabrik  gottliebdaimlerstraße 11  71394 kernen  telefon 07151 40110  fax 07151 401149  email jacobjacobgmbhde
+a sw1 h part no
+vpe
+pg 135 23 3 100 213 m
+pg 16 26 3 100 216 m
+pg 21 32 35 100 221 m
+pg 29 41 4 100 229 m
+pg 36 51 5 50 236 m
+pg 42 60 5 50 242 m
+pg 48 64 55 50 248 m
+jacob gmbh  elektrotechnische fabrik  gottliebdaimlerstraße 11  71394 kernen  telefon 07151 40110  fax 07151 401149  email jacobjacobgmbhde
+row 0
+the first row describes a hexagonal locknut which is a type of fastener characterized by its hexagonal shape facilitating easy manual tightening and removal using an allen wrench or socket hexagonal locknuts are designed to remain tight under vibration and dynamic loads due to their internal locking mechanism typically achieved through a nylon insert or a locking compound
+
+row 1
+the second row specifies internal thread indicating that the component has threads formed on the inside surface rather than on the outside as with external threads internal threads are commonly found in nuts sleeves and other fastening elements that mate with external threads to form a secure connection these threads are designed to engage with corresponding external threads on bolts screws or studs ensuring a tight and reliable joint
+row 0 of the dataframe contains a single entry in the properties column temperature range this property indicates the span or interval over which temperature values vary which could be relevant for understanding the thermal behavior or operational limits of a system or material under study the temperature range may be specified in degrees celsius c fahrenheit f or kelvin k depending on the context and requirements of the analysis
+the provided dataframe consists of a single column labeled a and three rows indexed at 0 1 and 2 each row contains a string value formatted as follows
+
+ row 0 the value pg 7 15 28 100 207 m indicates that the page number is 7 followed by a position or identifier 15 a numerical value 28 a percentage 100 and a final identifier 207 m
+ row 1 the value pg 9 18 28 100 209 m shows that the page number is 9 with a position or identifier 18 a numerical value 28 a percentage 100 and a final identifier 209 m
+ row 2 the value pg 11 21 3 100 211 m represents a page number of 11 a position or identifier 21 a numerical value 3 a percentage 100 and a final identifier 211 m
+
+each string in the column appears to follow a consistent pattern with specific fields delineated by spaces where the fields represent different attributes such as page number position numerical value percentage and an identifier ending with m
+the provided dataframe contains a single column labeled a and five rows indexed from 0 to 4 each row consists of a single string value that appears to represent some form of metadata or structured text here is a detailed technical description of each row
+
+1 row 0 the value pg 135 23 3 100 213 m indicates a page number followed by several numerical values pg 135 suggests a page reference likely referring to page 135 the subsequent numbers 23 3 100 213 could represent various metrics such as line numbers section identifiers percentages or other specific measurements the letter m at the end might denote a category or type such as male or another classification
+
+2 row 1 the value pg 16 26 3 100 216 m follows the same pattern as row 0 it includes a page reference pg 16 followed by the numbers 26 3 100 and 216 which could have similar interpretations as in row 0 the m at the end remains consistent suggesting a possible categorization or type
+
+3 row 2 the value pg 21 32 35 100 221 m continues the pattern the page reference is pg 21 and the following numbers are 32 35 100 and 221 the decimal number 35 adds a different scale or precision to one of the metrics the m at the end is again present indicating consistency in the data structure
+
+4 row 3 the value pg 29 41 4 100 229 m adheres to the established format it starts with a page reference pg 29 followed by 41 4 100 and 229 the integer 4 provides a distinct metric compared to the previous entries and the m at the end is consistent
+
+5 row 4 the value pg 36 51 5 50 236 m concludes the series
+

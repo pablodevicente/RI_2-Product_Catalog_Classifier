@@ -1,0 +1,140 @@
+screw plug 10xx15
+screw plug brass cuzn39pb3 nickelplated
+connecting thread metric as per en 60423
+properties
+ for secure sealing of unused
+threaded or clearance hole
+temperature range 60 c
+200 c
+protection grade max ip65
+features
+round
+a l da h part no
+vpe
+m12x10 45 16 75 100 101210
+m12x15 5 16 8 100 101215
+m16x15 6 20 9 100 101615
+m20x15 65 24 95 100 102015
+m25x15 7 28 11 100 102515
+m32x15 8 35 12 50 103215
+m40x15 8 45 12 50 104015
+m50x15 9 55 15 25 105015
+m63x15 10 68 16 10 106315
+m75x15 11 80 17 5 107515
+hexagonal
+jacob gmbh  elektrotechnische fabrik  gottliebdaimlerstraße 11  71394 kernen  telefon 07151 40110  fax 07151 401149  email jacobjacobgmbhde
+a l sw1 h part no
+vpe
+m12x15 5 14 
+m16x15 5 18 
+m20x15 6 22 
+m25x15 65 28 
+m32x15 7 35 105 50 1063215
+m40x15 8 44 12 50 1064015
+jacob gmbh  elektrotechnische fabrik  gottliebdaimlerstraße 11  71394 kernen  telefon 07151 40110  fax 07151 401149  email jacobjacobgmbhde
+ technical description of the dataframe
+
+the provided dataframe consists of a single column named item and two rows indexed at 0 and 1 each row contains a specific item description as follows
+
+ row 0
+   item screw plug
+   description a screw plug is a type of fastener designed to seal openings in surfaces such as walls or floors it typically consists of a threaded shank that screws into a tapped hole providing a secure and watertight seal the plug is often made from materials like plastic metal or composite materials depending on the application requirements
+
+ row 1
+   item connecting thread
+   description a connecting thread refers to a type of screw thread used to join or connect two parts together this thread design facilitates the assembly and disassembly of components allowing for a secure and adjustable connection connecting threads can be found in various applications including mechanical assemblies electrical connectors and plumbing systems they are characterized by their precise pitch and thread profile ensuring reliable performance under different loads and environmental conditions
+ technical description
+
+row 0 properties  temperature range
+ description this property specifies the operational temperature range within which the device or system can function without degradation of performance or reliability
+ units typically measured in degrees celsius c or fahrenheit f
+ significance ensures that the equipment operates safely and effectively under varying environmental conditions
+
+row 1 properties  protection grade
+ description this property indicates the level of protection provided by the device against external factors such as dust water and mechanical impacts
+ units defined using an internationally recognized standard eg ip rating
+ significance helps in determining the suitability of the device for use in harsh environments where exposure to elements is likely
+the provided dataframe contains a single column labeled a and five rows indexed from 0 to 4 each row represents a technical specification for different threaded fasteners specifically metric bolts or screws here is a detailed technical description of each row
+
+row 0
+ thread size m12x10
+ nominal diameter d 12 mm
+ pitch p 10 mm
+ length l 45 mm
+ nominal tensile strength rm 160 nmm²
+ nominal yield strength reh 75 nmm²
+ tensile stress area at 101210 mm²
+
+row 1
+ thread size m12x15
+ nominal diameter d 12 mm
+ pitch p 15 mm
+ length l 50 mm
+ nominal tensile strength rm 160 nmm²
+ nominal yield strength reh 80 nmm²
+ tensile stress area at 101215 mm²
+
+row 2
+ thread size m16x15
+ nominal diameter d 16 mm
+ pitch p 15 mm
+ length l 60 mm
+ nominal tensile strength rm 160 nmm²
+ nominal yield strength reh 90 nmm²
+ tensile stress area at 101615 mm²
+
+row 3
+ thread size m20x15
+ nominal diameter d 20 mm
+ pitch p 15 mm
+ length l 65 mm
+ nominal tensile strength rm 160 nmm²
+ nominal yield strength reh 95 nmm²
+ tensile stress area 
+the provided dataframe contains structured data describing various thread specifications and associated measurements here is a detailed technical description of each row
+
+1 row 0 
+    thread specification m12x15
+    diameter d 12 mm
+    pitch p 15 mm
+    length l 5 mm
+    major diameter d1 14 mm
+    minor diameter d2 75 mm
+    nominal diameter dn 1061215 mm
+
+2 row 1 
+    thread specification m16x15
+    diameter d 16 mm
+    pitch p 15 mm
+    length l 5 mm
+    major diameter d1 18 mm
+    minor diameter d2 8 mm
+    nominal diameter dn 1061615 mm
+
+3 row 2 
+    thread specification m20x15
+    diameter d 20 mm
+    pitch p 15 mm
+    length l 6 mm
+    major diameter d1 22 mm
+    minor diameter d2 9 mm
+    nominal diameter dn 1062015 mm
+
+4 row 3 
+    thread specification m25x15
+    diameter d 25 mm
+    pitch p 15 mm
+    length l 65 mm
+    major diameter d1 28 mm
+    minor diameter d2 10 mm
+    nominal diameter dn 1062515 mm
+
+5 row 4 
+    thread specification m32x15
+    diameter d 32 mm
+    pitch p 15 mm
+    length l 7 mm
+    major diameter d1 35 mm
+    minor diameter d2 105 mm
+    nominal diameter dn 
+

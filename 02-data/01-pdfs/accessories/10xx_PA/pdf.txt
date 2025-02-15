@@ -1,0 +1,60 @@
+screw plug 10xx pa
+screw plug polyamide pa6 gf30
+connecting thread pg as per din 40430
+properties
+ for secure sealing of unused
+threaded or clearance hole
+temperature range 40 c
+100 c
+protection grade ip54
+ip66  ip68 possible when using an
+additionally mounted sealing ring
+features
+ral 7035
+a l h da part no
+vpe
+pg 7 6 10 15 100 1007 pa
+pg 9 6 10 19 100 1009 pa
+pg 11 6 10 22 100 1011 pa
+pg 135 6 10 25 100 1013 pa
+pg 16 6 10 27 100 1016 pa
+pg 21 8 125 33 100 1021 pa
+pg 29 8  pa
+pg 36 10 15 555 50 1036 pa
+pg 42 10 155 625 50 1042 pa
+pg 48 12 17 695 50 1048 pa
+jacob gmbh  elektrotechnische fabrik  gottliebdaimlerstraße 11  71394 kernen  telefon 07151 40110  fax 07151 401149  email jacobjacobgmbhde
+ technical description of the dataframe
+
+ row 0
+ column screw plug
+   description a screw plug is a type of fastener designed to seal openings in surfaces such as walls floors or panels it typically consists of a threaded shaft that is screwed into a predrilled hole to create a secure and watertight seal screw plugs are commonly made from materials like metal eg brass stainless steel plastic or composite materials depending on the application requirements they are used in various industries including construction plumbing and electrical installations
+
+ row 1
+ column connecting thread
+   description a connecting thread refers to a specific type of external or internal thread design used for joining two components together these threads are characterized by their precise geometric profile which allows for tight and secure connections connecting threads can be found in a wide range of applications including mechanical assemblies plumbing systems and industrial equipment the design of these threads often adheres to standard specifications such as iso ansi or din to ensure compatibility and interchangeability across different manufacturers and products
+ technical description
+
+row 0 properties  temperature range
+ field name properties
+ subfield temperature range
+ description this field specifies the operational temperature range for a given device or system it defines the minimum and maximum temperatures within which the equipment can function without degradation of performance or safety the temperature range is crucial for ensuring that the device operates correctly under varying environmental conditions
+
+row 1 properties  protection grade
+ field name properties
+ subfield protection grade
+ description this field denotes the level of protection offered by a device or enclosure against external elements such as dust water and other environmental factors commonly represented using the ip ingress protection rating system it provides a standardized method for specifying the degree of protection provided by electrical enclosures the protection grade ensures that the device remains functional and safe under specific environmental conditions
+the provided dataframe contains a single column labeled a and five rows indexed from 0 to 4 each row consists of a single string value that appears to be a formatted text entry here is a detailed technical description of each row
+
+ row 0 index 0 contains the string pg 7 6 10 15 100 1007 pa this string includes multiple numerical values separated by spaces 7 6 10 15 100 1007 and the abbreviation pa
+
+ row 1 index 1 contains the string pg 9 6 10 19 100 1009 pa similar to row 0 this string also includes seven numerical values 9 6 10 19 100 1009 and the abbreviation pa
+
+ row 2 index 2 contains the string pg 11 6 10 22 100 1011 pa this string again follows the same pattern with seven elements 11 6 10 22 100 1011 and pa
+
+ row 3 index 3 contains the string pg 135 6 10 25 100 1013 pa the first element here is 135 note the comma as a decimal separator followed by 6 10 25 100 1013 and pa
+
+ row 4 index 4 contains the string pg 16 6 10 27 100 1016 pa this string concludes the series with seven elements 16 6 10 27 100 1016 and pa
+
+each row appears to follow a consistent structure with six numerical values and one textual abbreviation though the exact meaning or context of these values and the abbreviation pa is not specified in the given information
+

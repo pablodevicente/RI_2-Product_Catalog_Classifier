@@ -1,0 +1,80 @@
+hexagonal locknut 2xx panptg
+hexagonal locknut polyamide pa6 gf30
+internal thread npt
+properties
+ for secure tightening of cable
+glands and accessories
+temperature range 40 c
+100 c
+features
+ral 9005
+jacob gmbh  elektrotechnische fabrik  gottliebdaimlerstraße 11  71394 kernen  telefon 07151 40110  fax 07151 401149  email jacobjacobgmbhde
+a sw1 h part no
+vpe
+npt 38 22 5 100 238 panptswg
+npt 12 27 6 100 212 panptswg
+npt 34 36 7 100 234 panptswg
+npt 1 42 7 100 210 panptswg
+ral 7035
+a sw1 h part no
+vpe
+npt 38 22 5 100 238 panptg
+npt 12 27 6 100 212 panptg
+npt 34 36 7 100 234 panptg
+npt 1 42 7 100 210 panptg
+jacob gmbh  elektrotechnische fabrik  gottliebdaimlerstraße 11  71394 kernen  telefon 07151 40110  fax 07151 401149  email jacobjacobgmbhde
+ description of dataframe rows
+
+row 0
+ hexagonal locknut a type of fastener characterized by its hexagonal shape which allows for easy installation and removal using a wrench this component is designed to provide a secure fit by locking against the threads of the bolt or stud it engages with often used in applications requiring high torque retention
+
+row 1
+ internal thread refers to a threading feature found within a cylindrical or tubular component that allows for the engagement with external threads such as those on bolts or screws internal threads are commonly found in nuts washers and other fastening devices facilitating a secure connection between parts
+row 0 of the dataframe contains a single entry under the properties column which is temperature range this property indicates the span or interval over which temperature values vary typically expressed in degrees eg celsius or fahrenheit the temperature range can be used to describe the thermal conditions within a specific environment or system such as the operational temperature limits of a device the climate conditions in a geographical area or the temperature fluctuations observed over a given period
+the provided dataframe contains four rows and one column each row representing different pipe thread specifications here is a detailed technical description for each row
+
+1 row 0 this row describes an npt national pipe thread fitting with a nominal size of 38 inch the thread size is 22 indicating the number of threads per inch the body diameter is 6 mm the depth of the threads is 5 mm and the maximum pressure rating is 100 psi the material and finish are specified as panptswg which likely indicates a specific type of plastic or alloy with a particular surface treatment
+
+2 row 1 this row details an npt fitting with a nominal size of 12 inch it has 27 threads per inch a body diameter of 6 mm a thread depth of 6 mm and a maximum pressure rating of 100 psi the material and finish are again specified as panptswg
+
+3 row 2 this row pertains to an npt fitting with a nominal size of 34 inch the thread size is 36 indicating 36 threads per inch the body diameter is 7 mm the thread depth is 7 mm and the maximum pressure rating is 100 psi the material and finish are specified as panptswg
+
+4 row 3 this row describes an npt fitting with a nominal size of 1 inch the thread size is 42 indicating 42 threads per inch the body diameter is 7 mm the thread depth is 7 mm and the maximum pressure rating is 100 psi the material and finish are specified as panptswg
+the provided dataframe consists of a single column labeled a and four rows indexed at 0 1 2 and 3 each row contains detailed information about pipe thread specifications and additional parameters
+
+row 0
+ thread type npt national pipe thread
+ thread size 38
+ thread size code 22
+ thread size in decimal inches 0375
+ pressure class 100
+ temperature rating 238f
+ thread type identifier panptg
+
+row 1
+ thread type npt national pipe thread
+ thread size 12
+ thread size code 27
+ thread size in decimal inches 0500
+ pressure class 100
+ temperature rating 212f
+ thread type identifier panptg
+
+row 2
+ thread type npt national pipe thread
+ thread size 34
+ thread size code 36
+ thread size in decimal inches 0750
+ pressure class 100
+ temperature rating 234f
+ thread type identifier panptg
+
+row 3
+ thread type npt national pipe thread
+ thread size 1
+ thread size code 42
+ thread size in decimal inches 1000
+ pressure class 100
+ temperature rating 210f
+ thread type identifier panptg
+
