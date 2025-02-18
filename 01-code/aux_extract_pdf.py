@@ -369,11 +369,16 @@ def process_pdf(pdf_path, **kwargs):
 
         logging.debug("Text extracted and saved successfully.")
 
-        # Step 2: Extract tables and save to tables.txt
-        tables_content = extract_tables_from_pdf(pdf, **kwargs)
-        tables_output_path = os.path.join(pdf_folder, "tables.txt")
-        with open(tables_output_path, "w") as tables_file:
-            tables_file.write(tables_content)
+        # For a small test im not going to process the tables
+        no_table = 1
+        if no_table==1:
+            pass
+        else:
+            # Step 2: Extract tables and save to tables.txt
+            tables_content = extract_tables_from_pdf(pdf, **kwargs)
+            tables_output_path = os.path.join(pdf_folder, "tables.txt")
+            with open(tables_output_path, "w") as tables_file:
+                tables_file.write(tables_content)
 
         logging.debug("Tables extracted and saved successfully.")
 

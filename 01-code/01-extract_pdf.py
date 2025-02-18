@@ -29,8 +29,7 @@ def check_folders(input_folder, **kwargs):
 
             if os.path.isdir(input_path):
                 logging.info(f"Processing label: {label} (Path: {input_path})")
-                if label == "00-testing":
-                    process_label(input_path, **kwargs)  # Call process_label for the label
+                process_label(input_path, **kwargs)  # Call process_label for the label
             else:
                 logging.info(f"Skipping non-directory item: {label} (Path: {input_path})")
 
@@ -65,7 +64,7 @@ if __name__ == "__main__":
         "base_path",
         type=str,
         nargs="?",  # Makes the argument optional
-        default="../02-data/01-pdfs/",
+        default="../02-data/00-testing/03-demo/",
         help="The base path to the folder containing PDF files."
     )
     args = parser.parse_args()
