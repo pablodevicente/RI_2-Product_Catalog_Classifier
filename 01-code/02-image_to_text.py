@@ -7,6 +7,7 @@ import numpy as np
 from transformers import BitsAndBytesConfig
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
+import argparse
 
 def pre_filter(image_path, **kwargs):
     """
@@ -173,25 +174,63 @@ MIN_PIXELS = 1000
 MIN_ASPECT_RATIO = 0.2  # width / height. 200 px / 1000 px
 MAX_ASPECT_RATIO = 5.0
 
-pdf_path = "../02-data/01-pdfs/accessories"
 
-# Pre-filter images
-process_images(pdf_path, pre_filter)
-logging.info("Finished pre-filtering images")
+def main(pdf_path="../02-data/01-pdfs/accessories",
+         pre_filter=True,
+         classifier_filter=True,
+         image_to_llm=True,
+         classifier_model_path="../02-data/02-classifier/00-model/best_image_classifier.keras",
+         llama_model="qresearch/llama-3.1-8B-vision-378",
+         prompt_used="USER: <image>\nDescribe in a technical manner the elements in the image\nASSISTANT:",
+         max_new_tokens=200):
 
-# Classifier filtering
-classifier_model = load_model("../02-data/02-classifier/00-model/best_image_classifier.keras") # Load the model from the file --> look into aux_train_classifier.ipynb
-process_images(pdf_path, classifier_filter, model=classifier_model)
+    # Pre-filter images if requested
+    if pre_filter:
+        process_images(pdf_path, pre_filter)
+        logging.info("Finished pre-filtering images")
 
-# Import llama model
-llama_model = "qresearch/llama-3.1-8B-vision-378"
-llama_instance, tokenizer_instance = import_model(llama_model)
-prompt_used = "USER: <image>\nDescribe in a technical manner the elements in the image\nASSISTANT:"
+    # Classifier filtering if requested
+    if classifier_filter:
+        classifier_model = load_model(classifier_model_path)
+        process_images(pdf_path, classifier_filter, model=classifier_model)
+        logging.info("Finished classifier filtering")
 
-# Generate descriptions with the LLM
-process_images(pdf_path, image_to_llm,
-    model=llama_instance,
-    tokenizer=tokenizer_instance,
-    prompt=prompt_used,
-    max_new_tokens=200
-)
+    # Generate descriptions with LLM if requested
+    if image_to_llm:
+        llama_instance, tokenizer_instance = import_model(llama_model)
+        process_images(pdf_path, image_to_llm,
+                       model=llama_instance,
+                       tokenizer=tokenizer_instance,
+                       prompt=prompt_used,
+                       max_new_tokens=max_new_tokens)
+        logging.info("Finished image description generation with LLM")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Process images from a PDF and apply various filters")
+    parser.add_argument('--pdf_path', type=str, default="../02-data/01-pdfs/accessories",
+                        help="Path to the PDF directory")
+    parser.add_argument('--pre_filter', action='store_true', help="Enable pre-filtering of images")
+    parser.add_argument('--classifier_filter', action='store_true', help="Enable classifier filtering of images")
+    parser.add_argument('--image_to_llm', action='store_true', help="Enable description generation with LLM")
+    parser.add_argument('--classifier_model_path', type=str,
+                        default="../02-data/02-classifier/00-model/best_image_classifier.keras",
+                        help="Path to the classifier model file")
+    parser.add_argument('--llama_model', type=str, default="qresearch/llama-3.1-8B-vision-378",
+                        help="Name of the llama model")
+    parser.add_argument('--prompt_used', type=str,
+                        default="USER: <image>\nDescribe in a technical manner the elements in the image\nASSISTANT:",
+                        help="Prompt to use for the LLM")
+    parser.add_argument('--max_new_tokens', type=int, default=200,
+                        help="Maximum number of new tokens for LLM generation")
+
+    args = parser.parse_args()
+
+    main(pdf_path=args.pdf_path,
+         pre_filter=args.pre_filter,
+         classifier_filter=args.classifier_filter,
+         image_to_llm=args.image_to_llm,
+         classifier_model_path=args.classifier_model_path,
+         llama_model=args.llama_model,
+         prompt_used=args.prompt_used,
+         max_new_tokens=args.max_new_tokens)
