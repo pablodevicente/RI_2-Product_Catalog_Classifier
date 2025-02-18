@@ -1,60 +1,37 @@
-from gensim.models import Word2Vec
-from nltk.tokenize import word_tokenize
-
-# Load pre-trained Word2Vec model
-word2vec_model = Word2Vec.load('path_to_your_pretrained_word2vec_model')
-
-# Function to tokenize and get word vectors
-def get_word_vectors(text):
-    tokens = word_tokenize(text.lower())  # Tokenize and lowercase
-    word_vectors = []
-    for token in tokens:
-        if token in word2vec_model.wv:
-            word_vectors.append(word2vec_model.wv[token])
-    return word_vectors
-
-# Read from pdf.txt
-with open('pdf.txt', 'r', encoding='utf-8') as file:
-    text = file.read()
-
-# Get vectors for each word in the text
-word_vectors = get_word_vectors(text)
-
-# Example: Calculate document vector by averaging word vectors
-if word_vectors:
-    doc_vector = sum(word_vectors) / len(word_vectors)
-    print("Document vector shape:", doc_vector.shape)
-else:
-    print("No word vectors found in the text.")
-
-# You can further process `doc_vector` or store it as needed for your VSM application.
-
-
 import os
-import logging
+import numpy as np
+import gensim.downloader as api
+from gensim.models import Word2Vec
 
+model = api.load("word2vec-google-news-300")  # Google's 300-dim Word2Vec
+pdfs_dir = "../02-data/01-pdfs/accessories"
+document_vectors = {}
 
-def process_txt(folder_path):
-    """
-    Processes text files in labeled folders. For each folder containing
-    ('text.txt', 'tables.txt', 'images_to_txt.txt'):
+def process_pdf_directory(directory):
+    # Iterate through all subdirectories
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file == "pdf.txt":
+                file_path = os.path.join(root, file)
 
-    1. Calls `concat_txt` to merge them into `pdf.txt`
-    2. Calls `process_nlp_in_place` to clean up `pdf.txt`
+                # Read and preprocess the text file
+                with open(file_path, "r", encoding="utf-8") as f:
+                    text = f.read().split()
 
-    Parameters:
-    - folder_path (str): Path to the root directory containing label folders.
-    """
-    if not os.path.isdir(folder_path):
-        raise ValueError(f"The provided folder path does not exist: {folder_path}")
+                # Convert words to vectors
+                word_vectors = [model[word] for word in text if word in model]
 
-    for root, _, files in os.walk(folder_path):
-        if {"pdf.txt"}.issubset(set(files)):
-            logging.info(f"Processing folder: {root}")
+                # Compute document vector (mean of word embeddings)
+                if word_vectors:
+                    doc_vector = np.mean(word_vectors, axis=0)
+                else:
+                    doc_vector = np.zeros(model.vector_size)  # Default to zero vector if no words are found
 
-            try:
+                # Store the document vector using the file path as the key
+                document_vectors[file_path] = doc_vector
 
-                logging.info(f"Successfully processed {root}")
+process_pdf_directory(pdfs_dir)
 
-            except Exception as e:
-                logging.error(f"Error processing {root}: {e}")
+# Print summary
+print(f"Processed {len(document_vectors)} documents.")
+np.save("../02-data/00-testing/vsm1.npy", document_vectors)

@@ -85,7 +85,6 @@ history = model.fit(
     callbacks=[checkpoint_callback,lr_scheduler,early_stopping]
 )
 
-
 # Evaluate the model on test data (if available)
 test_datagen = ImageDataGenerator(rescale=1./255)
 
@@ -98,12 +97,8 @@ test_generator = test_datagen.flow_from_directory(
 test_loss, test_acc = model.evaluate(test_generator, verbose=2)
 print(f"Test accuracy: {test_acc}")
 
-
 # Evaluate the model on test data (using the best saved model)
-
 best_model = load_model('../02-data/02-classifier/00-model/best_image_classifier.keras')
-
 test_loss, test_acc = best_model.evaluate(test_generator, verbose=2)
 print(f"Test accuracy (best model): {test_acc}")
-
 model.save('../02-data/02-classifier/00-model/simple_image_classifier.keras')

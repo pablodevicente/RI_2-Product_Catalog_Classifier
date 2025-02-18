@@ -180,7 +180,7 @@ process_images(pdf_path, pre_filter)
 logging.info("Finished pre-filtering images")
 
 # Classifier filtering
-classifier_model = load_model("../02-data/02-classifier/model.keras") # Load the model from the file --> look into aux_train_classifier.ipynb
+classifier_model = load_model("../02-data/02-classifier/00-model/best_image_classifier.keras") # Load the model from the file --> look into aux_train_classifier.ipynb
 process_images(pdf_path, classifier_filter, model=classifier_model)
 
 # Import llama model
