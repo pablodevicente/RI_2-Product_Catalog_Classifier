@@ -8,17 +8,14 @@ pdfs_dir = "../02-data/01-pdfs/accessories"
 document_vectors = {}
 
 def process_pdf_directory(directory):
-    # Iterate through all subdirectories
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file == "pdf.txt":
                 file_path = os.path.join(root, file)
 
-                # Read and preprocess the text file
                 with open(file_path, "r", encoding="utf-8") as f:
                     text = f.read().split()
 
-                # Convert words to vectors
                 word_vectors = [model[word] for word in text if word in model]
 
                 # Compute document vector (mean of word embeddings)
