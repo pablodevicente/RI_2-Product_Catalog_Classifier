@@ -166,7 +166,7 @@ def process_images(folder_path, function, **kwargs):
 
 
 # Set up logging configuration
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Define the minimum pixel threshold and acceptable aspect ratio range
@@ -176,18 +176,16 @@ MAX_ASPECT_RATIO = 5.0
 
 
 def main(pdf_path="../02-data/01-pdfs/accessories",
-         pre_filter=True,
-         classifier_filter=True,
-         image_to_llm=True,
          classifier_model_path="../02-data/02-classifier/00-model/best_image_classifier.keras",
          llama_model="qresearch/llama-3.1-8B-vision-378",
          prompt_used="USER: <image>\nDescribe in a technical manner the elements in the image\nASSISTANT:",
          max_new_tokens=200):
-
+    print("OYE NO ME JODAS")
     # Pre-filter images if requested
     if pre_filter:
         process_images(pdf_path, pre_filter)
         logging.info("Finished pre-filtering images")
+        print("no si aqui entra pero no hace mierda")
 
     # Classifier filtering if requested
     if classifier_filter:
@@ -204,15 +202,13 @@ def main(pdf_path="../02-data/01-pdfs/accessories",
                        prompt=prompt_used,
                        max_new_tokens=max_new_tokens)
         logging.info("Finished image description generation with LLM")
+    
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process images from a PDF and apply various filters")
     parser.add_argument('--pdf_path', type=str, default="../02-data/01-pdfs/accessories",
                         help="Path to the PDF directory")
-    parser.add_argument('--pre_filter', action='store_true', help="Enable pre-filtering of images")
-    parser.add_argument('--classifier_filter', action='store_true', help="Enable classifier filtering of images")
-    parser.add_argument('--image_to_llm', action='store_true', help="Enable description generation with LLM")
     parser.add_argument('--classifier_model_path', type=str,
                         default="../02-data/02-classifier/00-model/best_image_classifier.keras",
                         help="Path to the classifier model file")
@@ -227,9 +223,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(pdf_path=args.pdf_path,
-         pre_filter=args.pre_filter,
-         classifier_filter=args.classifier_filter,
-         image_to_llm=args.image_to_llm,
          classifier_model_path=args.classifier_model_path,
          llama_model=args.llama_model,
          prompt_used=args.prompt_used,
