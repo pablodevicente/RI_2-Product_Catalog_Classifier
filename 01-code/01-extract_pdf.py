@@ -8,32 +8,33 @@ import argparse
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
+
 def check_folders(input_folder, **kwargs):
     """
-    Performs some checks and calls the 'process_label' function to process the label.
+    Performs checks and calls the 'process_pdf_file' function to process PDF files in the directory and its subdirectories.
 
     Args:
-        input_folder (str): The root directory containing the sub-folders of original PDF files.
+        input_folder (str): The root directory containing the sub-folders of PDF files.
             Example: '/path/to/root/01-pdfs/'
         kwargs (dict): Dictionary of keyword args with model information
 
     Returns:
-        None: Logs results of the comparison or errors encountered.
+        None: Logs results of the processing or errors encountered.
     """
     try:
         logging.info(f"Starting to process the input folder: {input_folder}")
 
-        # Iterate through each subfolder (label)
-        for label in os.listdir(input_folder):
-            input_path = os.path.join(input_folder, label)
+        # Iterate through each subfolder and file recursively
+        for root, dirs, files in os.walk(input_folder):
+            for file in files:
+                # Only process PDF files
+                if file.lower().endswith(".pdf"):
+                    pdf_path = os.path.join(root, file)
+                    logging.info(f"Found PDF file: {pdf_path}. Starting processing.")
+                    # Process the PDF file
+                    process_pdf(pdf_path, **kwargs)
 
-            if os.path.isdir(input_path):
-                logging.info(f"Processing label: {label} (Path: {input_path})")
-                process_label(input_path, **kwargs)  # Call process_label for the label
-            else:
-                logging.info(f"Skipping non-directory item: {label} (Path: {input_path})")
-
-        logging.info(f"Completed processing all labels in folder: {input_folder}")
+        logging.info(f"Completed processing all PDF files in folder: {input_folder}")
 
     except OSError as e:
         logging.error(f"File system error during label processing: {str(e)}")
