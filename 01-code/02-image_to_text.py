@@ -9,6 +9,15 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 import argparse
 
+# Set up logging configuration
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Define the minimum pixel threshold and acceptable aspect ratio range
+MIN_PIXELS = 1000
+MIN_ASPECT_RATIO = 0.2  # width / height. 200 px / 1000 px
+MAX_ASPECT_RATIO = 5.0
+
 def pre_filter(image_path, **kwargs):
     """
     Checks image properties and deletes images that do not meet specified criteria.
@@ -63,8 +72,10 @@ def classifier_filter(image_path, **kwargs):
         logging.debug(f"Image {image_path} is NOT a product (prediction: {val}). Deleting...")
         os.remove(image_path)
         logging.debug(f"Deleted image: {image_path}")
+        return True
     else:
         logging.debug(f"Image {image_path} is a product (prediction: {val}). Keeping...")
+        return False
 
 def image_to_llm(image_path, **kwargs):
     """
@@ -117,14 +128,17 @@ def import_model(model_path):
 
     return model,tokenizer
 
-def process_images(folder_path, function, **kwargs):
+def process_images(folder_path, classifier_model, llama_instance, tokenizer_instance, prompt, max_new_tokens):
     """
-    Processes image files in labeled folders, applying a given function to each image.
+    Processes image files in labeled folders, applying pre-filter, classifier, and LLM description generation.
 
     Parameters:
     - folder_path (str): Path to the root directory containing label folders.
-    - function (callable): Function to apply to each image.
-    - kwargs: Additional arguments for the processing function.
+    - classifier_model: Model for the classifier filter.
+    - llama_instance: LLM model instance.
+    - tokenizer_instance: Tokenizer for the LLM.
+    - prompt (str): Prompt for LLM image description.
+    - max_new_tokens (int): Max tokens for LLM output.
     """
     if not os.path.isdir(folder_path):
         raise ValueError(f"The provided folder path does not exist: {folder_path}")
@@ -148,76 +162,55 @@ def process_images(folder_path, function, **kwargs):
         with open(file_path, "w") as opened_file:
             logging.debug(f"Opened file for writing: {file_path}")
 
-            # Pass the opened file as an argument
-            kwargs["file_handle"] = opened_file
-
             for file in image_files:
-                image_path = os.path.join(root, file)  # Full path to the image file
+                image_path = os.path.join(root, file)
                 logging.debug(f"Processing image: {image_path}")
 
-                # Call the function with the image path and opened file
+                # Apply pre-filter
+                if not pre_filter(image_path):
+                    logging.debug(f"Image {image_path} failed pre-filter. Skipping.")
+                    continue
+
+                # Apply classifier filter
+                if not classifier_filter(image_path, model=classifier_model):
+                    logging.debug(f"Image {image_path} failed classifier filter. Skipping.")
+                    continue
+
+                # Generate description with LLM
                 try:
-                    function(image_path, **kwargs)
-                    logging.debug(f"Successfully processed image: {image_path}")
+                    image_to_llm(image_path, file_handle=opened_file, model=llama_instance, tokenizer=tokenizer_instance, prompt=prompt, max_new_tokens=max_new_tokens)
+                    logging.debug(f"Successfully processed image with LLM: {image_path}")
                 except Exception as e:
-                    logging.error(f"Error processing image {image_path}: {e}")
+                    logging.error(f"Error generating LLM description for image {image_path}: {e}")
 
     logging.debug(f"Finished processing all images in folder: {folder_path}")
 
+def main(pdf_path, classifier_model_path, llama_model, prompt_used, max_new_tokens):
+    # Load models once
+    classifier_model = load_model(classifier_model_path)
+    llama_instance, tokenizer_instance = import_model(llama_model)
 
-# Set up logging configuration
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-# Define the minimum pixel threshold and acceptable aspect ratio range
-MIN_PIXELS = 1000
-MIN_ASPECT_RATIO = 0.2  # width / height. 200 px / 1000 px
-MAX_ASPECT_RATIO = 5.0
-
-
-def main(pdf_path="../02-data/01-pdfs/accessories",
-         classifier_model_path="../02-data/02-classifier/00-model/best_image_classifier.keras",
-         llama_model="qresearch/llama-3.1-8B-vision-378",
-         prompt_used="USER: <image>\nDescribe in a technical manner the elements in the image\nASSISTANT:",
-         max_new_tokens=200):
-    print("OYE NO ME JODAS")
-    # Pre-filter images if requested
-    if pre_filter:
-        process_images(pdf_path, pre_filter)
-        logging.info("Finished pre-filtering images")
-        print("no si aqui entra pero no hace mierda")
-
-    # Classifier filtering if requested
-    if classifier_filter:
-        classifier_model = load_model(classifier_model_path)
-        process_images(pdf_path, classifier_filter, model=classifier_model)
-        logging.info("Finished classifier filtering")
-
-    # Generate descriptions with LLM if requested
-    if image_to_llm:
-        llama_instance, tokenizer_instance = import_model(llama_model)
-        process_images(pdf_path, image_to_llm,
-                       model=llama_instance,
-                       tokenizer=tokenizer_instance,
-                       prompt=prompt_used,
-                       max_new_tokens=max_new_tokens)
-        logging.info("Finished image description generation with LLM")
-    
+    # Process images with streamlined filtering and description
+    process_images(pdf_path, classifier_model, llama_instance, tokenizer_instance, prompt_used, max_new_tokens)
+    logging.info("Finished processing all images with pre-filter, classifier, and LLM")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process images from a PDF and apply various filters")
-    parser.add_argument('--pdf_path', type=str, default="../02-data/01-pdfs/accessories",
+    parser.add_argument('--pdf_path', type=str,
+                        default="/02-data/01-pdfs",
                         help="Path to the PDF directory")
     parser.add_argument('--classifier_model_path', type=str,
-                        default="../02-data/02-classifier/00-model/best_image_classifier.keras",
+                        default="02-data/02-classifier/00-model/best_image_classifier.keras",
                         help="Path to the classifier model file")
-    parser.add_argument('--llama_model', type=str, default="qresearch/llama-3.1-8B-vision-378",
+    parser.add_argument('--llama_model', type=str,
+                        default="qresearch/llama-3.1-8B-vision-378",
                         help="Name of the llama model")
     parser.add_argument('--prompt_used', type=str,
                         default="USER: <image>\nDescribe in a technical manner the elements in the image\nASSISTANT:",
                         help="Prompt to use for the LLM")
-    parser.add_argument('--max_new_tokens', type=int, default=200,
+    parser.add_argument('--max_new_tokens', type=int,
+                        default=200,
                         help="Maximum number of new tokens for LLM generation")
 
     args = parser.parse_args()
