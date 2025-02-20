@@ -293,7 +293,7 @@ def extract_images_from_pdf_fitz(pdf_path, pdf_name, pdf_folder):
 Main function, just calls all other methods
 """
 
-def process_pdf(pdf_path, **kwargs):
+def process_pdf(pdf_path,table_processing=False, **kwargs):
     """
     Processes a single PDF file to extract text, tables, and images.
     Extracts the text and tables and images to individual files.
@@ -301,6 +301,7 @@ def process_pdf(pdf_path, **kwargs):
 
     Args:
         pdf_path (str): The path to the PDF file.
+        table_processing (bool): Wether or not to process the tables in the pdfs
         **kwargs: Additional keyword arguments for table extraction.
 
     Returns:
@@ -326,10 +327,7 @@ def process_pdf(pdf_path, **kwargs):
         logging.debug("Text extracted and saved successfully.")
 
         # For a small test im not going to process the tables
-        no_table = 1
-        if no_table==1:
-            pass
-        else:
+        if not table_processing:
             # Step 2: Extract tables and save to tables.txt
             tables_content = extract_tables_from_pdf(pdf, **kwargs)
             tables_output_path = os.path.join(pdf_folder, "tables.txt")

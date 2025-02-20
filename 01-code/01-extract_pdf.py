@@ -32,7 +32,9 @@ def check_folders(input_folder, **kwargs):
                     pdf_path = os.path.join(root, file)
                     logging.info(f"Found PDF file: {pdf_path}. Starting processing.")
                     # Process the PDF file
-                    process_pdf(pdf_path, **kwargs)
+                    table_processing = False
+                    logging.info(f"Table processing value is set to{table_processing}-------------------------Beware")
+                    process_pdf(pdf_path,table_processing,**kwargs)
 
         logging.info(f"Completed processing all PDF files in folder: {input_folder}")
 
