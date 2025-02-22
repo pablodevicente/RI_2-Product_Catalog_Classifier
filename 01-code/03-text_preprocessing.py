@@ -9,55 +9,31 @@ import text_preprocessing as txtp
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+def concat_txt(folder, required_files={"text.txt", "tables.txt", "images_to_txt.txt"}):
+    """Concatenates contents of the found files into a single text file."""
+    file_name = os.path.basename(folder)
+    output_path = os.path.join(folder, f"{file_name}.txt")
 
-def concat_txt(folder_path):
-    """
-    Concatenates 'text.txt', 'tables.txt', and 'images_to_txt.txt' into a single 'pdf.txt'
-    for each valid pdf folder in the given directory.
+    found_files = [f for f in required_files if os.path.exists(os.path.join(folder, f))]
 
-    Parameters:
-    - folder_path (str): Path to the root directory containing labeled folders.
-    """
-    if not os.path.isdir(folder_path):
-        raise ValueError(f"The provided folder path does not exist: {folder_path}")
+    with open(output_path, "w", encoding="utf-8") as outfile:
+        for filename in found_files:
+            file_path = os.path.join(folder, filename)
+            with open(file_path, "r", encoding="utf-8") as infile:
+                outfile.write(infile.read() + "\n")  # Ensure newline separation
 
-    for root, _, files in os.walk(folder_path):
-        # Ensure we're only processing actual pdf folders
-        if {"text.txt", "tables.txt", "images_to_txt.txt"}.issubset(set(files)):
-            pdf_path = os.path.join(root, "pdf.txt")
-            logging.debug(f"Creating {pdf_path}")
-
-            try:
-                # First write text.txt, then append tables.txt, then images_to_txt.txt
-                with open(pdf_path, "w", encoding="utf-8") as pdf_file:
-                    for txt_filename in ["text.txt", "tables.txt", "images_to_txt.txt"]:
-                        txt_path = os.path.join(root, txt_filename)
-                        if os.path.exists(txt_path):
-                            with open(txt_path, "r", encoding="utf-8") as txt_file:
-                                pdf_file.write(txt_file.read() + "\n")
-
-                logging.info(f"Successfully created {pdf_path}")
-
-                # Read and return the contents of the created PDF file
-                with open(pdf_path, "r", encoding="utf-8") as pdf_file:
-                    pdf_contents = pdf_file.read()
-                return pdf_contents,pdf_path
-
-            except Exception as e:
-                logging.error(f"Error processing {root}: {e}")
-                return None  # or handle the error as needed
+    return output_path
 
 def keep_alpha_numeric(input_text: str) -> str:
     """ Remove any character except alphanumeric characters and newlines """
     return ''.join(c for c in input_text if c.isalnum() or c in {' ', '\n'})
 
 
-def process_nlp(file: str, path: str):
+def process_nlp(path: str):
     """
     Applies NLP preprocessing to a given text and saves the processed output to a file.
 
     Parameters:
-    - file (str): The input text to preprocess.
     - path (str): The output file path to save the processed text.
     """
 
@@ -67,10 +43,11 @@ def process_nlp(file: str, path: str):
         txtp.remove_stopword, txtp.remove_url, txtp.remove_punctuation, txtp.lemmatize_word
     ]
 
-    if not isinstance(file, str):
-        raise ValueError(f"Expected file to be a string, but got {type(file)}")
+    if not isinstance(path, str):
+        raise ValueError(f"Expected file to be a string, but got {type(path)}")
 
-    preprocessed_text = file
+    with open(path, "r", encoding="utf-8") as file:
+        preprocessed_text = file.read()
 
     for func in preprocess_functions:
         try:
@@ -128,19 +105,21 @@ def process_txt(folder_path):
     if not os.path.isdir(folder_path):
         raise ValueError(f"The provided folder path does not exist: {folder_path}")
 
-    for root, files , _ in os.walk(folder_path):
-        if {"text.txt", "tables.txt", "images_to_txt.txt"}.issubset(set(files)):
+    for root, _, files in os.walk(folder_path):
+        if required_files.intersection(set(files)):  # Check if at least one file is present
             logging.info(f"Processing folder: {root}")
 
             try:
-                pdf_file,pdf_path = concat_txt(root)  # Merge text files into pdf.txt
-                process_nlp(pdf_file,pdf_path)  # Clean up pdf.txt
+                concat_file_path = concat_txt(root)
+                process_nlp(concat_file_path)
                 logging.info(f"Successfully processed {root}")
 
             except Exception as e:
                 logging.error(f"Error processing {root}: {e}")
 
 
+
+required_files = {"text.txt", "tables.txt", "images_to_txt.txt"}
 pdf_path = "../02-data/00-testing/03-demo/"
 process_txt(pdf_path)
 #cleanup_txt_files(pdf_path)
