@@ -1,0 +1,71 @@
+Product: 9223
+Audio Coax, Low Noise, 22 AWG Str TC, Foil + 95% TC Brd, PVC Jkt
+Product Description
+Audio Coax, Low Noise, 22 AWG (7x30) Tinned Copper Conductor, Inner PE Conductive Layer, PE Insulation, Duobond® II + 95% Tinned Copper Braid
+Shield, PVC Jacket
+Technical Specifications
+Product Overview
+Suitable Applications: Low noise microphone, Analog audio, Instrumentation
+Construction Details
+RG Type: 58
+Conductor
+Size Stranding Nom. Diameter Material
+22 AWG 7x30 0.029 in TC - Tinned Copper
+Insulation
+Material Nom. Insulation Diameter Color Code
+PE - Polyethylene (Conductive) 0.112 in (2.84 mm) Black
+PE - Polyethylene 0.112 in (2.84 mm) White
+Outer Shield
+Layer Outer Shield Type Material Material Trade Name Coverage
+1 Tape Tri-Laminate (Alum+Poly+Alum) Duobond® II 100%
+2 Braid Tinned Copper (TC) 95%
+Outer Jacket
+Material Nom. Diameter
+PVC - Polyvinyl Chloride 0.195 in (4.95 mm)
+Overall Cable Diameter (Nominal): 0.195 in (4.95 mm)
+Electrical Characteristics
+Electricals
+Nom. Conductor DCR Nom. Outer Shield DCR Nom. Capacitance Cond-to-Shield Nom. Velocity of Prop.
+15.1 Ohm/1000ft (49.5 Ohm/km) 3.8 Ohm/1000ft (12 Ohm/km) 37 pF/ft (120 pF/m) 56%
+Voltage
+Voltage Rating
+1900 V RMS
+Electrical Characteristics Notes: NBS Low Noise Test (Modified), MIL-C-17 Paragraph 4.8.14, 8 mV Peak to Peak Max
+Mechanical Characteristics
+Temperature
+Operating
+-40°C to +80°C
+Bend Radius
+Installation Min.
+2 in (51 mm)
+Max. Pull Tension: 8.85 lbs (4.01 kg)
+Bulk Cable Weight: 24 lbs/1000ft
+Standards and Compliance
+Environmental Suitability: Indoor (Not Riser or Plenum), Indoor
+Sustainability: CA Prop 65
+CPR Compliance: CPR Euroclass: Eca; CPR UKCA Class: Eca
+European Directive Compliance: EU CE Mark, EU Directive 2015/863/EU (RoHS 2 amendment), REACH, EU Directive 2011/65/EU (RoHS 2), EU Directive 2012/19/EU (WEEE)
+UK Regulation Compliance: UKCA Mark
+APAC Compliance: China RoHS II (GB/T 26572-2011)
+Product Notes
+Notes: Not recommended for RF use
+History
+Update and Revision: Revision Number: 0.443 Revision Date: 04-29-2024
+Part Numbers
+Variants
+Item # Color Putup Type Length UPC Footnote
+9223 010100 Black Reel 100 ft 612825358831
+9223 010500 Black Reel 500 ft 612825357742 C
+9223 0101000 Black Reel 1,000 ft 612825357759 C
+© 2024 Belden, Inc
+All Rights Reserved.
+Although Belden makes every reasonable effort to ensure their accuracy at the time of this publication, information and specifications described here in are subject to error or omission and to change without
+notice, and the listing of such information and specifications does not ensure product availability.
+Belden provides the information and specifications herein on an "ASIS" basis, with no representations or warranties, whether express, statutory or implied. In no event will Belden be liable for any damages
+(including consequential, indirect, incidental, special, punitive, or exemplary damages) whatsoever, even if Belden has been advised of the possibility of such damages, whether in an action under contract,
+negligence or any other theory, arising out of or in connection with the use, or inability to use, the information or specifications described herein.
+All sales of Belden products are subject to Belden's standard terms and conditions of sale.
+Belden believes this product to be in compliance with all applicable environmental programs as listed in the data sheet. The information provided is correct to the best of Belden's knowledge, information and belief
+at the date of its publication. This information is designed only as a general guide for the safe handling, storage, and any other operation of the product itself or the one that it becomes a part of. The Product
+Disclosure is not to be considered a warranty or quality specification. Regulatory information is for guidance purposes only. Product users are responsible for determining the applicability of legislation and
+regulations based on their individual usage of the product.

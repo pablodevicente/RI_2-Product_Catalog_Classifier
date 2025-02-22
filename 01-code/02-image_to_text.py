@@ -8,6 +8,7 @@ from transformers import BitsAndBytesConfig
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 import argparse
+import sys
 
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -17,6 +18,11 @@ logger = logging.getLogger(__name__)
 MIN_PIXELS = 1000
 MIN_ASPECT_RATIO = 0.2  # width / height. 200 px / 1000 px
 MAX_ASPECT_RATIO = 5.0
+
+# Create a StreamHandler with flush enabled
+stream_handler = logging.StreamHandler(sys.stdout)
+stream_handler.flush = sys.stdout.flush  # Explicit flush
+logger.addHandler(stream_handler)
 
 def pre_filter(image_path, **kwargs):
     """
@@ -36,11 +42,11 @@ def pre_filter(image_path, **kwargs):
             aspect_ratio = width / height
 
             if pixel_count < MIN_PIXELS or not (MIN_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO):
-                logger.debug(f"Deleting {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
+                logger.info(f"Deleting {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
                 os.remove(image_path)
                 return True  # Image was deleted
             else:
-                logger.debug(f"Keeping {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
+                logger.info(f"Keeping {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
                 return False  # Image was kept
     except Exception as e:
         logger.error(f"Error processing {image_path}: {e}")
@@ -140,45 +146,44 @@ def process_images(folder_path, classifier_model, llama_instance, tokenizer_inst
     - prompt (str): Prompt for LLM image description.
     - max_new_tokens (int): Max tokens for LLM output.
     """
-
     for root, _, files in os.walk(folder_path):
-        logging.info(f"Processing folder: {root}")
+      logging.info(f"Processing folder: {root}")
+      
+      # Filter only image files
+      image_files = [file for file in files if file.lower().endswith(('.jpeg', '.jpg', '.png'))]
 
-        # Filter only image files
-        image_files = [file for file in files if file.lower().endswith(('.jpeg', '.jpg', '.png'))]
+      # Only proceed if there are images in the folder
+      if not image_files:
+          logging.info(f"No images found in {root}. Skipping file creation.")
+          continue  # Skip this folder
 
-        # Only proceed if there are images in the folder
-        if not image_files:
-            logging.info(f"No images found in {root}. Skipping file creation.")
-            continue  # Skip this folder
+      # Define the path for the output text file
+      output_path = os.path.join(root, "images_to_txt.txt")
+      logging.info(f"Output file for this folder: {output_path}")
 
-        # Define the path for the output text file
-        output_path = os.path.join(root, "images_to_txt.txt")
-        logging.info(f"Output file for this folder: {output_path}")
+      # Open the file once
+      with open(output_path, "w") as opened_file:
 
-        # Open the file once
-        with open(output_path, "w") as opened_file:
+          for file in image_files:
+              image_path = os.path.join(root, file)
+              logging.info(f"Processing image: {image_path}")
 
-            for file in image_files:
-                image_path = os.path.join(root, file)
-                logging.info(f"Processing image: {image_path}")
+              # Apply pre-filter
+              if pre_filter(image_path):
+                  logging.info(f"Image {image_path} failed pre-filter. Skipping.")
+                  continue
 
-                # Apply pre-filter
-                if not pre_filter(image_path):
-                    logging.info(f"Image {image_path} failed pre-filter. Skipping.")
-                    continue
+              # Apply classifier filter
+              if classifier_filter(image_path, model=classifier_model):
+                  logging.info(f"Image {image_path} failed classifier filter. Skipping.")
+                  continue
 
-                # Apply classifier filter
-                if not classifier_filter(image_path, model=classifier_model):
-                    logging.info(f"Image {image_path} failed classifier filter. Skipping.")
-                    continue
-
-                # Generate description with LLM
-                try:
-                    image_to_llm(image_path, file_handle=opened_file, model=llama_instance, tokenizer=tokenizer_instance, prompt=prompt, max_new_tokens=max_new_tokens)
-                    logging.info(f"Successfully processed image with LLM: {image_path}")
-                except Exception as e:
-                    logging.error(f"Error generating LLM description for image {image_path}: {e}")
+              # Generate description with LLM
+              try:
+                  image_to_llm(image_path, file_handle=opened_file, model=llama_instance, tokenizer=tokenizer_instance, prompt=prompt, max_new_tokens=max_new_tokens)
+                  logging.info(f"Successfully processed image with LLM: {image_path}")
+              except Exception as e:
+                  logging.error(f"Error generating LLM description for image {image_path}: {e}")
 
     logging.info(f"Finished processing all images in folder: {folder_path}")
 
@@ -197,7 +202,7 @@ if __name__ == "__main__":
                         default="../02-data/00-testing/03-demo/",
                         help="Path to the PDF directory")
     parser.add_argument('--classifier_model_path', type=str,
-                        default="02-data/02-classifier/00-model/best_image_classifier.keras",
+                        default="../02-data/02-classifier/00-model/best_image_classifier.keras",
                         help="Path to the classifier model file")
     parser.add_argument('--llama_model', type=str,
                         default="qresearch/llama-3.1-8B-vision-378",

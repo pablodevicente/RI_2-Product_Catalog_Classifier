@@ -1,0 +1,91 @@
+PRODUCT DATASHEET
+1-800-318-38-0703-2338 3/- 7U3S2A3 USA/CAN
+1-800-383-73w23w w/ C.eAnNerAgDizAer.com
+ENERGIZER 386/301 SILVER OXIDE
+Specifications
+Chemical System: Silver Oxide (Zn/AgO)
+2
+Designation: ANSI/NEDA-1133SO/1132SO, IEC-SR43
+Nominal Voltage: 1.55 Volts
+Typical Capacity: 127 mAh* (to 1.2 volts)
+Capacity Test: 6.5K ohm continuous drain at 21°C
+Typical Weight: 1.7 grams (0.06 oz.)
+Industry Standard Dimensions
+Typical Volume: 0.44 cubic centimeters (0.27 cubic inch)
+mm (inches) Impedance (40 Hz): 5 to 15 ohms
+* Varies according to the applied load, temperature, and cutoff voltage.
+Cross Section
+Typical Discharge Characteristics Temperature Characteristics
+Typical Performance at 21°C (70°F) Typical Performance at Low Discharge Rates
+1.7
+1.6
+1.5
+1.4
+1.3
+1.2
+1.1
+1.0
+0 150 300 450 600
+Schedule Typical Drains Load Cutoff
+at 1.52V 1.2V
+(milliamperes) (ohm) (hours)
+Continuous 0.234 6.5K 542
+Important Notice
+This datasheet contains typical information specific to products manufactured at the time of its publication.
+©Energizer Holdings, Inc. - Contents herein do not constitute a warranty.
+VCC
+,egatloV
+DESIGNED FOR USE ON CONTINUOUS LOW DRAIN
+HIGH PULSE ON DEMAND
+Schedule:Continuous
+Typical Drain @1.52V: 125
+0.234 milliamperes
+Load:6.5K ohm 100
+75
+50
+25
+0
+-20 0 20 40
+Service, Hours
+)%(
+ecivreS
+Service Effects
+Temperature (C)
+100
+90
+80
+70
+60
+0 2 4 6 8 10 12
+)%(
+ecivreS
+E
+6.70 (0.265) Ref.
+Typical
+11.60 (0.457)
+4.20 (0.165) T
+11.25 (0.443)
+3.80 (0.150)
+R1.5 (0.059) Ref.
+3.63 (0.143) Ref.
+Typical
+3.38 (0.133) Ref. E
+Anode Cap
+Gel Anode
+L
+0.20 (0.008) Maximum Ref. Gasket
+Permissible deflection from a flat Can
+O
+0.13 (0.005) Minimum Ref. Separator
+(applies to top edge of gasket or
+edge of crimp, whichever is higher)
+Cathode
+S
+B
+O
+Storage Effects
+0 C
+20 C
+40 C
+Storage Time (yrs)
+Form No. EBC - 4350B Page 1 of 1

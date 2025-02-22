@@ -1,0 +1,139 @@
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2020, PUI Audio Inc.
+Data Sheet AMM-3742-T-WP-R
+Specifications
+Parameters Values Units
+Sensitivity (1 kHz @ 50cm)
+0 dB=1V/Pa -42±1 dB
+Rated Voltage 1.5 VDC
+Operating Voltage Range 1.5 to 3.6 VDC
+Output Impedance (@ 1 kHz) 300 Ω
+Current consumption
+(at 1.8 VDC) 200 µA
+Signal-to-Noise Ratio
+(1kHz, 94 dB input, A-weighted) 59 dB
+Decreasing Voltage
+(0 dB=1V/Pa, 3.6 to 1.5 VDC) 0.5 dB
+Frequency Range 20 – 20,000 Hz
+Total Harmonic Distortion
+(94 dB @ 50cm, 1 kHz) 0.5% -
+Acoustic Overload Point (AOP)
+(50cm, 1kHz, 10% THD) 130 dB
+Directivity Omnidirectional
+See page 5 for soldering
+Acceptable Soldering Methods Reflow Solder information
+Environmental Compliances RoHS/REACH - Halogen Free
+Power Supply Rejection
+(PSR, 100 mVpp Square Wave
+@ 217 Hz, A-weighted) -100 dB
+Weight <0.3 Grams
+Operating Temperature
+(VDD < 3 VDC) -40 ~ +100 °C
+Operating Temperature
+(VDD > 3 VDC) -40 ~ +70 °C
+Storage Temperature -40 ~ +125 °C
+Environmental Protection Rating IP57 -
+MSL (Moisture Sensitivity Level) * 1 -
+*MSL level dependent on product remaining in sealed packaging until use
+Absolute Maximum Ratings
+Parameters Values Units
+Max Voltage on Any Pin 4 VDC
+Max Sound Pressure Level 160 dB
+Max Mechanical Shock 10,000 Gs
+Max Vibration Pre-MIL-STD-883 Method 2007, Test Condition B
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2020, PUI Audio Inc.
+Measurement Method
+Recommended Drive Circuit
+Typical Frequency Response with Pass/Fail Mask
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2020, PUI Audio Inc.
+Total Harmonic Distortion + Noise versus SPL Input
+(with acoustic source at 50cm)
+Microphone Output versus SPL Input
+(with acoustic source at 50cm)
+Ultrasonic Frequency Response
+(Sensitivity normalized to 0 dB)
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2020, PUI Audio Inc.
+Recommended Soldering Procedure
+Reliability Testing
+Type of Test Test Specifications
+Samples for qualification testing require 3 passes 260±5 ℃ reflow
+Simulated Reflow solder profiles. 2 hours of setting time is required between each
+(Without Solder) reflow profile test.
+Precondition at +25℃ for 1 hour. Expose to +85℃ with 85%
+relative humidity for 1000 hours. Finally, dry at room ambient for
+Static Humidity 3±1 hour before taking final measurement.
+Each cycle shall consist of 30 minutes at -40℃, 30 minutes at
++125℃ with 5 minutes transition time. Test duration is for 30
+Temperature Shock cycles, starting from cold to hot temperature.
+Perform ESD sensitivity threshold measurements for each contact
+according to MIL-STD-883G, Method 3015.7 for Human Body
+Model. Identify the ESD threshold levels indicating passage of
+ESD Sensitivity 8000V Human Body Model.
+Vibrate randomly along three perpendicular directions for 30
+minutes in each direction, 4 cycles from 20~2000 Hz with a peak
+Vibration Test acceleration of 20 Gs.
+Subject samples to half-sine shock pulses (3000±15% Gs for
+Shock Test 0.3ms) in each direction, for a total of 18 shocks.
+Drop samples from 1.5m height onto a steel surface, total 18
+Drop Test times and inspected for mechanical damage.
+Subject samples to +125℃ for 168 hours under full maximum
+Operation Life rated voltage.
+Place 15 microphones in water at 1m depth for 30 minutes.
+Remove and dissect 5 pieces to check for water ingress. Test
+remaining 10 microphones for sensitivity after resting at room
+Waterproof Test temperature for 2 hours.
+Microphone frequency response and sensitivity shall not deviate more than ±3 dB.
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2020, PUI Audio Inc.
+Dimensions
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2020, PUI Audio Inc.
+Suggested Pickup Tool Location and Land Pattern*
+*This land pattern is advisory only and its use or adaptation is entirely voluntary.
+PUI Audio disclaims all liability of any kind associated with the use, application, or
+adaptation of this land pattern.
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2020, PUI Audio Inc.
+Packaging
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2020, PUI Audio Inc.
+Packaging
+(continued)
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2020, PUI Audio Inc.
+Packaging
+(continued)
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2020, PUI Audio Inc.
+Specifications Revisions
+Revision Description Date
+- Released from Engineering 10/12/2020
+A Update drawing and pinouts 07/28/2023
+Note:
+1. Unless otherwise specified:
+A. All dimensions are in millimeters.
+B. Default tolerances are ±0.5mm and angles are ±3°.
+2. Specifications subject to change or withdrawal without notice.
+www.puiaudio.com

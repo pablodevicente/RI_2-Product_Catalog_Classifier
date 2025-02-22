@@ -1,0 +1,74 @@
+Product: 89207
+100Ω Twinax, 1 Pr #20 Str-1c TC/1c BC, FEP ins, FEP Inner Jkt, Duofoil®+TC
+Braid, FEP Jkt, CMP
+Product Description
+Twinax 100Ω, 1 Pair, 20 AWG (7x28) one tinned, one bare copper conductor, FEP insulation, FEP inner jacket, Duofoil® + tinned copper braid shield 85%,
+FEP jacket, CMP
+Technical Specifications
+Product Overview
+Suitable Applications: Computer, Instrumentation
+Construction Details
+Conductor
+Size Stranding Nom. Diameter Material
+20 AWG 7x28 0.036 in TC - Tinned Copper
+20 AWG 7x28 0.036 in BC - Bare Copper
+Insulation
+Material Nom. Insulation Diameter Color Code Notes
+FEP - Fluorinated Ethylene Propylene 0.072 in (1.8 mm) Clear FEP on both conductors
+FEP - Fluorinated Ethylene Propylene 0.201 in (5.11 mm) Clear FEP over pair
+Outer Shield
+Layer Outer Shield Type Material Material Trade Name Coverage
+1 Tape Tri-Laminate (Alum+Poly+Alum) Duofoil® 100%
+2 Braid Tinned Copper (TC) 85%
+Outer Jacket
+Material Nom. Diameter
+FEP - Fluorinated Ethylene Propylene 0.259 in (6.58 mm)
+Overall Cable Diameter (Nominal): 0.259 in (6.58 mm)
+Electrical Characteristics
+Electricals
+Nom. Conductor DCR Nom. Outer Shield DCR Nom. Capacitance Cond-to-Cond (Mutual) Nom. Capacitance Cond-to-Shield Nom. Characteristic Impedance Nom. Velocity of Prop.
+9.5 Ohm/1000ft (31 2.5 Ohm/1000ft (8.2 Ohm/km) 14.0 pF/ft (45.9 pF/m) 23.0 pF/ft (75.5 pF/m) 100 Ohm 70%
+Ohm/km)
+Voltage
+UL Voltage Rating
+300 V (CMP)
+Mechanical Characteristics
+Temperature
+UL Temperature Operating
+200°C -70°C to +200°C
+Bend Radius
+Installation Min.
+3.0 in
+Max. Pull Tension: 88 lbs (40 kg)
+Bulk Cable Weight: 52 lbs/1000ft
+Standards and Compliance
+Environmental Suitability: Indoor - Plenum, Indoor
+Sustainability: CA Prop 65
+Flammability / Reaction to Fire: NFPA 262
+CPR Compliance: CPR Euroclass: Eca
+NEC / UL Compliance: CMP
+CEC / C(UL) Compliance: CMP
+European Directive Compliance: EU CE Mark, EU Directive 2015/863/EU (RoHS 2 amendment), REACH, EU Directive 2011/65/EU (RoHS 2), EU Directive 2012/19/EU (WEEE)
+UK Regulation Compliance: UKCA Mark
+APAC Compliance: China RoHS II (GB/T 26572-2011)
+Non-Plenum Number: 9207
+History
+Update and Revision: Revision Number: 0.319 Revision Date: 05-05-2023
+Part Numbers
+Variants
+Item # Color Putup Type Length UPC
+89207 010100 Black Reel 100 ft 612825220756
+89207 010500 Black Reel 500 ft 612825220770
+89207 0101000 Black Reel 1,000 ft 612825220763
+© 2023 Belden, Inc
+All Rights Reserved.
+Although Belden makes every reasonable effort to ensure their accuracy at the time of this publication, information and specifications described here in are subject to error or omission and to change without
+notice, and the listing of such information and specifications does not ensure product availability.
+Belden provides the information and specifications herein on an "ASIS" basis, with no representations or warranties, whether express, statutory or implied. In no event will Belden be liable for any damages
+(including consequential, indirect, incidental, special, punitive, or exemplary damages) whatsoever, even if Belden has been advised of the possibility of such damages, whether in an action under contract,
+negligence or any other theory, arising out of or in connection with the use, or inability to use, the information or specifications described herein.
+All sales of Belden products are subject to Belden's standard terms and conditions of sale.
+Belden believes this product to be in compliance with all applicable environmental programs as listed in the data sheet. The information provided is correct to the best of Belden's knowledge, information and belief
+at the date of its publication. This information is designed only as a general guide for the safe handling, storage, and any other operation of the product itself or the one that it becomes a part of. The Product
+Disclosure is not to be considered a warranty or quality specification. Regulatory information is for guidance purposes only. Product users are responsible for determining the applicability of legislation and
+regulations based on their individual usage of the product.

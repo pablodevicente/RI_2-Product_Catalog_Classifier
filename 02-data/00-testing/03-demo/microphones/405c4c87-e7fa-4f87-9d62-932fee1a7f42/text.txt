@@ -1,0 +1,109 @@
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2019, PUI Audio Inc.
+Data Sheet PNM-3546L-C3310-R
+PUI Audio’s noise-canceling microphones are designed with dipole inlets on the
+back of the microphone capsule to reduce background noise from wind and the
+road for the clearest possible pickup of a user’s voice—especially when used in
+automotive applications.
+The frequency response of the microphone is exceptionally flat when placed
+2.54cm from the acoustic source, but rolls-off at 2 to 5 dB/octave when placed
+50cm away from the acoustic source.
+Features:
+• 6mm diameter
+• 3.5mm height
+• -46 dB sensitivity @ 50cm
+• >55 dB signal-to-noise ratio
+• Reduces the effect of wind and road noise
+• Integrated 33pF and 10pF buzz-blocking capacitors reduce GSM noise
+Specifications
+Parameters Values Units
+Sensitivity (1 kHz @ 50cm)
+0 dB=1V/Pa -46 ±4 dB
+Rated Voltage 2 VDC
+Output Impedance (@ 1 kHz) 2.2 kΩ
+Current consumption
+(3VS with 2.2 kΩ RL) 500 µA
+Signal-to-Noise Ratio
+(1kHz, 94 dB input, A-weighted) >55 dB
+Decreasing Voltage (2VS to 1.5VS) -3 dB
+Frequency Range (@ 2.54cm) 20 ~ 20,000 Hz
+Frequency Range (@ 50cm, -10 dB) 250 ~ 20,000 Hz
+Operating Voltage Range 1 ~ 10 VDC
+Maximum SPL Input (THD<3%) 110 dB
+Directivity Dipole -
+Operating Temperature -20 ~ +60 °C
+Storage Temperature -40 ~ +70 °C
+Weight <0.3 Grams
+PUI Audio, Inc., 3541 Stop Eight Road, Dayton, OH 45414
+Tel: (937) 415-5901 Fax: (937) 415-5925
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2019, PUI Audio Inc.
+Measurement Method
+(in Anechoic Chamber)
+Typical Frequency Response
+(measured at 50cm with 2V input and 94 dB source)
+Typical Frequency Response Near-Field vs. Far-Field
+(2.54cm vs 50cm)
+PUI Audio, Inc., 3541 Stop Eight Road, Dayton, OH 45414
+Tel: (937) 415-5901 Fax: (937) 415-5925
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2019, PUI Audio Inc.
+Reliability Testing
+Type of Test Test Specifications
+200 hours at +60°C ± 3°C followed by two hours
+High Temperature Test in normal room temperature
+200 hours at -20°C ± 3°C followed by two hours
+Low Temperature Test in normal room temperature
+200 hours at +40°C ± 3°C with relative humidity
+at 90% to 95% followed by 2 hours in normal
+Humidity Test room temperature
+30 minutes at -25°C, 10 minutes at 20°C, 30
+minutes at +70°C, 10 minutes at 20°C for five
+cycles, followed by 2 hours in normal room
+Temperature Cycle Testing temperature
+10 to 55 Hz for 1 minute with 1.52mm distance,
+Vibration Test followed by a two-hour 3 axis test in packaging
+Drop microphones in packaging onto concrete
+Drop Test floor from 1-meter height in each of 3-axis
+1. Contact discharge - Discharge 6000 VDC
+from capacitor into microphone output
+through 330Ω resistor ten times.
+2. Air discharge - Discharge 8000 VDC into
+ESD Test (according to IEC 6100) sound hole of the microphone ten times.
+After each test, the speaker’s SPL shall be ±3 dB of the original SPL
+Dimensions
+Recommended Drive Circuit
+PUI Audio, Inc., 3541 Stop Eight Road, Dayton, OH 45414
+Tel: (937) 415-5901 Fax: (937) 415-5925
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2019, PUI Audio Inc.
+Microphone Handling Precautions
+High temperature and/or static electricity may damage microphones. To ensure careful handling, we
+suggest following these precautions:
+• Ensure the power rating of the soldering iron is below 90 watts
+• The temperature of the soldering iron must be limited to 360°C ±10°C (680°F ±50°F)
+• Soldering duration for each terminal shall be at or under 2 seconds
+• If practical, use a metal fixture to hold the microphone in-place and to act as a heatsink. A fixture
+should have appropriate diameter holes drilled through the entire fixture to prevent pressure from
+being placed on the diaphragm (as below)
+Packaging
+PUI Audio, Inc., 3541 Stop Eight Road, Dayton, OH 45414
+Tel: (937) 415-5901 Fax: (937) 415-5925
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2019, PUI Audio Inc.
+Specifications Revisions
+Revision Description Date
+- Released from Engineering 9/4/2018
+Note:
+1. Unless otherwise specified:
+A. All dimensions are in millimeters.
+B. Default tolerances are ±0.5mm and angles are ±3°.
+2. Specifications subject to change or withdrawal without notice.
+3. This part is RoHS 2011/65/EU Compliant.
+PUI Audio, Inc., 3541 Stop Eight Road, Dayton, OH 45414
+Tel: (937) 415-5901 Fax: (937) 415-5925

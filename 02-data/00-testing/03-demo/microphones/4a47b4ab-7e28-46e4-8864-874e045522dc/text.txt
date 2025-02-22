@@ -1,0 +1,121 @@
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2023, PUI Audio Inc.
+Data Sheet AUM-5241L-HD
+PUI Audio’s all-new HD Series microphones use premium-grade MOSFETs and diaphragms
+for high sensitivity and superior signal-to-noise ratio. Each microphone features GSM buzz-
+blocking capacitors. Upgrade the ECM microphone that you use today with a PUI Audio
+HD Series microphone.
+The 14mm diameter AUM-5241L-HD ECM is a back-electret cardioid/uni-directional
+microphone designed for extreme fidelity and focused recording of acoustic sources
+directly on-axis with the face of the microphone.
+Features:
+• -41dB sensitivity
+• 74dB signal-to-noise ratio
+• Cardioid pickup pattern
+• 14mm diameter
+• 5.2mm height
+Specifications (V = 3.0V, unless otherwise specified.)
+DD
+Parameter Test Condition Value Unit
+94dBSPL -44 (min)
+Sensitivity f = 1 kHz -41 (typ) dBFS
+IN
+All operating modes -38 (max)
+Signal-to-Noise Ratio f = 1kHz, 94dBSPL, A-weighted 74 (typ) dB
+IN
+Attenuation -180° ±20° from membrane’s front surface 12 (min) dB
+Frequency Range See Frequency Response Curve response limits 20 – 20k Hz
+Acoustic Overload Point
+f = 1kHz, 10% THD 135 (typ) dB
+IN
+(AOP)
+Output Impedance f = 1kHz 3.3 (max) kW
+Supply Voltage 3.0 (typ) V
+DD
+1.0 (min)
+Supply Voltage Range V
+DD
+10.0 (max)
+Supply Current V = 3.0V, R =3.3kW 500 (typ) µA
+dd L
+-20 (min)
+Operating Temperature °C
+70 (max)
+-40 (min)
+Storage Temperature °C
+85 (max)
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2023, PUI Audio Inc.
+Typical Frequency Response
+(Driven by a 94dBSPL excitation source)
+Typical Application Circuit
+Dimensions
+(in mm)
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2023, PUI Audio Inc.
+Measurement Method
+Standard Conditions Temperature Humidity Air Pressure
+Environment Conditions 22±5°C 30% ≤ RH ≤ 70% 86kPa ≤ AP ≤ 106kPa
+Arbitration Conditions 20±5°C 40% ≤ RH ≤ 70% 86kPa ≤ AP ≤ 106kPa
+Microphone Handling Precautions
+High temperature and/or static electricity may damage microphones. To ensure careful
+handling, we suggest following these precautions:
+• Ensure the power rating of the soldering iron is below 90 watts
+• The temperature of the soldering iron must be limited to 360°C ±10°C (680°F ±50°F)
+• Soldering duration for each terminal shall be at or under 2 seconds
+• Avoid the rear sound holes when soldering
+• If practical, use a metal fixture to hold the microphone in-place and to act as a
+heatsink. A fixture should have appropriate diameter holes drilled through the entire
+fixture to prevent pressure from being placed on the diaphragm (as below)
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2023, PUI Audio Inc.
+Reliability Testing
+Type of Test Test Specifications
+High Temperature 200 hours at +70°C ± 3°C followed by two hours in normal room
+Test temperature
+Low Temperature 200 hours at -25°C ± 3°C followed by two hours in normal room
+Test temperature
+200 hours at +40°C ± 3°C with relative humidity at 90% to 95%
+Humidity Test
+followed by 2 hours in normal room temperature
+30 minutes at -25°C, 10 minutes at 20°C, 30 minutes at +70°C, 10
+Temperature
+minutes at 20°C for five cycles, followed by 2 hours in normal room
+Cycle Testing
+temperature
+10 to 55 Hz for 1 minute with 1.52mm distance, followed by a two-
+Vibration Test
+hour 3 axis test in packaging
+Drop microphones in packaging onto concrete floor from 1 meter
+Drop Test
+height in each of 3 axis
+1. Contact discharge - Discharge 6000 VDC from capacitor into
+ESD Test
+microphone output through 330Ω resistor ten times.
+(according to IEC
+2. Air discharge - Discharge 8000 VDC into sound hole of the
+6100)
+microphone ten times.
+After each test, the speaker’s SPL shall be ±3 dB of the original SPL.
+www.puiaudio.com
+This document contains data proprietary to PUI Audio Inc. Any use or reproduction, in any form, without prior written permission
+of PUI Audio Inc. is prohibited.
+©2023, PUI Audio Inc.
+Packaging
+Specifications Revisions
+Revision Description Date
+A Datasheet developed by Engineering 11/01/2023
+Note:
+1. Unless otherwise specified:
+A. All dimensions are in millimeters.
+B. Default tolerances are ±0.5mm and angles are ±3°.
+2. Specifications subject to change or withdrawal without notice.
+3. This part is RoHS 2015/863/EU Compliant.
+www.puiaudio.com

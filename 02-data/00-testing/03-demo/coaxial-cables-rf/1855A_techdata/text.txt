@@ -1,0 +1,141 @@
+Product: 1855A
+75 Ohm SDI Coax, Mini RG-59, 23 AWG Solid BC, Foil + 95% TC Braid, PVC
+Jkt, CMR
+Product Description
+75 Ohm SDI Coax, Mini RG-59, 23 AWG Solid Bare Copper Conductor, PE Insulation, Foil + 95% Tinned Copper Braid Shield, PVC Jacket, CMR
+Technical Specifications
+Product Overview
+Suitable Applications: Digital Video, 6 Gb/s UHDTV, HD-SDI 1080p
+Construction Details
+RG Type: Mini 59
+Conductor
+Size Stranding Nom. Diameter Material
+23 AWG Solid 0.023 in BC - Bare Copper
+Insulation
+Material Nom. Insulation Diameter Color Code
+PE - Polyethylene (Foam) 0.102 in (2.59 mm) White
+Outer Shield
+Layer Outer Shield Type Material Material Trade Name Coverage
+1 Tape Tri-Laminate (Alum+Poly+Alum) Duofoil® 100%
+2 Braid Tinned Copper (TC) 95%
+Outer Jacket
+Material Nom. Diameter
+PVC - Polyvinyl Chloride 0.159 in (4.04 mm)
+Overall Cable Diameter (Nominal): 0.159 in (4.04 mm)
+Electrical Characteristics
+Return Loss (RL)
+Frequency Min. Return Loss
+5 - 1600 MHz 23 dB
+1600 - 4500 MHz 21 dB
+4500 - 6000 MHz 15 dB
+Attenuation
+Frequency Nom. Attenuation
+1 MHz 0.39 dB/100ft
+3.58 MHz 0.78 dB/100ft
+5 MHz 0.92 dB/100ft
+6 MHz 1.00 dB/100ft
+7 MHz 1.08 dB/100ft
+10 MHz 1.2 dB/100ft
+12 MHz 1.3 dB/100ft
+25 MHz 1.8 dB/100ft
+67.5 MHz 2.83 dB/100ft
+71.5 MHz 2.93 dB/100ft
+88.5 MHz 3.22 dB/100ft
+100 MHz 3.39 dB/100ft
+135 MHz 3.84 dB/100ft
+143 MHz 4.00 dB/100ft
+180 MHz 4.41 dB/100ft
+270 MHz 5.44 dB/100ft
+360 MHz 6.34 dB/100ft
+540 MHz 7.85 dB/100ft
+720 MHz 9.15 dB/100ft
+750 MHz 9.31 dB/100ft
+1000 MHz 10.89 dB/100ft
+1500 MHz 13.38 dB/100ft
+2000 MHz 15.64 dB/100ft
+2250 MHz 16.68 dB/100ft
+3000 MHz 19.65 dB/100ft
+4500 MHz 24.35 dB/100ft
+6000 MHz 28.97 dB/100ft
+Electricals
+Nom. Conductor DCR Nom. Outer Shield DCR Nom. Capacitance Cond-to-Shield Nom. Characteristic Impedance Nom. Velocity of Prop.
+20.1 Ohm/1000ft 3.7 Ohm/1000ft (12 Ohm/km) 16.3 pF/ft (53.5 pF/m) 75 Ohm 82%
+Voltage
+UL Voltage Rating
+300 V (CMR, CMG)
+Mechanical Characteristics
+Temperature
+UL Temperature Operating
+75°C -30°C to +75°C
+Bend Radius
+Installation Min.
+1.6 in (41 mm)
+Max. Pull Tension: 33 lbs (15 kg)
+Bulk Cable Weight: 17 lbs/1000ft
+Standards and Compliance
+Environmental Suitability: Indoor/Outdoor, Indoor, UV Resistance, Aerial - Black only, When supported by messenger wire
+Sustainability: CA Prop 65
+Flammability / Reaction to Fire: UL1666 Vertical Shaft
+CPR Compliance: CPR Euroclass: Eca; CPR UKCA Class: Eca
+NEC / UL Compliance: CMR
+CEC / C(UL) Compliance: CMG
+European Directive Compliance: EU CE Mark, EU Directive 2015/863/EU (RoHS 2 amendment), REACH, EU Directive 2011/65/EU (RoHS 2), EU Directive 2012/19/EU (WEEE)
+UK Regulation Compliance: UKCA Mark
+APAC Compliance: China RoHS II (GB/T 26572-2011)
+Plenum Number: 1855P
+History
+Update and Revision: Revision Number: 0.471 Revision Date: 04-24-2023
+Part Numbers
+Variants
+Item # Color Putup Type Length UPC Footnote
+1855A 010500 Black Reel 500 ft 612825356950
+1855A 0101000 Black Reel 1,000 ft 612825358503 C
+1855A 010N1000 Black Reel w/Small Barrel 1,000 ft
+1855A 010Z1000 Black ReelTuff Box 1,000 ft 612825434993
+1855A 0105000 Black Reel 5,000 ft 612825436126
+1855A 0061000 Blue, Light Reel 1,000 ft 612825358459 C
+1855A 006N1000 Blue, Light Reel w/Small Barrel 1,000 ft
+1855A 006Z1000 Blue, Light ReelTuff Box 1,000 ft 612825434955
+1855A 0065000 Blue, Light Reel 5,000 ft 612825436072
+1855A 0011000 Brown Reel 1,000 ft 612825356851 C
+1855A 001N1000 Brown Reel w/Small Barrel 1,000 ft
+1855A 0015000 Brown Reel 5,000 ft 612825436027
+1855A 0081000 Gray Reel 1,000 ft 612825358510 C
+1855A 008N1000 Gray Reel w/Small Barrel 1,000 ft
+1855A 0085000 Gray Reel 5,000 ft 612825436096
+1855A N3U1000 Green, Mil Reel 1,000 ft 612825358480 C
+1855A N3UN1000 Green, Mil Reel w/Small Barrel 1,000 ft
+1855A N3UZ1000 Green, Mil ReelTuff Box 1,000 ft 612825435006
+1855A N3U5000 Green, Mil Reel 5,000 ft 612825436133
+1855A 0031000 Orange Reel 1,000 ft 612825356844 C
+1855A 003N1000 Orange Reel w/Small Barrel 1,000 ft
+1855A 003Z1000 Orange ReelTuff Box 1,000 ft 612825434931
+1855A 0035000 Orange Reel 5,000 ft 612825436041
+1855A 0021000 Red Reel 1,000 ft 612825358473 C
+1855A 002N1000 Red Reel w/Small Barrel 1,000 ft
+1855A 002Z1000 Red ReelTuff Box 1,000 ft 612825434917
+1855A 0025000 Red Reel 5,000 ft 612825436034
+1855A 0071000 Violet Reel 1,000 ft 612825356837 C
+1855A 007N1000 Violet Reel w/Small Barrel 1,000 ft
+1855A 007Z1000 Violet ReelTuff Box 1,000 ft 612825434962
+1855A 0075000 Violet Reel 5,000 ft 612825436089
+1855A 0091000 White Reel 1,000 ft 612825358497 C
+1855A 009N1000 White Reel w/Small Barrel 1,000 ft
+1855A 009Z1000 White ReelTuff Box 1,000 ft 612825434986
+1855A 0095000 White Reel 5,000 ft 612825436102
+1855A 0041000 Yellow Reel 1,000 ft 612825358466 C
+1855A 004N1000 Yellow Reel w/Small Barrel 1,000 ft
+1855A 004Z1000 Yellow ReelTuff Box 1,000 ft 612825434948
+1855A 0045000 Yellow Reel 5,000 ft 612825436065
+© 2024 Belden, Inc
+All Rights Reserved.
+Although Belden makes every reasonable effort to ensure their accuracy at the time of this publication, information and specifications described here in are subject to error or omission and to change without
+notice, and the listing of such information and specifications does not ensure product availability.
+Belden provides the information and specifications herein on an "ASIS" basis, with no representations or warranties, whether express, statutory or implied. In no event will Belden be liable for any damages
+(including consequential, indirect, incidental, special, punitive, or exemplary damages) whatsoever, even if Belden has been advised of the possibility of such damages, whether in an action under contract,
+negligence or any other theory, arising out of or in connection with the use, or inability to use, the information or specifications described herein.
+All sales of Belden products are subject to Belden's standard terms and conditions of sale.
+Belden believes this product to be in compliance with all applicable environmental programs as listed in the data sheet. The information provided is correct to the best of Belden's knowledge, information and belief
+at the date of its publication. This information is designed only as a general guide for the safe handling, storage, and any other operation of the product itself or the one that it becomes a part of. The Product
+Disclosure is not to be considered a warranty or quality specification. Regulatory information is for guidance purposes only. Product users are responsible for determining the applicability of legislation and
+regulations based on their individual usage of the product.

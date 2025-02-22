@@ -1,0 +1,99 @@
+Product: 8241
+75 Ohm Analog Video Coax, RG-59, 23 AWG Solid BCCS, 95% BC Braid,
+PVC Jkt, CM
+Product Description
+75 Ohm Analog Video Coax, RG-59, 23 AWG Solid Bare Copper Covered Steel Conductor , PE Insulation, 95% Bare Copper Braid Shield, PVC Jacket, CM
+Technical Specifications
+Product Overview
+Suitable Applications: Standard analog video
+Construction Details
+RG Type: 59
+Conductor
+Size Stranding Nom. Diameter Material
+23 AWG Solid 0.023 in BCCS - Bare Copper Covered Steel
+Insulation
+Material Nom. Insulation Diameter Color Code
+PE - Polyethylene 0.146 in (3.71 mm) White
+Outer Shield
+Outer Shield Type Material Coverage
+Braid Bare Copper (BC) 95%
+Outer Jacket
+Material Nom. Diameter
+PVC - Polyvinyl Chloride 0.240 in (6.10 mm)
+Overall Cable Diameter (Nominal): 0.240 in (6.10 mm)
+Electrical Characteristics
+Attenuation
+Nom. Attenuation
+[delete]
+[delete]
+[delete]
+[delete]
+[delete]
+[delete]
+[delete]
+[delete]
+[delete]
+Power Rating
+Frequency Max. Power Rating
+50 MHz 470 W
+100 MHz 310 W
+300 MHz 160 W
+500 MHz 115 W
+1,000 MHz 76 W
+Electricals
+Nom. Conductor DCR Nom. Outer Shield DCR Nom. Capacitance Cond-to-Shield Nom. Characteristic Impedance Nom. Velocity of Prop.
+49 Ohm/1000ft 2.6 Ohm/1000ft (8.5 Ohm/km) 20.4 pF/ft (66.9 pF/m) 75 Ohm 66%
+Voltage
+UL Voltage Rating Voltage Rating
+300 V (CM), 30 V (UL AWM 1354) 1700 V
+Mechanical Characteristics
+Temperature
+UL Temperature Operating
+75°C -30°C to +75°C
+Bend Radius
+Installation Min.
+2.4 in (61 mm)
+Max. Pull Tension: 63 lbs (29 kg)
+Bulk Cable Weight: 37 lbs/1000ft
+Standards and Compliance
+Environmental Suitability: Indoor/Outdoor, Indoor, Aerial - Black only, When supported by messenger wire
+Sustainability: CA Prop 65
+Flammability / Reaction to Fire: UL1685 UL Loading
+CPR Compliance: CPR Euroclass: Eca
+NEC / UL Compliance: CM
+AWM Compliance: AWM 1354
+CEC / C(UL) Compliance: CM
+European Directive Compliance: EU CE Mark, EU Directive 2015/863/EU (RoHS 2 amendment), REACH, EU Directive 2011/65/EU (RoHS 2), EU Directive 2012/19/EU (WEEE)
+UK Regulation Compliance: UKCA Mark
+APAC Compliance: China RoHS II (GB/T 26572-2011)
+Plenum Number: 88241, 82241
+History
+Update and Revision: Revision Number: 0.497 Revision Date: 04-29-2024
+Part Numbers
+Variants
+Item # Color Putup Type Length UPC Footnote
+8241 010100 Black Reel 100 ft 612825358695
+8241 010500 Black Reel 500 ft 612825355717 C
+8241 010U500 Black UnReel 500 ft 612825355977
+8241 0101000 Black Reel 1,000 ft 612825356011 C
+8241 010U1000 Black UnReel 1,000 ft 612825358060
+8241 0102000 Black Reel 2,000 ft 612825358701 C
+8241 0105000 Black Reel 5,000 ft 612825358640 C
+8241 006U1000 Blue, Light UnReel 1,000 ft 612825357629
+8241 005U1000 Green, Dark UnReel 1,000 ft 612825358039
+8241 003U1000 Orange UnReel 1,000 ft 612825355601
+8241 002U1000 Red UnReel 1,000 ft 612825358046
+8241 009U1000 White UnReel 1,000 ft 612825358688
+8241 004U1000 Yellow UnReel 1,000 ft 612825355595
+© 2024 Belden, Inc
+All Rights Reserved.
+Although Belden makes every reasonable effort to ensure their accuracy at the time of this publication, information and specifications described here in are subject to error or omission and to change without
+notice, and the listing of such information and specifications does not ensure product availability.
+Belden provides the information and specifications herein on an "ASIS" basis, with no representations or warranties, whether express, statutory or implied. In no event will Belden be liable for any damages
+(including consequential, indirect, incidental, special, punitive, or exemplary damages) whatsoever, even if Belden has been advised of the possibility of such damages, whether in an action under contract,
+negligence or any other theory, arising out of or in connection with the use, or inability to use, the information or specifications described herein.
+All sales of Belden products are subject to Belden's standard terms and conditions of sale.
+Belden believes this product to be in compliance with all applicable environmental programs as listed in the data sheet. The information provided is correct to the best of Belden's knowledge, information and belief
+at the date of its publication. This information is designed only as a general guide for the safe handling, storage, and any other operation of the product itself or the one that it becomes a part of. The Product
+Disclosure is not to be considered a warranty or quality specification. Regulatory information is for guidance purposes only. Product users are responsible for determining the applicability of legislation and
+regulations based on their individual usage of the product.
