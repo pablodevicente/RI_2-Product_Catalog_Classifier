@@ -14,7 +14,6 @@ import sys
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="keras.src.trainers.data_adapters.py_dataset_adapter")
 
-
 log_file_path = '../02-data/02-classifier/00-model/tensorflow_rendezvous_logs.txt'
 sys.stderr = open(log_file_path, 'w')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Only capture errors, to avoid excessive logs
@@ -100,5 +99,6 @@ print(f"Test accuracy: {test_acc}")
 # Evaluate the model on test data (using the best saved model)
 best_model = load_model('../02-data/02-classifier/00-model/best_image_classifier.keras')
 test_loss, test_acc = best_model.evaluate(test_generator, verbose=2)
+
 print(f"Test accuracy (best model): {test_acc}")
 model.save('../02-data/02-classifier/00-model/simple_image_classifier.keras')

@@ -51,7 +51,7 @@ def process_nlp(path: str):
 
     for func in preprocess_functions:
         try:
-            result = func(preprocessed_text)
+            result = func( )
             if isinstance(result, str) and result.strip():  # Ensure it's a valid non-empty string
                 preprocessed_text = result
         except Exception as e:

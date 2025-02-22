@@ -4,7 +4,7 @@ import gensim.downloader as api
 from gensim.models import Word2Vec
 
 model = api.load("word2vec-google-news-300")  # Google's 300-dim Word2Vec
-pdfs_dir = "../02-data/01-pdfs/accessories"
+pdfs_dir = "../02-data/00-testing/03-demo/"
 document_vectors = {}
 
 def process_pdf_directory(directory):
@@ -31,4 +31,4 @@ process_pdf_directory(pdfs_dir)
 
 # Print summary
 print(f"Processed {len(document_vectors)} documents.")
-np.save("../02-data/00-testing/vsm1.npy", document_vectors)
+np.save("../02-data/00-testing/vsm2.npy", document_vectors)

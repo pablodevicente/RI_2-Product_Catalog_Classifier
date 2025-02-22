@@ -36,11 +36,11 @@ def pre_filter(image_path, **kwargs):
             aspect_ratio = width / height
 
             if pixel_count < MIN_PIXELS or not (MIN_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO):
-                logger.debug(f"Deleting {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
+                logger.info(f"Deleting {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
                 os.remove(image_path)
                 return True  # Image was deleted
             else:
-                logger.debug(f"Keeping {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
+                logger.info(f"Keeping {image_path} (Pixels: {pixel_count}, Aspect Ratio: {aspect_ratio:.2f})")
                 return False  # Image was kept
     except Exception as e:
         logger.error(f"Error processing {image_path}: {e}")
@@ -164,12 +164,12 @@ def process_images(folder_path, classifier_model, llama_instance, tokenizer_inst
                 logging.info(f"Processing image: {image_path}")
 
                 # Apply pre-filter
-                if not pre_filter(image_path):
+                if pre_filter(image_path):
                     logging.info(f"Image {image_path} failed pre-filter. Skipping.")
                     continue
 
                 # Apply classifier filter
-                if not classifier_filter(image_path, model=classifier_model):
+                if classifier_filter(image_path, model=classifier_model):
                     logging.info(f"Image {image_path} failed classifier filter. Skipping.")
                     continue
 
@@ -185,7 +185,10 @@ def process_images(folder_path, classifier_model, llama_instance, tokenizer_inst
 def main(pdf_path, classifier_model_path, llama_model, prompt_used, max_new_tokens):
     # Load models once
     classifier_model = load_model(classifier_model_path)
-    llama_instance, tokenizer_instance = import_model(llama_model)
+    #llama_instance, tokenizer_instance = import_model(llama_model)
+
+    llama_instance = ""
+    tokenizer_instance = ""
 
     process_images(pdf_path, classifier_model, llama_instance, tokenizer_instance, prompt_used, max_new_tokens)
     logging.info("Finished processing all images with pre-filter, classifier, and LLM")
@@ -194,10 +197,10 @@ def main(pdf_path, classifier_model_path, llama_model, prompt_used, max_new_toke
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process images from a PDF and apply various filters")
     parser.add_argument('--pdf_path', type=str,
-                        default="../02-data/00-testing/03-demo/",
+                        default="../02-data/00-testing/03-demo/ microphones",
                         help="Path to the PDF directory")
     parser.add_argument('--classifier_model_path', type=str,
-                        default="02-data/02-classifier/00-model/best_image_classifier.keras",
+                        default="../02-data/02-classifier/00-model/best_image_classifier.keras",
                         help="Path to the classifier model file")
     parser.add_argument('--llama_model', type=str,
                         default="qresearch/llama-3.1-8B-vision-378",
