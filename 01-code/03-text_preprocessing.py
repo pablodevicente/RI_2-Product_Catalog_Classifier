@@ -51,11 +51,11 @@ def process_nlp(path: str):
 
     for func in preprocess_functions:
         try:
-            result = func( )
+            result = func(preprocessed_text)
             if isinstance(result, str) and result.strip():  # Ensure it's a valid non-empty string
                 preprocessed_text = result
         except Exception as e:
-            logging.debug(f"Skipping {func.__name__} due to error: {e}")
+            logging.info(f"Skipping {func.__name__} due to error: {e}")
 
     try:
         with open(path, "w", encoding="utf-8") as output_file:
