@@ -174,9 +174,9 @@ def process_images(folder_path, classifier_model, llama_instance, tokenizer_inst
                   continue
 
               # Apply classifier filter
-              if classifier_filter(image_path, model=classifier_model):
-                  logging.info(f"Image {image_path} failed classifier filter. Skipping.")
-                  continue
+              # if classifier_filter(image_path, model=classifier_model):
+              #    logging.info(f"Image {image_path} failed classifier filter. Skipping.")
+              #    continue
 
               # Generate description with LLM
               try:
