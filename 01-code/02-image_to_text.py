@@ -10,7 +10,7 @@ from tensorflow.keras.preprocessing import image
 import argparse
 
 # Set up logging configuration
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.info, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Define the minimum pixel threshold and acceptable aspect ratio range
@@ -65,16 +65,16 @@ def classifier_filter(image_path, **kwargs):
 
     # Make prediction
     val = model.predict(X, verbose=0)[0][0]  # Get the scalar value from the output. verbose=0 restricts output
-    logging.debug(f"Prediction value for {image_path}: {val}")
+    logging.info(f"Prediction value for {image_path}: {val}")
 
     # Interpret the prediction based on a threshold (e.g., 0.5)
     if val >= 0.5:
-        logging.debug(f"Image {image_path} is NOT a product (prediction: {val}). Deleting...")
+        logging.info(f"Image {image_path} is NOT a product (prediction: {val}). Deleting...")
         os.remove(image_path)
-        logging.debug(f"Deleted image: {image_path}")
+        logging.info(f"Deleted image: {image_path}")
         return True
     else:
-        logging.debug(f"Image {image_path} is a product (prediction: {val}). Keeping...")
+        logging.info(f"Image {image_path} is a product (prediction: {val}). Keeping...")
         return False
 
 def image_to_llm(image_path, **kwargs):
@@ -140,50 +140,48 @@ def process_images(folder_path, classifier_model, llama_instance, tokenizer_inst
     - prompt (str): Prompt for LLM image description.
     - max_new_tokens (int): Max tokens for LLM output.
     """
-    if not os.path.isdir(folder_path):
-        raise ValueError(f"The provided folder path does not exist: {folder_path}")
 
     for root, _, files in os.walk(folder_path):
-        logging.debug(f"Processing folder: {root}")
+        logging.info(f"Processing folder: {root}")
 
         # Filter only image files
         image_files = [file for file in files if file.lower().endswith(('.jpeg', '.jpg', '.png'))]
 
         # Only proceed if there are images in the folder
         if not image_files:
-            logging.debug(f"No images found in {root}. Skipping file creation.")
+            logging.info(f"No images found in {root}. Skipping file creation.")
             continue  # Skip this folder
 
         # Define the path for the output text file
         file_path = os.path.join(root, "images_to_txt.txt")
-        logging.debug(f"Output file for this folder: {file_path}")
+        logging.info(f"Output file for this folder: {file_path}")
 
         # Open the file once
         with open(file_path, "w") as opened_file:
-            logging.debug(f"Opened file for writing: {file_path}")
+            logging.info(f"Opened file for writing: {file_path}")
 
             for file in image_files:
                 image_path = os.path.join(root, file)
-                logging.debug(f"Processing image: {image_path}")
+                logging.info(f"Processing image: {image_path}")
 
                 # Apply pre-filter
                 if not pre_filter(image_path):
-                    logging.debug(f"Image {image_path} failed pre-filter. Skipping.")
+                    logging.info(f"Image {image_path} failed pre-filter. Skipping.")
                     continue
 
                 # Apply classifier filter
                 if not classifier_filter(image_path, model=classifier_model):
-                    logging.debug(f"Image {image_path} failed classifier filter. Skipping.")
+                    logging.info(f"Image {image_path} failed classifier filter. Skipping.")
                     continue
 
                 # Generate description with LLM
                 try:
                     image_to_llm(image_path, file_handle=opened_file, model=llama_instance, tokenizer=tokenizer_instance, prompt=prompt, max_new_tokens=max_new_tokens)
-                    logging.debug(f"Successfully processed image with LLM: {image_path}")
+                    logging.info(f"Successfully processed image with LLM: {image_path}")
                 except Exception as e:
                     logging.error(f"Error generating LLM description for image {image_path}: {e}")
 
-    logging.debug(f"Finished processing all images in folder: {folder_path}")
+    logging.info(f"Finished processing all images in folder: {folder_path}")
 
 def main(pdf_path, classifier_model_path, llama_model, prompt_used, max_new_tokens):
     # Load models once

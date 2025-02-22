@@ -128,7 +128,7 @@ def process_txt(folder_path):
     if not os.path.isdir(folder_path):
         raise ValueError(f"The provided folder path does not exist: {folder_path}")
 
-    for root, _, files in os.walk(folder_path):
+    for root, files , _ in os.walk(folder_path):
         if {"text.txt", "tables.txt", "images_to_txt.txt"}.issubset(set(files)):
             logging.info(f"Processing folder: {root}")
 
