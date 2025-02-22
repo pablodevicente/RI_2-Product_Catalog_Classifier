@@ -10,7 +10,7 @@ from tensorflow.keras.preprocessing import image
 import argparse
 
 # Set up logging configuration
-logging.basicConfig(level=logging.info, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Define the minimum pixel threshold and acceptable aspect ratio range
@@ -153,12 +153,11 @@ def process_images(folder_path, classifier_model, llama_instance, tokenizer_inst
             continue  # Skip this folder
 
         # Define the path for the output text file
-        file_path = os.path.join(root, "images_to_txt.txt")
-        logging.info(f"Output file for this folder: {file_path}")
+        output_path = os.path.join(root, "images_to_txt.txt")
+        logging.info(f"Output file for this folder: {output_path}")
 
         # Open the file once
-        with open(file_path, "w") as opened_file:
-            logging.info(f"Opened file for writing: {file_path}")
+        with open(output_path, "w") as opened_file:
 
             for file in image_files:
                 image_path = os.path.join(root, file)
@@ -188,7 +187,6 @@ def main(pdf_path, classifier_model_path, llama_model, prompt_used, max_new_toke
     classifier_model = load_model(classifier_model_path)
     llama_instance, tokenizer_instance = import_model(llama_model)
 
-    # Process images with streamlined filtering and description
     process_images(pdf_path, classifier_model, llama_instance, tokenizer_instance, prompt_used, max_new_tokens)
     logging.info("Finished processing all images with pre-filter, classifier, and LLM")
 
@@ -196,7 +194,7 @@ def main(pdf_path, classifier_model_path, llama_model, prompt_used, max_new_toke
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process images from a PDF and apply various filters")
     parser.add_argument('--pdf_path', type=str,
-                        default="/02-data/01-pdfs",
+                        default="../02-data/00-testing/03-demo/",
                         help="Path to the PDF directory")
     parser.add_argument('--classifier_model_path', type=str,
                         default="02-data/02-classifier/00-model/best_image_classifier.keras",
