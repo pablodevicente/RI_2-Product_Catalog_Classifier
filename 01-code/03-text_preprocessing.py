@@ -3,8 +3,11 @@ Using the github repository https://github.com/berknology/text-preprocessing to 
 """
 import os
 import logging
-
 import text_preprocessing as txtp
+
+# Set up logging configuration
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def concat_txt(folder_path):
@@ -75,7 +78,7 @@ def process_nlp(file: str, path: str):
             if isinstance(result, str) and result.strip():  # Ensure it's a valid non-empty string
                 preprocessed_text = result
         except Exception as e:
-            logging.DEBUG(f"Skipping {func.__name__} due to error: {e}")
+            logging.debug(f"Skipping {func.__name__} due to error: {e}")
 
     try:
         with open(path, "w", encoding="utf-8") as output_file:
@@ -138,10 +141,6 @@ def process_txt(folder_path):
                 logging.error(f"Error processing {root}: {e}")
 
 
-# Set up logging configuration
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-pdf_path = "../02-data/01-pdfs/accessories"
+pdf_path = "../02-data/00-testing/03-demo/"
 process_txt(pdf_path)
 #cleanup_txt_files(pdf_path)

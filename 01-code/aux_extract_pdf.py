@@ -327,7 +327,7 @@ def process_pdf(pdf_path,table_processing=False, **kwargs):
         logging.debug("Text extracted and saved successfully.")
 
         # For a small test im not going to process the tables
-        if not table_processing:
+        if table_processing:
             # Step 2: Extract tables and save to tables.txt
             tables_content = extract_tables_from_pdf(pdf, **kwargs)
             tables_output_path = os.path.join(pdf_folder, "tables.txt")

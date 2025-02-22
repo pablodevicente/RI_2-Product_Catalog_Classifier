@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import logging
 from tqdm import tqdm
-from aux_extract_pdf import process_pdf,preload_model,process_label
+from aux_extract_pdf import process_pdf,preload_model
 import argparse
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         "base_path",
         type=str,
         nargs="?",  # Makes the argument optional
-        default="../02-data/00-testing/03-demo/",
+        default="../02-data/00-testing/03-demo",
         help="The base path to the folder containing PDF files."
     )
     args = parser.parse_args()
