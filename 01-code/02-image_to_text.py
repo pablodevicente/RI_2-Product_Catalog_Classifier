@@ -185,10 +185,8 @@ def process_images(folder_path, classifier_model, llama_instance, tokenizer_inst
 def main(pdf_path, classifier_model_path, llama_model, prompt_used, max_new_tokens):
     # Load models once
     classifier_model = load_model(classifier_model_path)
-    #llama_instance, tokenizer_instance = import_model(llama_model)
+    llama_instance, tokenizer_instance = import_model(llama_model)
 
-    llama_instance = ""
-    tokenizer_instance = ""
 
     process_images(pdf_path, classifier_model, llama_instance, tokenizer_instance, prompt_used, max_new_tokens)
     logging.info("Finished processing all images with pre-filter, classifier, and LLM")
