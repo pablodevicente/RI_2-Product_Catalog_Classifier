@@ -4,7 +4,10 @@ import gensim.downloader as api
 import logging
 from gensim.models import Word2Vec
 from gensim.models.word2vec import LineSentence
-from nltk.tokenize import word_tokenize
+from gensim.models import KeyedVectors
+import pickle
+import nltk
+from nltk.tokenize import sent_tokenize, word_tokenize
 
 # Configure logging
 logging.basicConfig(
@@ -16,58 +19,59 @@ logging.basicConfig(
     ]
 )
 
+def build_corpus(text_files_dir):
+    nltk.download('punkt')  # Ensure tokenization models are downloaded
 
-def fine_tune_word2vec(existing_model_path, text_directory, new_model_path, vector_size=300, epochs=10):
-    """
-    Fine-tunes a pre-trained Word2Vec model by adding new words from text files.
+    sents = []  # List to store tokenized sentences
 
-    Args:
-        existing_model_path (str): Path to the pre-trained Word2Vec model.
-        text_directory (str): Directory containing new text files for training.
-        new_model_path (str): Path to save the fine-tuned model.
-        vector_size (int): Dimensionality of word vectors.
-        epochs (int): Number of training epochs.
-
-    Returns:
-        None (Saves the fine-tuned model to `new_model_path`).
-    """
-    logging.info("Loading Google News Word2Vec KeyedVectors...")
-    keyed_vectors = api.load("word2vec-google-news-300")  # Loads non-trainable KeyedVectors
-
-    # Convert KeyedVectors into a trainable Word2Vec model
-    logging.info("Converting KeyedVectors into a trainable Word2Vec model...")
-    model = Word2Vec(vector_size=vector_size, min_count=1)
-    model.build_vocab_from_freq({word: keyed_vectors.get_vecattr(word, "count") for word in keyed_vectors.index_to_key})
-    model.wv = keyed_vectors  # Assign pre-trained vectors
-    model.trainables.syn1neg = model.wv.vectors  # Assign negative sampling weights
-
-    logging.info("Collecting new sentences from text files...")
-    sentences = []
-    for root, _, files in os.walk(text_directory):
+    # Traverse directory and process each text file
+    for root, dirs, files in os.walk(text_files_dir):
         for file in files:
-            if file.endswith(".txt"):
+            if file.endswith(".txt"):  # Adjust as needed
                 file_path = os.path.join(root, file)
+
                 with open(file_path, "r", encoding="utf-8") as f:
                     text = f.read()
-                    tokens = word_tokenize(text.lower())  # Tokenize and lowercase
-                    sentences.append(tokens)
 
-    logging.info(f"Collected {len(sentences)} new sentences.")
+                # Tokenize text into sentences and then into words
+                tokenized_sents = [word_tokenize(sent) for sent in sent_tokenize(text)]
+                sents.extend(tokenized_sents)  # Add to the main list
 
-    # Update vocabulary with new words
-    logging.info("Updating model vocabulary with new words...")
-    model.build_vocab(sentences, update=True)
+    return sents
 
-    # Fine-tune the model
-    logging.info(f"Training the model for {epochs} epochs...")
-    model.train(sentences, total_examples=len(sentences), epochs=epochs)
+def fine_tune_word2vec(text_files_dir,pretrained_model_path, output_path):
 
-    # Save the fine-tuned model
-    logging.info(f"Saving fine-tuned model to {new_model_path}...")
-    model.save(new_model_path)
-    logging.info("Fine-tuning completed successfully.")
+    # build new vocab (from our own data)
+    sentences = build_corpus(text_files_dir)
 
-def process_text_file(txt_path):
+    pretrained_model = KeyedVectors.load_word2vec_format(
+        pretrained_model_path, binary=True)
+    pretrained_vocab = list(pretrained_model.index_to_key)
+
+    # Create new model
+    model = Word2Vec(vector_size=pretrained_model.vector_size)
+    model.build_vocab(sentences)
+    total_examples = model.corpus_count
+    model_vocab = list(model.wv.index_to_key)
+
+    # Load pretrained model's vocabulary.
+    model.build_vocab([pretrained_vocab], update=True)
+
+    # vectors_lockf property is initialize in __init__ method of Word2Vec class.
+    # We are using build_vocab method to update vocabulary of model, so we need initialize vectors_lockf property manually.
+    model.wv.vectors_lockf = np.ones(len(model.wv), dtype=np.float32)
+
+    # load pretrained model's embeddings into model
+    model.wv.intersect_word2vec_format(pretrained_model_path, binary=True)
+
+    model.train(sentences,
+                total_examples=total_examples, epochs=model.epochs)
+
+    model.wv.save_word2vec_format(output_path, binary=True)
+
+
+
+def process_text_file(txt_path,model):
     """
     Reads a text file, tokenizes words, and computes its document vector using Word2Vec.
 
@@ -79,7 +83,7 @@ def process_text_file(txt_path):
                     Returns a zero vector if no words are found.
     """
     if not os.path.exists(txt_path):
-        logging.warning(f"File not found: {txt_path}. Skipping...")
+        logging.warning(f"File not found: {txt_path}, Skipping...")
         return None
 
     try:
@@ -99,45 +103,71 @@ def process_text_file(txt_path):
         return None
 
 
-def process_pdf_directory(directory):
+def process_pdf_directory(directory,model):
     """
     Iterates through a directory, processes text files corresponding to PDF folders,
     and computes document vectors.
 
     Args:
         directory (str): The root directory containing folders with PDFs.
-
+        model : Word2Vec model.
     Returns:
         dict: A dictionary mapping folder paths to their document vectors.
     """
-    document_vectors = {}
 
+
+    corpus_vectors = {}
     logging.info(f"Processing directory: {directory}")
 
     for root, _, _ in os.walk(directory):
-        folder_name = os.path.basename(root)  # Folder name
-        txt_filename = f"{folder_name}.txt"  # Expected text file name
-        txt_path = os.path.join(root, txt_filename)
 
-        doc_vector = process_text_file(txt_path)
+        file_name = os.path.basename(root)
+        txt_filename = os.path.join(root, f"{file_name}.txt")
+
+        doc_vector = process_text_file(txt_filename,model) ## Returns vector for the document
         if doc_vector is not None:
-            document_vectors[root] = doc_vector
+            corpus_vectors[root] = doc_vector
 
-    logging.info(f"Processed {len(document_vectors)} documents successfully.")
-    return document_vectors
+    logging.info(f"Processed {len(corpus_vectors)} documents successfully.")
+    return corpus_vectors
 
 
 if __name__ == "__main__":
-    pdfs_dir = "../02-data/00-testing/03-demo/"
-    output_path = "../02-data/00-testing/vsm2.npy"
 
-    existing_model_path = "word2vec-google-news-300"  # Path to existing model
-    new_model_path = "../02-data/00-testing/word2vec_finetuned.model"  # Path to save the updated model
+    finetune = 0
 
-    fine_tune_word2vec(existing_model_path, pdfs_dir, new_model_path)
+    if finetune == 0: #--------------------------- uses the normal version
 
-    #document_vectors = process_pdf_directory(pdfs_dir)
+        pdfs_dir ='../02-data/00-testing/03-demo/'
 
-    # Save document vectors
-    # np.save(output_path, document_vectors)
-    logging.info(f"Saved document vectors to {output_path}.")
+        output_path = "../02-data/00-testing/word2vec-finetuned-demo.pkl"
+        word2vec_path = "word2vec-google-news-300"
+
+        logging.info("Loading Google News Word2Vec KeyedVectors...")
+        model = api.load(word2vec_path)  # Loads non-trainable KeyedVectors
+
+        # Create VSM from pdfs_dir
+        document_vectors = process_pdf_directory(pdfs_dir,model)
+
+        with open(output_path, "wb") as f:
+            pickle.dump(document_vectors, f)
+        logging.info(f"Saved document vectors to {output_path}.")
+
+    else: #--------------------------- uses the finetuned version
+
+        pdfs_dir = '../02-data/00-testing/03-demo/'
+        text_files_dir = "../02-data/00-testing/03-demo"
+        pretrained_model_path = "../02-data/03-VSM/word2vec-google-news-300.bin"
+        output_path = "../02-data/03-VSM/word2vec_finetuned.bin"
+
+        fine_tune_word2vec(text_files_dir,pretrained_model_path, output_path)
+
+        print("Loading Google News Word2Vec KeyedVectors finetuned...")
+        model = KeyedVectors.load_word2vec_format(output_path, binary=True)
+
+        # Create VSM from pdfs_dir
+        document_vectors = process_pdf_directory(pdfs_dir,model)
+
+        with open(output_path, "wb") as f:
+            pickle.dump(document_vectors, f)
+        logging.info(f"Saved document vectors to {output_path}.")

@@ -12,6 +12,9 @@ import gc
 import os
 import sys
 import warnings
+
+## TRAINS THE CLASSIFIER USED FOR DISCERNING REAL IMAGES TO PROCESS FROM LOGOS OR IRRELEVANT IMAGES
+
 warnings.filterwarnings("ignore", category=UserWarning, module="keras.src.trainers.data_adapters.py_dataset_adapter")
 
 log_file_path = '../02-data/02-classifier/00-model/tensorflow_rendezvous_logs.txt'
