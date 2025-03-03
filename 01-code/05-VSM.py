@@ -70,7 +70,6 @@ def fine_tune_word2vec(text_files_dir,pretrained_model_path, output_path):
     model.wv.save_word2vec_format(output_path, binary=True)
 
 
-
 def process_text_file(txt_path,model):
     """
     Reads a text file, tokenizes words, and computes its document vector using Word2Vec.
@@ -134,7 +133,7 @@ def process_pdf_directory(directory,model):
 
 if __name__ == "__main__":
 
-    finetune = 0
+    finetune = 1
 
     if finetune == 0: #--------------------------- uses the normal version
 
@@ -155,10 +154,9 @@ if __name__ == "__main__":
 
     else: #--------------------------- uses the finetuned version
 
-        pdfs_dir = '../02-data/00-testing/03-demo/'
-        text_files_dir = "../02-data/00-testing/03-demo"
-        pretrained_model_path = "../02-data/03-VSM/word2vec-google-news-300.bin"
-        output_path = "../02-data/03-VSM/word2vec_finetuned.bin"
+        text_files_dir = "../02-data/00-testing/03-demo" # where are the documents located?
+        pretrained_model_path = "../02-data/03-VSM/word2vec-google-news-300.bin" #based model location
+        output_path = "../02-data/03-VSM/word2vec_finetuned.bin" # new model location
 
         fine_tune_word2vec(text_files_dir,pretrained_model_path, output_path)
 
@@ -166,7 +164,7 @@ if __name__ == "__main__":
         model = KeyedVectors.load_word2vec_format(output_path, binary=True)
 
         # Create VSM from pdfs_dir
-        document_vectors = process_pdf_directory(pdfs_dir,model)
+        document_vectors = process_pdf_directory(text_files_dir,model)
 
         with open(output_path, "wb") as f:
             pickle.dump(document_vectors, f)
