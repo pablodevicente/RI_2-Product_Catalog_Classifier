@@ -2,5 +2,5 @@ PyMuPDF
 frontend
 pdfplumber
 logger
-bitsandbytesv
+bitsandbytes
 tensorflow==2.17.0
