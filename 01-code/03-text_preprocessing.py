@@ -4,12 +4,13 @@ Using the github repository https://github.com/berknology/text-preprocessing to 
 import os
 import logging
 import text_preprocessing as txtp
+import re
 
 # Set up logging configuration
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def concat_txt(folder, required_files={"text.txt", "tables.txt", "images_to_txt.txt"}):
+def concat_txt(folder, required_files):
     """Concatenates contents of the found files into a single text file."""
     file_name = os.path.basename(folder)
     output_path = os.path.join(folder, f"{file_name}.txt")
@@ -28,6 +29,40 @@ def keep_alpha_numeric(input_text: str) -> str:
     """ Remove any character except alphanumeric characters and newlines """
     return ''.join(c for c in input_text if c.isalnum() or c in {' ', '\n'})
 
+def remove_isolated_letters(text: str):
+    """
+    Removes isolated single letters from the text.
+
+    Parameters:
+    - text (str): The input text.
+
+    Returns:
+    - str: The cleaned text without single-letter words.
+    """
+    return re.sub(r'\b[a-zA-Z]\b', '', text)  # Removes standalone letters
+
+
+def remove_random_numbers(text: str):
+    """
+    Removes lines that are entirely or mostly numbers while keeping numbers in valid sentences.
+
+    Parameters:
+    - text (str): The input text.
+
+    Returns:
+    - str: The cleaned text without isolated number sequences.
+    """
+    lines = text.split("\n")  # Split text into lines
+
+    filtered_lines = []
+    for line in lines:
+        # Remove if the line is entirely numbers or mostly numbers with spaces
+        if re.fullmatch(r'[\d\s]+', line):  # Matches lines with only digits and spaces
+            continue
+
+        filtered_lines.append(line)  # Keep valid lines
+
+    return "\n".join(filtered_lines)  # Reconstruct text
 
 def process_nlp(path: str):
     """
@@ -40,7 +75,8 @@ def process_nlp(path: str):
     preprocess_functions = [
         txtp.to_lower, keep_alpha_numeric, txtp.remove_email,
         txtp.remove_phone_number, txtp.remove_itemized_bullet_and_numbering,
-        txtp.remove_stopword, txtp.remove_url, txtp.remove_punctuation, txtp.lemmatize_word
+        txtp.remove_stopword, txtp.remove_url, txtp.remove_punctuation, txtp.lemmatize_word,
+        remove_isolated_letters, remove_random_numbers
     ]
 
     if not isinstance(path, str):
@@ -64,31 +100,37 @@ def process_nlp(path: str):
     except Exception as e:
         logging.error(f"Error saving processed text: {e}")
 
-def cleanup_txt_files(folder_path):
+def cleanup_txt_files(concat_file_path, folder_path):
     """
-    Deletes 'text.txt', 'tables.txt', and 'images_to_txt.txt' from each subfolder
-    after they have been concatenated into 'pdf.txt'.
+    Deletes 'text.txt', 'tables.txt', 'images_to_txt.txt' and any '.jpg' or '.png' files
+    from the given folder after they have been concatenated into 'pdf.txt'.
 
     Parameters:
-    - folder_path (str): Path to the root directory containing labeled folders.
+    - concat_file_path (str): Path to the concatenated 'pdf.txt' file.
+    - folder_path (str): Path to the folder containing the files.
     """
-    if not os.path.isdir(folder_path):
-        raise ValueError(f"The provided folder path does not exist: {folder_path}")
+    txt_files_to_delete = ["text.txt", "tables.txt", "images_to_txt.txt"]
 
-    for root, _, files in os.walk(folder_path):
-        txt_files_to_delete = ["text.txt", "tables.txt", "images_to_txt.txt"]
+    if os.path.exists(concat_file_path):
+        # Delete specified text files
+        for txt_filename in txt_files_to_delete:
+            txt_path = os.path.join(folder_path, txt_filename)
+            if os.path.exists(txt_path):
+                try:
+                    os.remove(txt_path)
+                    logging.info(f"Deleted: {txt_path}")
+                except Exception as e:
+                    logging.error(f"Error deleting {txt_path}: {e}")
 
-        # Check if pdf.txt exists before deleting
-        pdf_path = os.path.join(root, "pdf.txt")
-        if os.path.exists(pdf_path):
-            for txt_filename in txt_files_to_delete:
-                txt_path = os.path.join(root, txt_filename)
-                if os.path.exists(txt_path):
-                    try:
-                        os.remove(txt_path)
-                        logging.info(f"Deleted: {txt_path}")
-                    except Exception as e:
-                        logging.error(f"Error deleting {txt_path}: {e}")
+        # Delete any .jpg or .png files
+        for file in os.listdir(folder_path):
+            if file.lower().endswith((".jpg", ".png")):
+                img_path = os.path.join(folder_path, file)
+                try:
+                    os.remove(img_path)
+                    logging.info(f"Deleted image: {img_path}")
+                except Exception as e:
+                    logging.error(f"Error deleting {img_path}: {e}")
 
 
 def process_txt(folder_path):
@@ -97,7 +139,8 @@ def process_txt(folder_path):
     ('text.txt', 'tables.txt', 'images_to_txt.txt'):
 
     1. Calls `concat_txt` to merge them into `pdf.txt`
-    2. Calls `process_nlp_in_place` to clean up `pdf.txt`
+    2. Calls `process_nlp` to clean up `pdf.txt`
+    3. Calls `cleanup_txt_files` to delete intermediate files
 
     Parameters:
     - folder_path (str): Path to the root directory containing label folders.
@@ -106,12 +149,15 @@ def process_txt(folder_path):
         raise ValueError(f"The provided folder path does not exist: {folder_path}")
 
     for root, _, files in os.walk(folder_path):
-        if required_files.intersection(set(files)):  # Check if at least one file is present
+        required_files = {"text.txt", "tables.txt", "images_to_txt.txt"}
+
+        if required_files.intersection(set(files)):
             logging.info(f"Processing folder: {root}")
 
             try:
-                concat_file_path = concat_txt(root)
+                concat_file_path = concat_txt(root, required_files)
                 process_nlp(concat_file_path)
+                cleanup_txt_files(concat_file_path,root)  # Cleanup files in the same directory
                 logging.info(f"Successfully processed {root}")
 
             except Exception as e:
@@ -119,7 +165,5 @@ def process_txt(folder_path):
 
 
 
-required_files = {"text.txt", "tables.txt", "images_to_txt.txt"}
-pdf_path = "../02-data/00-testing/03-demo/"
+pdf_path = "../02-data/00-testing/cable-ties-and-zip-ties/"
 process_txt(pdf_path)
-#cleanup_txt_files(pdf_path)

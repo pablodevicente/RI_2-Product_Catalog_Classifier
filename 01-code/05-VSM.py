@@ -137,9 +137,9 @@ if __name__ == "__main__":
 
     if finetune == 0: #--------------------------- uses the normal version
 
-        pdfs_dir ='../02-data/00-testing/03-demo/'
+        pdfs_dir ='../02-data/00-testing/'
 
-        output_path = "../02-data/00-testing/word2vec-finetuned-demo.pkl"
+        output_path = "../02-data/03-VSM/word2vec-demo-v2.pkl"
         word2vec_path = "word2vec-google-news-300"
 
         logging.info("Loading Google News Word2Vec KeyedVectors...")
@@ -154,18 +154,19 @@ if __name__ == "__main__":
 
     else: #--------------------------- uses the finetuned version
 
-        text_files_dir = "../02-data/00-testing/03-demo" # where are the documents located?
+        text_files_dir = "../02-data/00-testing/" # where are the documents located?
         pretrained_model_path = "../02-data/03-VSM/word2vec-google-news-300.bin" #based model location
-        output_path = "../02-data/03-VSM/word2vec_finetuned.bin" # new model location
+        model_path = "../02-data/03-VSM/word2vec_finetuned-v2.bin" # new model location
+        vsm_path = "../02-data/03-VSM/word2vec-finetuned-demo-v2.pkl"
 
-        fine_tune_word2vec(text_files_dir,pretrained_model_path, output_path)
+        fine_tune_word2vec(text_files_dir,pretrained_model_path, model_path)
 
         print("Loading Google News Word2Vec KeyedVectors finetuned...")
-        model = KeyedVectors.load_word2vec_format(output_path, binary=True)
+        model = KeyedVectors.load_word2vec_format(model_path, binary=True)
 
         # Create VSM from pdfs_dir
         document_vectors = process_pdf_directory(text_files_dir,model)
 
-        with open(output_path, "wb") as f:
+        with open(vsm_path, "wb") as f:
             pickle.dump(document_vectors, f)
-        logging.info(f"Saved document vectors to {output_path}.")
+        logging.info(f"Saved document vectors to {vsm_path}.")
