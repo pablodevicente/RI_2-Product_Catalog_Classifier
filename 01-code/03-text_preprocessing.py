@@ -5,9 +5,10 @@ import os
 import logging
 import text_preprocessing as txtp
 import re
+import argparse
 
 # Set up logging configuration
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def concat_txt(folder, required_files):
@@ -163,7 +164,25 @@ def process_txt(folder_path):
             except Exception as e:
                 logging.error(f"Error processing {root}: {e}")
 
+def main(pdf_dir):
+    if not os.path.isdir(pdf_dir):
+        print(f"Error: {pdf_dir} is not a valid directory.")
+        return
+    
+    for filename in os.listdir(pdf_dir):
+        if filename.endswith(".pdf"):
+            pdf_path = os.path.join(pdf_dir, filename)
+            process_txt(pdf_path)
+            print(f"Processed: {filename}")
 
-
-pdf_path = "../02-data/00-testing/cable-ties-and-zip-ties/"
-process_txt(pdf_path)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Process PDFs and extract text")
+    parser.add_argument(
+        '--pdf_path', 
+        type=str, 
+        default="../02-data/00-testing/03-demo/microphones",  # Removed extra space in the default path
+        help="Path to the directory containing PDF files"
+    )
+    
+    args = parser.parse_args()
+    main(args.pdf_path)
