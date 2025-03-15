@@ -15,7 +15,6 @@ def load_glove_embeddings(file_path):
             embeddings_index[word] = coefs
     return embeddings_index
 
-
 def create_vector_representation(file_path, embeddings_index):
     if not os.path.exists(file_path):
         logging.warning(f"File not found: {file_path}, Skipping...")
@@ -37,40 +36,50 @@ def create_vector_representation(file_path, embeddings_index):
         else:
             return None
 
-
 def load_vectors_pickle(input_path):
     with open(input_path, 'rb') as f:
         return pickle.load(f)  # This will return a dictionary
-
 
 def save_vectors_pickle(vectors_dict, output_path):
     with open(output_path, 'wb') as f:
         pickle.dump(vectors_dict, f)
 
 
-# Example usage
-directory = '../02-data/00-testing/03-demo/'
-glove_file = '../02-data/03-VSM/glove.6B/glove.6B.100d.txt'
-embeddings_index = load_glove_embeddings(glove_file)
+def main():
+    directory = '../02-data/00-testing/03-demo/'  # Input directory containing text files
+    glove_file = '../02-data/03-VSM/02-Glove/glove.6B.100d.txt'  # Path to GloVe embeddings file
+    output_pickle = '../02-data/03-VSM/02-Glove/glove-5.pkl'
 
-logging.info(f"Processing directory: {directory}")
-corpus_vectors = {}
+    # Load GloVe embeddings
+    logging.info("Loading GloVe embeddings...")
+    embeddings_index = load_glove_embeddings(glove_file)
 
-for root, _, _ in os.walk(directory):
+    # Process the directory and create vectors
+    logging.info(f"Processing directory: {directory}")
+    corpus_vectors = {}
 
-    file_name = os.path.basename(root)
-    txt_filename = os.path.join(root, f"{file_name}.txt")
+    for root, _, _ in os.walk(directory):
+        file_name = os.path.basename(root)
+        txt_filename = os.path.join(root, f"{file_name}.txt")
 
-    doc_vector = create_vector_representation(txt_filename, embeddings_index)
+        doc_vector = create_vector_representation(txt_filename, embeddings_index)
 
-    if doc_vector is not None:
-        corpus_vectors[root] = doc_vector  # ✅ Store correctly
-        logging.info(f"Vector representation for {root}: ")
-    else:
-        logging.info(f"No valid GloVe vectors found for {txt_filename}")
+        if doc_vector is not None:
+            corpus_vectors[root] = doc_vector
+            logging.info(f"Vector representation for {root} created successfully.")
+        else:
+            logging.info(f"No valid GloVe vectors found for {txt_filename}")
 
-output_npz = '../02-data/03-VSM/glove-demo.npz'
-output_pickle = '../02-data/03-VSM/glove-demo.pkl'
-save_vectors_pickle(corpus_vectors, output_pickle)
+    # Save vectors to pickle file
+    save_vectors_pickle(corpus_vectors, output_pickle)
 
-logging.info(f"Processed {len(corpus_vectors)} documents successfully.")
+    # Log success message
+    logging.info(f"Processed {len(corpus_vectors)} documents successfully.")
+    logging.info(f"Saved document vectors to {output_pickle}.")
+
+
+if __name__ == "__main__":
+    # Set up logging
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+    main()
