@@ -88,8 +88,8 @@ def main():
 
         # Define input/output paths
         pdfs_dir = "../02-data/00-testing/"
-        word2vec_path = "../02-data/03-VSM/word2vec-google-news-300.bin"
-        vsm_out_path = "../02-data/03-VSM/word2vec-demo-v2.pkl"
+        word2vec_path = "../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"
+        vsm_out_path = "../02-data/03-VSM/01-Word2Vec/word2vec-demo-v2.pkl"
 
         try:
             logging.info("Loading Google News Word2Vec KeyedVectors...")
@@ -104,9 +104,9 @@ def main():
 
         # Define input/output paths for fine-tuning
         pdfs_dir = "../02-data/00-testing/"
-        pretrained_model_path = "../02-data/03-VSM/word2vec-google-news-300.bin"
-        finetuned_model_path = "../02-data/03-VSM/word2vec_finetuned-v2.bin"
-        vsm_out_path = "../02-data/03-VSM/word2vec-finetuned-demo-v2.pkl"
+        pretrained_model_path = "../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"
+        finetuned_model_path = "../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin"
+        vsm_out_path = "../02-data/03-VSM/01-Word2Vec/word2vec-finetuned-demo-v2.pkl"
 
         try:
             logging.info("Fine-tuning Word2Vec model...")
