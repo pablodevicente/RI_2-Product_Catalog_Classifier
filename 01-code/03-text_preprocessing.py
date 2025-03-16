@@ -7,9 +7,6 @@ import text_preprocessing as txtp
 import re
 import argparse
 
-# Set up logging configuration
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
 def concat_txt(folder, required_files):
     """Concatenates contents of the found files into a single text file."""
@@ -146,8 +143,6 @@ def process_txt(folder_path):
     Parameters:
     - folder_path (str): Path to the root directory containing label folders.
     """
-    if not os.path.isdir(folder_path):
-        raise ValueError(f"The provided folder path does not exist: {folder_path}")
 
     for root, _, files in os.walk(folder_path):
         required_files = {"text.txt", "tables.txt", "images_to_txt.txt"}
@@ -164,25 +159,31 @@ def process_txt(folder_path):
             except Exception as e:
                 logging.error(f"Error processing {root}: {e}")
 
+
 def main(pdf_dir):
     if not os.path.isdir(pdf_dir):
-        print(f"Error: {pdf_dir} is not a valid directory.")
+        logging.error(f"{pdf_dir} is not a valid directory.")
         return
-    
-    for filename in os.listdir(pdf_dir):
-        if filename.endswith(".pdf"):
-            pdf_path = os.path.join(pdf_dir, filename)
-            process_txt(pdf_path)
-            print(f"Processed: {filename}")
+
+    for root, _, files in os.walk(pdf_dir):
+        for filename in files:
+            if filename.endswith(".pdf"):
+                pdf_path = os.path.join(root, filename)
+                process_txt(root)
+                logging.info(f"Processed: {pdf_path}")
+
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+    logger = logging.getLogger(__name__)
+
     parser = argparse.ArgumentParser(description="Process PDFs and extract text")
     parser.add_argument(
-        '--pdf_path', 
-        type=str, 
-        default="../02-data/00-testing/03-demo/microphones",  # Removed extra space in the default path
+        '--pdf_path',
+        type=str,
+        default="../02-data/00-testing/batteries-non-rechargable-primary",
         help="Path to the directory containing PDF files"
     )
-    
+
     args = parser.parse_args()
     main(args.pdf_path)
