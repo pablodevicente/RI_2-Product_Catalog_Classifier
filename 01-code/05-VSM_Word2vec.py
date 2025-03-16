@@ -5,18 +5,20 @@ import logging
 from gensim.models import KeyedVectors
 import pickle
 import aux_vsm as aux
+import fasttext
+import fasttext.util
 
-def process_text_file(txt_path,model):
+def process_text_file(txt_path, model):
     """
-    Reads a text file, tokenizes words, and computes its document vector using Word2Vec.
+    Reads a text file, tokenizes words, and computes its document vector using the provided word embedding model.
 
     Args:
         txt_path (str): Path to the text file.
-        model : Model to utilize for vectorization
+        model: A pre-trained word embedding model (FastText or Word2Vec).
 
     Returns:
         np.ndarray: The computed document vector (mean of word embeddings).
-                    Returns a zero vector if no words are found.
+                    Returns None if the file is not found or if an error occurs during processing.
     """
 
     if not os.path.exists(txt_path):
@@ -28,7 +30,10 @@ def process_text_file(txt_path,model):
             words = f.read().split()
 
         # Extract word vectors for words present in the model
-        word_vectors = [model[word] for word in words if word in model]
+        word_vectors = []
+        for word in words:
+            if word in model:
+                word_vectors.append(model[word])
 
         # Compute document vector (mean of word embeddings)
         doc_vector = np.mean(word_vectors, axis=0) if word_vectors else np.zeros(model.vector_size)
@@ -80,16 +85,17 @@ def main():
     """
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+    pdfs_dir = "../02-data/00-testing/"
 
-    finetune = 0  # Set to 0 for pre-trained Word2Vec, 1 for fine-tuning
+    word2vec_path = "../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"
+    finetuned_model_path = "../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin"
 
-    if finetune == 0:
+    vsm_out_path = "../02-data/03-VSM/01-Word2Vec/fasttext-5.pkl"
+
+    model_choice = input("Choose model type (word2vec/fasttext): ").strip().lower()
+
+    if model_choice == "word2vec":
         logging.info("Using pre-trained Google News Word2Vec model.")
-
-        # Define input/output paths
-        pdfs_dir = "../02-data/00-testing/"
-        word2vec_path = "../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"
-        vsm_out_path = "../02-data/03-VSM/01-Word2Vec/word2vec-demo-v2.pkl"
 
         try:
             logging.info("Loading Google News Word2Vec KeyedVectors...")
@@ -99,18 +105,11 @@ def main():
             logging.error(f"Error loading Word2Vec model: {e}")
             return
 
-    else:
+    elif model_choice == "word2vec_finetuned":
         logging.info("Using fine-tuned Word2Vec model.")
-
-        # Define input/output paths for fine-tuning
-        pdfs_dir = "../02-data/00-testing/"
-        pretrained_model_path = "../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"
-        finetuned_model_path = "../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin"
-        vsm_out_path = "../02-data/03-VSM/01-Word2Vec/word2vec-finetuned-demo-v2.pkl"
-
         try:
             logging.info("Fine-tuning Word2Vec model...")
-            aux.fine_tune_word2vec(pdfs_dir, pretrained_model_path, finetuned_model_path)
+            aux.fine_tune_word2vec(pdfs_dir, word2vec_path, finetuned_model_path)
             logging.info("Fine-tuning complete.")
 
             logging.info("Loading fine-tuned Word2Vec model...")
@@ -120,7 +119,19 @@ def main():
             logging.error(f"Error during fine-tuning or model loading: {e}")
             return
 
-    # Process text files and generate document vectors
+    elif model_choice == "fasttext":
+        logging.info("Downloading and loading pre-trained FastText model.")
+        try:
+            fasttext.util.download_model('en', if_exists='ignore')
+            model = fasttext.load_model("cc.en.300.bin")
+            logging.info("FastText model loaded successfully.")
+        except Exception as e:
+            logging.error(f"Error loading FastText model: {e}")
+            return
+    else:
+        logging.error("Invalid model type. Choose either 'word2vec' or 'fasttext'.")
+        return
+
     try:
         logging.info(f"Processing text files in directory: {pdfs_dir}")
         document_vectors = process_pdf_directory(pdfs_dir, model)
