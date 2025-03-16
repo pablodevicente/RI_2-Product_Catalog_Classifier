@@ -122,7 +122,7 @@ def cleanup_txt_files(concat_file_path, folder_path):
 
         # Delete any .jpg or .png files
         for file in os.listdir(folder_path):
-            if file.lower().endswith((".jpg", ".png")):
+            if file.lower().endswith((".jpg", ".png", ".jpeg")):
                 img_path = os.path.join(folder_path, file)
                 try:
                     os.remove(img_path)
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--pdf_path',
         type=str,
-        default="../02-data/00-testing/batteries-non-rechargable-primary",
+        default="../02-data/00-testing/coaxial-cables-rf",
         help="Path to the directory containing PDF files"
     )
 

@@ -90,16 +90,17 @@ def main():
     word2vec_path = "../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"
     finetuned_model_path = "../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin"
 
-    vsm_out_path = "../02-data/03-VSM/01-Word2Vec/fasttext-5.pkl"
+    fasttext_path = "../02-data/03-VSM/03-Fasttext/cc.en.300.bin"
 
-    model_choice = input("Choose model type (word2vec/fasttext): ").strip().lower()
+    vsm_out_path = "../02-data/03-VSM/01-Word2Vec/word2vec-finetuned-50.pkl"
+    model_choice = "word2vec_finetuned"
 
     if model_choice == "word2vec":
         logging.info("Using pre-trained Google News Word2Vec model.")
 
         try:
             logging.info("Loading Google News Word2Vec KeyedVectors...")
-            model = api.load(word2vec_path)  # Loads non-trainable KeyedVectors
+            model = KeyedVectors.load_word2vec_format(word2vec_path, binary=True)  # Correct way to load local model
             logging.info("Word2Vec model loaded successfully.")
         except Exception as e:
             logging.error(f"Error loading Word2Vec model: {e}")
@@ -122,8 +123,14 @@ def main():
     elif model_choice == "fasttext":
         logging.info("Downloading and loading pre-trained FastText model.")
         try:
-            fasttext.util.download_model('en', if_exists='ignore')
-            model = fasttext.load_model("cc.en.300.bin")
+            if not os.path.exists(fasttext_path):
+                logging.info("FastText model not found. Downloading...")
+                fasttext.util.download_model('en', if_exists='ignore')  # Download model
+                os.rename("cc.en.300.bin", fasttext_path)  # Move to desired location
+            else:
+                logging.info("FastText model already exists in memory. Loading...")
+                model = fasttext.load_model(fasttext_path)
+
             logging.info("FastText model loaded successfully.")
         except Exception as e:
             logging.error(f"Error loading FastText model: {e}")
