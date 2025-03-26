@@ -4,7 +4,7 @@ import logging
 import os
 
 # Define the variable for the first part of the path
-base_path = '/02-data/01-pdfs/'
+base_path = '../02-data/01-pdfs/'
 
 # Configure the logger
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
@@ -34,22 +34,12 @@ def download(categories, debug=False):
         save_folder = os.path.join(base_path, label)  # Create save path for each label
         logger.debug(f"Processing label: {label} with {len(urls)} URLs.")
 
-        for url in urls:
-            # Extract the PDF name from the URL
-            pdf_name = os.path.splitext(os.path.basename(url))[0]
-
-            # Create a subfolder for each PDF
-            pdf_folder = os.path.join(save_folder, pdf_name)
-            os.makedirs(pdf_folder, exist_ok=True)  # Ensure the folder exists
-
-            # Define the full path to save the PDF
-            pdf_path = os.path.join(pdf_folder, f"{pdf_name}.pdf")
-
-            # Download the PDF and save it
-            logger.debug(f"Downloading PDF from URL: {url} to {pdf_path}")
-            download_pdfs_from_page(url, pdf_path)
+        # Download the PDF and save it
+        logger.debug(f"Downloading PDF from URL: {urls} to {save_folder}")
+        download_pdfs_from_page(urls, save_folder)
 
     logger.debug("Cleaning corrupted PDFs process initiated.")
+
     for label in categories.keys():
         logger.info(f"Processing corrupted PDFs for label: {label}.")
         save_folder = os.path.join(base_path, label)  # Folder to check for corrupted PDFs
@@ -59,7 +49,7 @@ def download(categories, debug=False):
 if __name__ == "__main__":
 
     # Open the file and read the URLs line by line
-    with open("02-data/urls.txt", "r") as file:
+    with open("../02-data/urls.txt", "r") as file:
         urls = [line.strip() for line in file.readlines() if line.strip()]  # Remove extra spaces and newlines
 
     categories = create_urls(urls)

@@ -11,9 +11,10 @@ import hashlib
 import json
 import magic
 import pandas as pd
+import time
 
 # Configure the logger
-logging.basicConfig(level=logging.ERROR, format='%(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 CACHE_FILE = 'pdf_cache.json'
@@ -46,27 +47,54 @@ def download_pdfs_from_page(urls, save_folder):
     """
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
-        logger.debug(f"Created directory: {save_folder}")
+        logger.info(f"Created directory: {save_folder}")
 
     cache = load_cache()
+
+    skip_all = False
 
     for url in urls:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
-        
+
         try:
             response = requests.get(url, headers=headers)
+
+            # Handle 429 Too Many Requests
+            if response.status_code == 429:
+                retry_after = response.headers.get("Retry-After")
+                wait_time = int(retry_after) if retry_after and retry_after.isdigit() else 60  # Default to 60s
+
+                logger.info(f"Rate limited (429). Waiting {wait_time} seconds before retrying: {url}\n")
+
+                start_time = time.time()
+                while (time.time() - start_time < wait_time) and (skip_all == False):
+                    user_input = input("Press '1' to skip waiting or 2 to skip this batch of links: \n").strip().lower()
+                    if user_input == '1':
+                        break
+                    if user_input == '2':
+                        skip_all = True
+                        logger.info("Skipping all links due to rate limiting.")
+                        break
+                    time.sleep(1)
+                continue
+
             response.raise_for_status()
-            logger.debug(f"Successfully retrieved webpage: {url}")
+            logger.info(f"Successfully retrieved webpage: {url}")
+
         except Exception as e:
-            logger.debug(f"info retrieving webpage: {url}. Exception: {e}")
+            logger.info(f"Info retrieving webpage: {url}. Exception: {e}")
+            continue
+
+        except Exception as e:
+            logger.info(f"Info retrieving webpage: {url}. Exception: {e}")
             continue
 
         soup = BeautifulSoup(response.content, 'html.parser')
         pdf_links = [urljoin(url, link['href']) for link in soup.find_all('a', href=True) if '.pdf' in link['href']]
 
         if not pdf_links:
-            logger.debug(f"No PDFs found on {url}.")
+            logger.info(f"No PDFs found on {url}.")
             continue
 
         total_processed = len(pdf_links)
@@ -78,17 +106,20 @@ def download_pdfs_from_page(urls, save_folder):
                         pdf_content_hash = hash_content(pdf_response.content)
 
                         if cache.get(pdf_link) == pdf_content_hash:
-                            logger.debug(f"PDF {pdf_link} is already up-to-date. Skipping download.")
+                            logger.info(f"PDF {pdf_link} is already up-to-date. Skipping download.")
                         else:
-                            pdf_filename = os.path.join(save_folder, os.path.basename(pdf_link))
+                            pdf_name = os.path.splitext(os.path.basename(pdf_link))[0] #pdf_name1
+                            pdf_folder = os.path.join(save_folder, pdf_name) #"content/label/pdf_name1/"
+                            os.makedirs(pdf_folder, exist_ok=True)  # Ensure the folder exists
+                            pdf_filename = os.path.join(pdf_folder, f"{pdf_name}.pdf") #"content/label/pdf_name1/pdf_name1.pdf"
                             with open(pdf_filename, 'wb') as f:
                                 f.write(pdf_response.content)
                             cache[pdf_link] = pdf_content_hash
-                            logger.debug(f"Successfully downloaded: {pdf_filename}")
+                            logger.info(f"Successfully downloaded: {pdf_filename}")
                     else:
-                        logger.debug(f"Failed to download {pdf_link}. Status code: {pdf_response.status_code}")
+                        logger.info(f"Failed to download {pdf_link}. Status code: {pdf_response.status_code}")
                 except Exception as e:
-                    logger.debug(f"info downloading PDF {pdf_link}: {e}")
+                    logger.info(f"info downloading PDF {pdf_link}: {e}")
                 pbar.update(1)
 
         save_cache(cache)
@@ -108,7 +139,7 @@ def is_pdf_valid(file_path):
         # Use magic to check the actual file type
         mime = magic.from_file(file_path, mime=True)
         if mime != 'application/pdf':
-            logger.debug(f"File '{file_path}' is not a valid PDF, it is '{mime}'")
+            logger.info(f"File '{file_path}' is not a valid PDF, it is '{mime}'")
             return False
         
         # Attempt to open the PDF and check if it has pages
@@ -117,7 +148,7 @@ def is_pdf_valid(file_path):
             doc.close()  # Close the file
             return True
     except Exception as e:
-        logger.debug(f"Invalid PDF '{file_path}': {e}")
+        logger.info(f"Invalid PDF '{file_path}': {e}")
         return False
     return False
 
@@ -132,33 +163,43 @@ def check_pdfs_in_folder(folder_path):
     Returns:
         None
     """
-
-   # Traverse the folder to check for PDF files
     for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
+        file_subfolder = os.path.join(folder_path, filename)  # Create subfolder path
+        file_path = os.path.join(file_subfolder, f"{filename}.pdf")  # Append filename.pdf
 
         # Ignore hidden/system files
         if filename.startswith('.'):
-            logger.debug(f"Skipping hidden/system file: {file_path}")
+            logger.info(f"Skipping hidden/system file: {file_path}")
             continue
 
-        if filename.lower().endswith('.pdf'):  # Only process PDF files
-            # Check if the PDF is valid or invalid
-            if is_pdf_valid(file_path):
-                logger.debug(f"Valid PDF: {file_path}")
-            else:
-                logger.debug(f"Invalid PDF: {file_path} - Deleting file")
-                if os.path.exists(file_path):
-                    os.remove(file_path)  # Delete the invalid PDF
+        # Ensure the subfolder is a directory
+        if not os.path.isdir(file_subfolder):
+            logger.info(f"Skipping non-directory: {file_subfolder}")
+            continue
+
+        try:
+            # List PDF files in the subfolder
+            pdf_files = [f for f in os.listdir(file_subfolder) if f.lower().endswith('.pdf')]
+
+            for pdf in pdf_files:
+                pdf_path = os.path.join(file_subfolder, pdf)
+
+                if is_pdf_valid(pdf_path):  # Validate the PDF
+                    logger.info(f"Valid PDF: {pdf_path}")
                 else:
-                    logger.debug(f"File not found: {file_path}")
-        else:
-            # Delete non-PDF files
-            logger.debug(f"Non-PDF file: {file_path} - Deleting file")
-            if os.path.exists(file_path):
-                os.remove(file_path)  # Delete the non-PDF file
-            else:
-                logger.debug(f"File not found: {file_path}")
+                    logger.warning(f"Invalid PDF: {pdf_path} - Deleting file")
+                    os.remove(pdf_path)
+
+            # Delete non-PDF files in the subfolder
+            for file in os.listdir(file_subfolder):
+                file_path = os.path.join(file_subfolder, file)
+
+                if not file.lower().endswith('.pdf'):  # Remove non-PDF files
+                    logger.warning(f"Non-PDF file: {file_path} - Deleting file")
+                    os.remove(file_path)
+
+        except Exception as e:
+            logger.error(f"Error processing folder {file_subfolder}: {e}")
 
 
 def check_wifi_connection():
@@ -171,10 +212,10 @@ def check_wifi_connection():
     try:
         # Attempt to connect to Google's public DNS server (8.8.8.8) on port 53
         socket.create_connection(("8.8.8.8", 53), timeout=3)
-        logger.debug("Internet connection is active.")
+        logger.info("Internet connection is active.")
         return True
     except OSError:
-        logger.debug("No internet connection detected.")
+        logger.info("No internet connection detected.")
         return False
 
 def create_urls(urls):
@@ -219,7 +260,7 @@ def create_urls(urls):
         new_urls = [base_url + query for query in additional_queries]
 
         # Log the process of creating new URLs
-        logger.debug(f"Generated URLs for label '{label}': {new_urls}")
+        logger.info(f"Generated URLs for label '{label}': {new_urls}")
 
         # Append the URLs to the catalog under the correct label
         if label in catalog:
@@ -235,7 +276,7 @@ def create_urls(urls):
         create_urls_and_append_to_catalog(url, catalog)
 
     # Log the final catalog structure
-    logger.debug(f"Final URL catalog: {catalog}")
+    logger.info(f"Final URL catalog: {catalog}")
     
     return catalog
 
