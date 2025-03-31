@@ -10,8 +10,5 @@ venv/
 # VsCode IDE settings
 .vscode/
 
-# Ignore the 03-model folder
-03-model/
-
 # Ignore __pycache__ folders
 __pycache__/
