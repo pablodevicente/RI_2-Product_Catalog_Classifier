@@ -317,29 +317,31 @@ def process_pdf(pdf_path,table_processing=False, **kwargs):
 
         # Step 0: Open the PDF
         pdf = pdfplumber.open(pdf_path)
+        if pdf.pages < 15:
+            # Step 1: Extract text and save to text.txt
+            text_content = extract_text_from_pdf(pdf)
+            text_output_path = os.path.join(pdf_folder, "text.txt")
+            with open(text_output_path, "w") as text_file:
+                text_file.write(text_content)
 
-        # Step 1: Extract text and save to text.txt
-        text_content = extract_text_from_pdf(pdf)
-        text_output_path = os.path.join(pdf_folder, "text.txt")
-        with open(text_output_path, "w") as text_file:
-            text_file.write(text_content)
+            logging.debug("Text extracted and saved successfully.")
 
-        logging.debug("Text extracted and saved successfully.")
+            # For a small test im not going to process the tables
+            if table_processing:
+                # Step 2: Extract tables and save to tables.txt
+                tables_content = extract_tables_from_pdf(pdf, **kwargs)
+                tables_output_path = os.path.join(pdf_folder, "tables.txt")
+                with open(tables_output_path, "w") as tables_file:
+                    tables_file.write(tables_content)
 
-        # For a small test im not going to process the tables
-        if table_processing:
-            # Step 2: Extract tables and save to tables.txt
-            tables_content = extract_tables_from_pdf(pdf, **kwargs)
-            tables_output_path = os.path.join(pdf_folder, "tables.txt")
-            with open(tables_output_path, "w") as tables_file:
-                tables_file.write(tables_content)
+            logging.debug("Tables extracted and saved successfully.")
 
-        logging.debug("Tables extracted and saved successfully.")
+            # Step 3: Extract and save images
+            extract_images_from_pdf_fitz(pdf_path, pdf_name_without_ext, pdf_folder)
 
-        # Step 3: Extract and save images
-        extract_images_from_pdf_fitz(pdf_path, pdf_name_without_ext, pdf_folder)
-
-        logging.debug("Images extracted and saved successfully.")
+            logging.debug("Images extracted and saved successfully.")
+        else:
+            logging.info(f"Pdf {pdf_name_without_ext} was to big to process (>15 pages)")
 
         pdf.close()
 
