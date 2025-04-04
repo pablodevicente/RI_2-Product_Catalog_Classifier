@@ -48,7 +48,7 @@ def save_vectors_pickle(vectors_dict, output_path):
 def main():
     directory = '../02-data/00-testing/'  # Input directory containing text files
     glove_file = '../02-data/03-VSM/02-Glove/glove.6B/glove.6B.100d.txt'  # Path to GloVe embeddings file
-    output_pickle = '../02-data/03-VSM/02-Glove/glove-50.pkl'
+    output_pickle = '../02-data/03-VSM/02-Glove/glove-5-50.pkl'
 
     # Load GloVe embeddings
     logging.info("Loading GloVe embeddings...")

@@ -153,7 +153,7 @@ def process_txt(folder_path):
             try:
                 concat_file_path = concat_txt(root, required_files)
                 process_nlp(concat_file_path)
-                cleanup_txt_files(concat_file_path,root)  # Cleanup files in the same directory
+                # cleanup_txt_files(concat_file_path,root)  # Cleanup files in the same directory
                 logging.info(f"Successfully processed {root}")
 
             except Exception as e:
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--pdf_path',
         type=str,
-        default="../02-data/00-testing/coaxial-cables-rf",
+        default="../02-data/00-testing/",
         help="Path to the directory containing PDF files"
     )
 

@@ -85,15 +85,14 @@ def main():
     """
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-    pdfs_dir = "../02-data/00-testing/"
+    pdfs_dir = "../02-data/00-testing/" #what pdfs to transcribe
 
-    word2vec_path = "../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"
-    finetuned_model_path = "../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin"
+    word2vec_path = "../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin" #the pretrained word2vec model
+    finetuned_model_path = "../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin" #the finetuned word2vec model
+    fasttext_path = "../02-data/03-VSM/03-Fasttext/cc.en.300.bin" #the pretrained fasttext model
 
-    fasttext_path = "../02-data/03-VSM/03-Fasttext/cc.en.300.bin"
-
-    vsm_out_path = "../02-data/03-VSM/01-Word2Vec/word2vec-finetuned-50.pkl"
-    model_choice = "word2vec_finetuned"
+    model_choice = "fasttext"
+    vsm_out_path = f"../02-data/03-VSM/03-Fasttext/{model_choice}-5-50.pkl" #the resulting VSM name
 
     if model_choice == "word2vec":
         logging.info("Using pre-trained Google News Word2Vec model.")

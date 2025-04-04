@@ -1,0 +1,49 @@
+2025-04-04 13:17:44,890 - INFO - =========== Training with VSM ../02-data/03-VSM/01-Word2Vec/word2vec-5-50.pkl ===========
+2025-04-04 13:17:44,891 - INFO - Class distribution in training set: {0: 42, 1: 32, 2: 34, 3: 38, 4: 26}
+2025-04-04 13:17:44,891 - INFO - Class distribution in test set: {0: 7, 1: 6, 2: 11, 3: 11, 4: 9}
+2025-04-04 13:17:44,895 - INFO - Mean Cosine Similarity in Training Set: 0.7533
+2025-04-04 13:17:44,896 - INFO -  ----------- Training Logistic Regression -----------
+2025-04-04 13:17:45,297 - INFO - Logistic Regression Best Params: {'C': 10, 'max_iter': 500}
+2025-04-04 13:17:45,297 - INFO - Logistic Regression Cross-validation Accuracy: 0.8605 ± 0.0705
+2025-04-04 13:17:45,298 - INFO - Logistic Regression Test Set Accuracy: 0.9545
+2025-04-04 13:17:45,298 - INFO -  ----------- Training SVM -----------
+2025-04-04 13:17:45,502 - INFO - SVM Best Params: {'C': 10, 'kernel': 'rbf'}
+2025-04-04 13:17:45,503 - INFO - SVM Cross-validation Accuracy: 0.8894 ± 0.0125
+2025-04-04 13:17:45,503 - INFO - SVM Test Set Accuracy: 0.9545
+2025-04-04 13:17:45,503 - INFO -  ----------- Training Random Forest -----------
+2025-04-04 13:17:54,414 - INFO - Random Forest Best Params: {'max_depth': 20, 'n_estimators': 50}
+2025-04-04 13:17:54,414 - INFO - Random Forest Cross-validation Accuracy: 0.8543 ± 0.0771
+2025-04-04 13:17:54,414 - INFO - Random Forest Test Set Accuracy: 0.9318
+2025-04-04 13:17:54,415 - INFO - =========== Training with VSM ../02-data/03-VSM/02-Glove/glove-5-50.pkl ===========
+2025-04-04 13:17:54,417 - INFO - Class distribution in training set: {0: 41, 1: 21, 2: 38, 3: 30, 4: 30}
+2025-04-04 13:17:54,417 - INFO - Class distribution in test set: {0: 6, 1: 11, 2: 7, 3: 12, 4: 5}
+2025-04-04 13:17:54,418 - INFO - Mean Cosine Similarity in Training Set: 0.9608
+2025-04-04 13:17:54,418 - INFO -  ----------- Training Logistic Regression -----------
+2025-04-04 13:17:55,198 - INFO - Logistic Regression Best Params: {'C': 10, 'max_iter': 500}
+2025-04-04 13:17:55,198 - INFO - Logistic Regression Cross-validation Accuracy: 0.9250 ± 0.0643
+2025-04-04 13:17:55,198 - INFO - Logistic Regression Test Set Accuracy: 0.9268
+2025-04-04 13:17:55,198 - INFO -  ----------- Training SVM -----------
+2025-04-04 13:17:55,300 - INFO - SVM Best Params: {'C': 10, 'kernel': 'linear'}
+2025-04-04 13:17:55,301 - INFO - SVM Cross-validation Accuracy: 0.9313 ± 0.0306
+2025-04-04 13:17:55,301 - INFO - SVM Test Set Accuracy: 0.9512
+2025-04-04 13:17:55,301 - INFO -  ----------- Training Random Forest -----------
+2025-04-04 13:18:03,023 - INFO - Random Forest Best Params: {'max_depth': 20, 'n_estimators': 50}
+2025-04-04 13:18:03,023 - INFO - Random Forest Cross-validation Accuracy: 0.9000 ± 0.0606
+2025-04-04 13:18:03,023 - INFO - Random Forest Test Set Accuracy: 0.8780
+2025-04-04 13:18:03,025 - INFO - =========== Training with VSM ../02-data/03-VSM/03-Fasttext/fasttext-5-50.pkl ===========
+2025-04-04 13:18:03,025 - INFO - Class distribution in training set: {0: 41, 1: 21, 2: 38, 3: 30, 4: 30}
+2025-04-04 13:18:03,026 - INFO - Class distribution in test set: {0: 6, 1: 11, 2: 7, 3: 12, 4: 5}
+2025-04-04 13:18:03,027 - INFO - Mean Cosine Similarity in Training Set: 0.9010
+2025-04-04 13:18:03,027 - INFO -  ----------- Training Logistic Regression -----------
+2025-04-04 13:18:03,425 - INFO - Logistic Regression Best Params: {'C': 10, 'max_iter': 500}
+2025-04-04 13:18:03,425 - INFO - Logistic Regression Cross-validation Accuracy: 0.7812 ± 0.0559
+2025-04-04 13:18:03,425 - INFO - Logistic Regression Test Set Accuracy: 0.8049
+2025-04-04 13:18:03,425 - INFO -  ----------- Training SVM -----------
+2025-04-04 13:18:03,672 - INFO - SVM Best Params: {'C': 10, 'kernel': 'rbf'}
+2025-04-04 13:18:03,672 - INFO - SVM Cross-validation Accuracy: 0.8875 ± 0.0375
+2025-04-04 13:18:03,672 - INFO - SVM Test Set Accuracy: 0.8780
+2025-04-04 13:18:03,673 - INFO -  ----------- Training Random Forest -----------
+2025-04-04 13:18:13,417 - INFO - Random Forest Best Params: {'max_depth': None, 'n_estimators': 200}
+2025-04-04 13:18:13,418 - INFO - Random Forest Cross-validation Accuracy: 0.9125 ± 0.0306
+2025-04-04 13:18:13,418 - INFO - Random Forest Test Set Accuracy: 0.9268
+2025-04-04 13:18:13,422 - INFO - Results saved to ../02-data/04-Classifier/preeliminary_classification.csv
