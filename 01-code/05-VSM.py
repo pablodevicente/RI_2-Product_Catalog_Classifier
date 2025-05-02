@@ -1,12 +1,17 @@
 import os
 import numpy as np
-import gensim.downloader as api
-import logging
-from gensim.models import KeyedVectors
-import pickle
 import aux_vsm as aux
+import fasttext.util
+import argparse
+import logging
+import pickle
+from pathlib import Path
+from typing import Any, Dict, Union
+
+from gensim.models import KeyedVectors
 import fasttext
 import fasttext.util
+from tqdm import tqdm
 
 def process_text_file(txt_path, model):
     """
@@ -37,7 +42,7 @@ def process_text_file(txt_path, model):
 
         # Compute document vector (mean of word embeddings)
         doc_vector = np.mean(word_vectors, axis=0) if word_vectors else np.zeros(model.vector_size)
-        logging.info(f"Processed: {txt_path} ({len(word_vectors)} valid words)")
+        logging.info(f"Processed: {txt_path} ({len(word_vectors)} valid words)") 
 
         return doc_vector
 
@@ -52,7 +57,7 @@ def process_pdf_directory(directory,model):
 
     Args:
         directory (str): The root directory containing folders with PDFs.
-        model : Word2Vec model.
+        model : A pre-trained word embedding model.
     Returns:
         dict: A dictionary mapping folder paths to their document vectors.
     """
@@ -71,86 +76,156 @@ def process_pdf_directory(directory,model):
     logging.info(f"Processed {len(corpus_vectors)} documents successfully.")
     return corpus_vectors
 
+
+# Configure root logger once
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate document vectors using various embedding models."
+    )
+    parser.add_argument(
+        "--model",
+        choices=["word2vec", "word2vec_finetuned", "fasttext", "glove"],
+        required=True,
+        help="Embedding model to use."
+    )
+    parser.add_argument(
+        "--input-dir",
+        type=Path,
+        default=Path("../02-data/00-testing/"),
+        help="Directory with text files to process."
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path("../02-data/03-VSM/"),
+        help="Base directory for saving vector pickles."
+    )
+    parser.add_argument(
+        "--size",
+        default="4-50-4-150",
+        help="Descriptor tag for output filename."
+    )
+    return parser.parse_args()
+
+
+def ensure_directories(path: Path) -> None:
+    if not path.parent.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def load_word2vec_model(google_path: Path) -> KeyedVectors:
+    logger.info("Loading pre-trained Google News Word2Vec model...")
+    return KeyedVectors.load_word2vec_format(str(google_path), binary=True)
+
+
+def load_finetuned_word2vec(
+    base_dir: Path, google_path: Path, finetuned_path: Path
+) -> KeyedVectors:
+    logger.info("Fine-tuning Word2Vec model...")
+    aux.fine_tune_word2vec(str(base_dir), str(google_path), str(finetuned_path))
+    logger.info("Loading fine-tuned Word2Vec model...")
+    return KeyedVectors.load_word2vec_format(str(finetuned_path), binary=True)
+
+
+def load_fasttext_model(fasttext_path: Path) -> Any:
+    logger.info("Loading FastText model...")
+    if not fasttext_path.exists():
+        fasttext.util.download_model('en', if_exists='ignore')
+        downloaded = Path("cc.en.300.bin")
+        downloaded.rename(fasttext_path)
+    return fasttext.load_model(str(fasttext_path))
+
+
+def load_glove_index(glove_file: Path) -> Dict[str, Any]:
+    logger.info("Loading GloVe embeddings...")
+    return aux.load_glove_embeddings(str(glove_file))
+
+
+def process_with_embedding_model(
+    model: Union[KeyedVectors, Any], input_dir: Path
+) -> Dict[str, Any]:
+    logger.info(f"Processing directory {input_dir} with embedding model...")
+    return process_pdf_directory(str(input_dir), model)
+
+
+def process_with_glove(
+    glove_index: Dict[str, Any], input_dir: Path
+) -> Dict[str, Any]:
+    logger.info(f"Processing directory {input_dir} with GloVe embeddings...")
+    corpus_vectors: Dict[str, Any] = {}
+    for txt_file in tqdm(input_dir.rglob("*.txt")):
+        doc_id = str(txt_file.parent)
+        vector = aux.create_vector_representation(str(txt_file), glove_index)
+        if vector is not None:
+            corpus_vectors[doc_id] = vector
+    return corpus_vectors
+
+
+def save_vectors(vectors: Dict[str, Any], output_path: Path) -> None:
+    ensure_directories(output_path)
+    with open(output_path, 'wb') as f:
+        pickle.dump(vectors, f)
+    logger.info(f"Saved document vectors to {output_path}")
+
+
 def main():
-    """
-    Main function to process document vectors using either a pre-trained or fine-tuned Word2Vec model.
+    args = parse_args()
 
-    The script performs the following:
-    1. If `finetune` is 0, it loads the pre-trained Google News Word2Vec model.
-    2. If `finetune` is 1, it fine-tunes the Word2Vec model using the given text dataset.
-    3. It processes text files and computes document vectors.
-    4. The computed vectors are saved to disk for later use.
+    # Define model-specific paths
+    paths = {
+        'word2vec': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"),
+        'word2vec_finetuned': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"),
+        'fasttext': Path("../02-data/03-VSM/03-Fasttext/cc.en.300.bin"),
+        'glove': Path("../02-data/03-VSM/02-Glove/glove.6B/glove.6B.100d.txt")
+    }
+    finetuned_path = Path(
+        "../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin"
+    )
 
-    Logging is used throughout to track progress and potential issues.
-    """
+    # Determine output pickle path
+    model_dir_map = {
+        'word2vec': '01-Word2Vec',
+        'word2vec_finetuned': '01-Word2Vec',
+        'fasttext': '03-Fasttext',
+        'glove': '02-Glove'
+    }
+    output_file = (
+        args.output_dir
+        / model_dir_map[args.model]
+        / f"{args.model}-{args.size}.pkl"
+    )
 
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-    pdfs_dir = "../02-data/00-testing/" #what pdfs to transcribe
-
-    word2vec_path = "../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin" #the pretrained word2vec model
-    finetuned_model_path = "../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin" #the finetuned word2vec model
-    fasttext_path = "../02-data/03-VSM/03-Fasttext/cc.en.300.bin" #the pretrained fasttext model
-
-    model_choice = "fasttext"
-    vsm_out_path = f"../02-data/03-VSM/03-Fasttext/{model_choice}-5-50.pkl" #the resulting VSM name
-
-    if model_choice == "word2vec":
-        logging.info("Using pre-trained Google News Word2Vec model.")
-
-        try:
-            logging.info("Loading Google News Word2Vec KeyedVectors...")
-            model = KeyedVectors.load_word2vec_format(word2vec_path, binary=True)  # Correct way to load local model
-            logging.info("Word2Vec model loaded successfully.")
-        except Exception as e:
-            logging.error(f"Error loading Word2Vec model: {e}")
-            return
-
-    elif model_choice == "word2vec_finetuned":
-        logging.info("Using fine-tuned Word2Vec model.")
-        try:
-            logging.info("Fine-tuning Word2Vec model...")
-            aux.fine_tune_word2vec(pdfs_dir, word2vec_path, finetuned_model_path)
-            logging.info("Fine-tuning complete.")
-
-            logging.info("Loading fine-tuned Word2Vec model...")
-            model = KeyedVectors.load_word2vec_format(finetuned_model_path, binary=True)
-            logging.info("Fine-tuned Word2Vec model loaded successfully.")
-        except Exception as e:
-            logging.error(f"Error during fine-tuning or model loading: {e}")
-            return
-
-    elif model_choice == "fasttext":
-        logging.info("Downloading and loading pre-trained FastText model.")
-        try:
-            if not os.path.exists(fasttext_path):
-                logging.info("FastText model not found. Downloading...")
-                fasttext.util.download_model('en', if_exists='ignore')  # Download model
-                os.rename("cc.en.300.bin", fasttext_path)  # Move to desired location
-            else:
-                logging.info("FastText model already exists in memory. Loading...")
-                model = fasttext.load_model(fasttext_path)
-
-            logging.info("FastText model loaded successfully.")
-        except Exception as e:
-            logging.error(f"Error loading FastText model: {e}")
-            return
-    else:
-        logging.error("Invalid model type. Choose either 'word2vec' or 'fasttext'.")
-        return
+    # Model loading dispatch
+    loaders = {
+        'word2vec': lambda: load_word2vec_model(paths['word2vec']),
+        'word2vec_finetuned':
+            lambda: load_finetuned_word2vec(args.input_dir, paths['word2vec'], finetuned_path),
+        'fasttext': lambda: load_fasttext_model(paths['fasttext']),
+        'glove': lambda: load_glove_index(paths['glove'])
+    }
 
     try:
-        logging.info(f"Processing text files in directory: {pdfs_dir}")
-        document_vectors = process_pdf_directory(pdfs_dir, model)
-        logging.info(f"Processed {len(document_vectors)} documents successfully.")
-
-        # Save document vectors
-        with open(vsm_out_path, "wb") as f:
-            pickle.dump(document_vectors, f)
-        logging.info(f"Saved document vectors to {vsm_out_path}.")
-
+        model_or_index = loaders[args.model]()
     except Exception as e:
-        logging.error(f"Error during document vector processing: {e}")
+        logger.error(f"Failed to load model: {e}")
+        return
+
+    # Processing dispatch
+    if args.model == 'glove':
+        vectors = process_with_glove(model_or_index, args.input_dir)
+    else:
+        vectors = process_with_embedding_model(model_or_index, args.input_dir)
+
+    # Save results
+    try:
+        save_vectors(vectors, output_file)
+    except Exception as e:
+        logger.error(f"Failed to save vectors: {e}")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
