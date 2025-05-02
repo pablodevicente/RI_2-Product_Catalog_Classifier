@@ -317,7 +317,7 @@ def process_pdf(pdf_path,table_processing=False, **kwargs):
 
         # Step 0: Open the PDF
         pdf = pdfplumber.open(pdf_path)
-        if pdf.pages < 15:
+        if len(pdf.pages) < 15:
             # Step 1: Extract text and save to text.txt
             text_content = extract_text_from_pdf(pdf)
             text_output_path = os.path.join(pdf_folder, "text.txt")
