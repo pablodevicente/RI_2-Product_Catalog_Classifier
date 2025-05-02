@@ -12,6 +12,59 @@ from gensim.models import KeyedVectors
 import fasttext
 import fasttext.util
 from tqdm import tqdm
+from typing import List, Dict, Any
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+
+def fit_tfidf(corpus: List[str]) -> (TfidfVectorizer, Dict[str, float]):
+    """
+    Fit a TfidfVectorizer on the full corpus and return both
+    the fitted vectorizer and a word->idf lookup dict.
+    """
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(corpus)
+    feature_names = vectorizer.get_feature_names_out()
+    idf_values     = vectorizer.idf_
+    idf_dict = {word: idf_values[idx] for idx, word in enumerate(feature_names)}
+    return vectorizer, idf_dict
+
+def tfidf_weighted_avg_embedding(
+    doc_tokens: List[str],
+    model: Any,
+    idf_dict: Dict[str, float],
+    vector_size: int
+) -> np.ndarray:
+    """
+    Compute the TF‑IDF‑weighted average embedding for a single document.
+    - doc_tokens: list of str tokens for this document
+    - model: any embedding model with __getitem__ or .wv[word] interface
+    - idf_dict: word -> idf weight mapping
+    - vector_size: dimensionality of your embeddings
+    """
+    weighted_sum = np.zeros(vector_size, dtype=float)
+    weight_sum   = 0.0
+
+    for word in doc_tokens:
+        # handle both Gensim KeyedVectors and dict-based embeddings
+        try:
+            vec = (
+                model.wv[word]   # for Word2Vec
+                if hasattr(model, "wv")
+                else model[word] # for FastText or glove-index dict
+            )
+        except KeyError:
+            continue
+
+        if word in idf_dict:
+            w = idf_dict[word]
+            weighted_sum += vec * w
+            weight_sum   += w
+
+    if weight_sum > 0:
+        return weighted_sum / weight_sum
+    else:
+        # fallback to zero vector if no overlap
+        return np.zeros(vector_size, dtype=float)
 
 def process_text_file(txt_path, model):
     """
