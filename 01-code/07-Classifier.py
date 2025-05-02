@@ -11,6 +11,10 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics.pairwise import cosine_similarity
 from collections import Counter
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_curve, auc, precision_recall_curve
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score, learning_curve, validation_curve
+
+import matplotlib.pyplot as plt
 
 # Configure logging
 # Configure logging to both console and file
@@ -20,6 +24,35 @@ logging.basicConfig(level=logging.INFO,
                         logging.StreamHandler(),  # Log to console
                         logging.FileHandler("../02-data/04-Classifier/preeliminary_classification.txt")  # Log to file
                     ])
+
+def plot_learning_curve(name, best_model, X_train, y_train):
+    """Plot the learning curve for the classifier."""
+    train_sizes, train_scores, test_scores = learning_curve(best_model, X_train, y_train, cv=5, n_jobs=-1)
+
+    plt.plot(train_sizes, train_scores.mean(axis=1), label='Training score')
+    plt.plot(train_sizes, test_scores.mean(axis=1), label='Test score')
+    plt.xlabel('Training Size')
+    plt.ylabel('Accuracy')
+    plt.title(f'{name} Learning Curve')
+    plt.legend()
+    plt.show()
+
+def plot_validation_curve(name, best_model, X_train, y_train):
+    """Plot the validation curve for the classifier."""
+    if 'C' not in best_model.get_params():
+        logging.warning(f"{'C'} is not a valid parameter for {name}. Skipping validation curve plot.")
+        return
+
+    param_range = [0.1, 1, 10]
+    train_scores, test_scores = validation_curve(best_model, X_train, y_train, param_name='C', param_range=param_range, cv=5)
+
+    plt.plot(param_range, train_scores.mean(axis=1), label='Train score')
+    plt.plot(param_range, test_scores.mean(axis=1), label='Test score')
+    plt.xlabel('C Parameter')
+    plt.ylabel('Accuracy')
+    plt.title(f'{name} Validation Curve')
+    plt.legend()
+    plt.show()
 
 def extract_category(file_path: str) -> str:
     """
@@ -110,12 +143,47 @@ def train_and_evaluate_classifiers(doc_vectors, doc_paths, file_name, results):
         logging.info(f"{name} Cross-validation Accuracy: {cross_val_scores.mean():.4f} ± {cross_val_scores.std():.4f}")
         logging.info(f"{name} Test Set Accuracy: {accuracy:.4f}")
 
-        results.append([file_name, name, grid_search.best_params_, accuracy])
+        # Additional evaluations
+        logging.info(f"{name} Confusion Matrix: \n{confusion_matrix(y_test, y_pred)}")
+        logging.info(
+            f"{name} Classification Report: \n{classification_report(y_test, y_pred, target_names=label_encoder.classes_)}")
+
+        # For ROC AUC (binary classification)
+        if len(np.unique(y)) == 2:
+            fpr, tpr, _ = roc_curve(y_test, y_pred)
+            roc_auc = auc(fpr, tpr)
+            logging.info(f"{name} ROC AUC: {roc_auc:.4f}")
+
+        # Plot learning and validation curves
+        plot_learning_curve(name, best_model, X_train, y_train)
+        plot_validation_curve(name, best_model, X_train, y_train)
+
+        result_record = {
+            "file_name": file_name,
+            "classifier": name,
+            "best_params": grid_search.best_params_,
+            "accuracy": accuracy,
+            "train_class_distribution": dict(sorted(Counter(y_train).items())),
+            "test_class_distribution": dict(sorted(Counter(y_test).items())),
+            "mean_cosine_similarity_train": cosine_similarity(X_train).mean(),
+            "cross_val_accuracy": cross_val_scores.mean(),
+            "cross_val_std": cross_val_scores.std(),
+            "confusion_matrix": confusion_matrix(y_test, y_pred),  # You may convert this if needed.
+            "classification_report": classification_report(
+                y_test, y_pred, target_names=label_encoder.classes_
+            )
+        }
+
+        # Append the flat dictionary to your results list.
+        results.append(result_record)
 
 if __name__ == "__main__":
-    files = ["../02-data/03-VSM/01-Word2Vec/word2vec-5-50.pkl",
-             "../02-data/03-VSM/02-Glove/glove-5-50.pkl",
-             "../02-data/03-VSM/03-Fasttext/fasttext-5-50.pkl"]
+    files = ["../02-data/03-VSM/01-Word2Vec/word2vec-4-50-4-150.pkl",
+             "../02-data/03-VSM/02-Glove/glove-4-50-4-150.pkl",
+             "../02-data/03-VSM/03-Fasttext/fasttext-4-50-4-150.pkl"]
+
+    save_path = "../02-data/04-Classifier/classifiers-4-50-4-150.csv"
+
     results = []
 
     for file_path in files:
@@ -125,7 +193,7 @@ if __name__ == "__main__":
             logging.info(f"=========== Training with VSM {file_path} ===========")
             train_and_evaluate_classifiers(document_vectors, doc_paths, os.path.basename(file_path), results)
 
-    df_results = pd.DataFrame(results, columns=["File", "Classifier", "Best Parameters", "Accuracy"])
-    save_path = "../02-data/04-Classifier/preeliminary_classification.csv"
+    df_results = pd.DataFrame(results)
     df_results.to_csv(save_path, index=False)
     logging.info(f"Results saved to {save_path}")
+
