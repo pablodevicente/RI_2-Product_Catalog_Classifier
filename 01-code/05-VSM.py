@@ -12,119 +12,63 @@ from gensim.models import KeyedVectors
 import fasttext
 import fasttext.util
 from tqdm import tqdm
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-
-def fit_tfidf(corpus: List[str]) -> (TfidfVectorizer, Dict[str, float]):
-    """
-    Fit a TfidfVectorizer on the full corpus and return both
-    the fitted vectorizer and a word->idf lookup dict.
-    """
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(corpus)
-    feature_names = vectorizer.get_feature_names_out()
-    idf_values     = vectorizer.idf_
-    idf_dict = {word: idf_values[idx] for idx, word in enumerate(feature_names)}
-    return vectorizer, idf_dict
-
-def tfidf_weighted_avg_embedding(
-    doc_tokens: List[str],
-    model: Any,
-    idf_dict: Dict[str, float],
-    vector_size: int
-) -> np.ndarray:
-    """
-    Compute the TF‑IDF‑weighted average embedding for a single document.
-    - doc_tokens: list of str tokens for this document
-    - model: any embedding model with __getitem__ or .wv[word] interface
-    - idf_dict: word -> idf weight mapping
-    - vector_size: dimensionality of your embeddings
-    """
-    weighted_sum = np.zeros(vector_size, dtype=float)
-    weight_sum   = 0.0
-
-    for word in doc_tokens:
-        # handle both Gensim KeyedVectors and dict-based embeddings
-        try:
-            vec = (
-                model.wv[word]   # for Word2Vec
-                if hasattr(model, "wv")
-                else model[word] # for FastText or glove-index dict
-            )
-        except KeyError:
-            continue
-
-        if word in idf_dict:
-            w = idf_dict[word]
-            weighted_sum += vec * w
-            weight_sum   += w
-
-    if weight_sum > 0:
-        return weighted_sum / weight_sum
-    else:
-        # fallback to zero vector if no overlap
-        return np.zeros(vector_size, dtype=float)
-
-def process_text_file(txt_path, model):
-    """
-    Reads a text file, tokenizes words, and computes its document vector using the provided word embedding model.
-
-    Args:
-        txt_path (str): Path to the text file.
-        model: A pre-trained word embedding model (FastText or Word2Vec).
-
-    Returns:
-        np.ndarray: The computed document vector (mean of word embeddings).
-                    Returns None if the file is not found or if an error occurs during processing.
-    """
-
-    if not os.path.exists(txt_path):
-        logging.warning(f"File not found: {txt_path}, Skipping...")
-        return None
-
-    try:
-        with open(txt_path, "r", encoding="utf-8") as f:
-            words = f.read().split()
-
-        # Extract word vectors for words present in the model
-        word_vectors = []
-        for word in words:
-            if word in model:
-                word_vectors.append(model[word])
-
-        # Compute document vector (mean of word embeddings)
-        doc_vector = np.mean(word_vectors, axis=0) if word_vectors else np.zeros(model.vector_size)
-        logging.info(f"Processed: {txt_path} ({len(word_vectors)} valid words)") 
-
-        return doc_vector
-
-    except Exception as e:
-        logging.error(f"Error processing {txt_path}: {e}")
-        return None
-
-def process_pdf_directory(directory,model):
+def process_pdf_directory(
+        directory: str,
+        model: Any,
+        tokenize_fn: callable,
+        vector_size: int
+) -> Dict[str, Any]:
     """
     Iterates through a directory, processes text files corresponding to PDF folders,
-    and computes document vectors.
+    and computes TF‑IDF‑weighted document vectors.
 
     Args:
         directory (str): The root directory containing folders with PDFs.
-        model : A pre-trained word embedding model.
+        model:        A pre-trained word embedding model or glove-index dict.
+        tokenize_fn:  Function that takes raw text and returns a list of tokens.
+        vector_size:  Dimensionality of the embedding vectors.
+
     Returns:
-        dict: A dictionary mapping folder paths to their document vectors.
+        dict: A mapping from folder paths to their TF‑IDF‑weighted document vectors.
     """
-    corpus_vectors = {}
-    logging.info(f"Processing directory: {directory}")
+    logging.info(f"Scanning directory for corpus: {directory}")
+
+    # 1. Gather all documents for TF‑IDF fitting
+    all_texts: List[str] = []
+    doc_paths: List[Tuple[str, str]] = []  # (doc_id, txt_path)
 
     for root, _, _ in os.walk(directory):
-
         file_name = os.path.basename(root)
-        txt_filename = os.path.join(root, f"{file_name}.txt")
+        txt_path = os.path.join(root, f"{file_name}.txt")
+        if os.path.isfile(txt_path):
+            with open(txt_path, 'r', encoding='utf-8') as f:
+                text = f.read()
+            all_texts.append(text)
+            doc_paths.append((root, txt_path))
 
-        doc_vector = process_text_file(txt_filename,model) ## Returns vector for the document
-        if doc_vector is not None:
-            corpus_vectors[root] = doc_vector
+    # 2. Fit TF‑IDF on the entire corpus
+    logging.info("Fitting TF‑IDF vectorizer on the corpus...")
+    _, idf_dict = aux.fit_tfidf(all_texts)
+
+    # 3. Compute TF‑IDF‑weighted embeddings per document
+    corpus_vectors: Dict[str, Any] = {}
+    logging.info("Computing TF‑IDF‑weighted embeddings for each document...")
+
+    for doc_id, txt_path in doc_paths:
+        with open(txt_path, 'r', encoding='utf-8') as f:
+            raw_text = f.read()
+        tokens = tokenize_fn(raw_text)
+
+        vec = aux.tfidf_weighted_avg_embedding(
+            doc_tokens=tokens,
+            model=model,
+            idf_dict=idf_dict,
+            vector_size=vector_size
+        )
+        corpus_vectors[doc_id] = vec
 
     logging.info(f"Processed {len(corpus_vectors)} documents successfully.")
     return corpus_vectors
@@ -202,7 +146,8 @@ def process_with_embedding_model(
     model: Union[KeyedVectors, Any], input_dir: Path
 ) -> Dict[str, Any]:
     logger.info(f"Processing directory {input_dir} with embedding model...")
-    return process_pdf_directory(str(input_dir), model)
+
+    return process_pdf_directory(str(input_dir), model, aux.simple_tokenize, model.vector_size)
 
 
 def process_with_glove(

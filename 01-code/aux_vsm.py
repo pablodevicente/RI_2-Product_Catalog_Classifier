@@ -5,6 +5,9 @@ from gensim.models import KeyedVectors
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 import pickle
+from sklearn.feature_extraction.text import TfidfVectorizer
+from typing import List, Dict, Any
+from pathlib import Path
 
 def build_corpus(text_files_dir):
     nltk.download('punkt')  # Ensure tokenization models are downloaded
@@ -94,3 +97,95 @@ def load_vectors_pickle(input_path):
 def save_vectors_pickle(vectors_dict, output_path):
     with open(output_path, 'wb') as f:
         pickle.dump(vectors_dict, f)
+
+
+## tf-idf functions
+
+def load_all_texts(input_dir: Path):
+    """
+    Loads all .txt files from the given directory and its subdirectories.
+
+    Args:
+        input_dir (Path): The root directory containing subfolders with .txt files.
+
+    Returns:
+        List[Tuple[str, str]]: A list of tuples where each tuple is (file_path, file_content).
+    """
+    text_data = []
+    for txt_path in input_dir.rglob("*.txt"):
+        try:
+            with open(txt_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                text_data.append((str(txt_path), content))
+        except Exception as e:
+            print(f"Failed to read {txt_path}: {e}")
+
+    return text_data
+
+def fit_tfidf(corpus: List[str]) -> (TfidfVectorizer, Dict[str, float]):
+    """
+    Fit a TfidfVectorizer on the full corpus and return both
+    the fitted vectorizer and a word->idf lookup dict.
+    """
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(corpus)
+    feature_names = vectorizer.get_feature_names_out()
+    idf_values     = vectorizer.idf_
+    idf_dict = {word: idf_values[idx] for idx, word in enumerate(feature_names)}
+    return vectorizer, idf_dict
+
+def tfidf_weighted_avg_embedding(
+    doc_tokens: List[str],
+    model: Any,
+    idf_dict: Dict[str, float],
+    vector_size: int
+) -> np.ndarray:
+    """
+    Compute the TF‑IDF‑weighted average embedding for a single document.
+    - doc_tokens: list of str tokens for this document
+    - model: any embedding model with __getitem__ or .wv[word] interface
+    - idf_dict: word -> idf weight mapping
+    - vector_size: dimensionality of your embeddings
+    """
+    weighted_sum = np.zeros(vector_size, dtype=float)
+    weight_sum   = 0.0
+
+    for word in doc_tokens:
+        # handle both Gensim KeyedVectors and dict-based embeddings
+        try:
+            vec = (
+                model.wv[word]   # for Word2Vec
+                if hasattr(model, "wv")
+                else model[word] # for FastText or glove-index dict
+            )
+        except KeyError:
+            continue
+
+        if word in idf_dict:
+            w = idf_dict[word]
+            weighted_sum += vec * w
+            weight_sum   += w
+
+    if weight_sum > 0:
+        return weighted_sum / weight_sum
+    else:
+        # fallback to zero vector if no overlap
+        return np.zeros(vector_size, dtype=float)
+
+def simple_tokenize(text: str) -> List[str]:
+    """
+    Tokenizes input text into a list of lowercase words, stripping punctuation.
+
+    Args:
+        text (str): The raw text input.
+
+    Returns:
+        List[str]: List of clean tokens.
+    """
+    from nltk.tokenize import word_tokenize
+
+    tokens = word_tokenize(text)  # handles punctuation and contractions
+    # Remove punctuation and lower-case the tokens
+    tokens = [token.lower() for token in tokens if token.isalpha()]
+
+    return tokens
