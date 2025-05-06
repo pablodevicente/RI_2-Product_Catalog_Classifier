@@ -10,36 +10,64 @@ from typing import Any, Dict, Union
 
 from gensim.models import KeyedVectors
 import fasttext
-import fasttext.util
 from tqdm import tqdm
 from typing import List, Dict, Any, Tuple
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+def get_or_build_idf(
+    texts: List[str],
+    cache_path: str
+) -> Dict[str, float]:
+    """
+    Returns an IDF dictionary, either by loading it from cache_path
+    or by fitting on the provided texts and then caching it.
+
+    Args:
+        texts (List[str]): The corpus of raw documents.
+        cache_path (str): Path to load/save the IDF dict.
+
+    Returns:
+        Dict[str, float]: Mapping from term to inverse document frequency.
+    """
+    if os.path.exists(cache_path):
+        logging.info(f"Loading cached IDF dictionary from {cache_path}...")
+        with open(cache_path, "rb") as f:
+            idf_dict = pickle.load(f)
+    else:
+        logging.info("Fitting TF‑IDF vectorizer on the corpus...")
+        _, idf_dict = aux.fit_tfidf(texts)
+        logging.info(f"Caching IDF dictionary to {cache_path}...")
+        with open(cache_path, "wb") as f:
+            pickle.dump(idf_dict, f)
+    return idf_dict
+
+
 def process_pdf_directory(
-        directory: str,
-        model: Any,
-        tokenize_fn: callable,
-        vector_size: int
-) -> Dict[str, Any]:
+    directory: str,
+    model: Any,
+    idf_cache_path: str,
+    tokenize_fn: callable,
+    vector_size: int,
+) -> Dict[str, np.ndarray]:
     """
     Iterates through a directory, processes text files corresponding to PDF folders,
-    and computes TF‑IDF‑weighted document vectors.
+    and computes TF‑IDF‑weighted document vectors using a shared IDF.
 
     Args:
         directory (str): The root directory containing folders with PDFs.
-        model:        A pre-trained word embedding model or glove-index dict.
-        tokenize_fn:  Function that takes raw text and returns a list of tokens.
-        vector_size:  Dimensionality of the embedding vectors.
+        model: A pre-trained word embedding model or glove-index dict.
+        tokenize_fn: Function that takes raw text and returns a list of tokens.
+        vector_size: Dimensionality of the embedding vectors.
+        idf_cache_path (str): Path to load/save the IDF dictionary.
 
     Returns:
-        dict: A mapping from folder paths to their TF‑IDF‑weighted document vectors.
+        Dict[str, np.ndarray]: Mapping from folder paths (doc IDs) to their TF‑IDF‑weighted vectors.
     """
     logging.info(f"Scanning directory for corpus: {directory}")
 
     # 1. Gather all documents for TF‑IDF fitting
     all_texts: List[str] = []
     doc_paths: List[Tuple[str, str]] = []  # (doc_id, txt_path)
-
     for root, _, _ in os.walk(directory):
         file_name = os.path.basename(root)
         txt_path = os.path.join(root, f"{file_name}.txt")
@@ -49,14 +77,12 @@ def process_pdf_directory(
             all_texts.append(text)
             doc_paths.append((root, txt_path))
 
-    # 2. Fit TF‑IDF on the entire corpus
-    logging.info("Fitting TF‑IDF vectorizer on the corpus...")
-    _, idf_dict = aux.fit_tfidf(all_texts)
+    # 2. Build or load IDF dictionary
+    idf_dict = get_or_build_idf(all_texts, idf_cache_path)
 
     # 3. Compute TF‑IDF‑weighted embeddings per document
-    corpus_vectors: Dict[str, Any] = {}
+    corpus_vectors: Dict[str, np.ndarray] = {}
     logging.info("Computing TF‑IDF‑weighted embeddings for each document...")
-
     for doc_id, txt_path in doc_paths:
         with open(txt_path, 'r', encoding='utf-8') as f:
             raw_text = f.read()
@@ -72,6 +98,35 @@ def process_pdf_directory(
 
     logging.info(f"Processed {len(corpus_vectors)} documents successfully.")
     return corpus_vectors
+
+def process_with_embedding_model(
+    model: Union[KeyedVectors, Any], input_dir: Path, idf_cache_path : Path
+) -> Dict[str, Any]:
+    logging.info(f"Processing directory {input_dir} with embedding model...")
+
+    return process_pdf_directory(str(input_dir), model, str(idf_cache_path), aux.simple_tokenize, model.vector_size)
+
+
+
+def process_with_glove(
+    glove_index: Dict[str, Any], input_dir: Path
+) -> Dict[str, Any]:
+    logging.info(f"Processing directory {input_dir} with GloVe embeddings...")
+    corpus_vectors: Dict[str, Any] = {}
+    for txt_file in tqdm(input_dir.rglob("*.txt")):
+        doc_id = str(txt_file.parent)
+        vector = aux.create_vector_representation(str(txt_file), glove_index)
+        if vector is not None:
+            corpus_vectors[doc_id] = vector
+    return corpus_vectors
+
+
+def save_vectors(vectors: Dict[str, Any], output_path: Path) -> None:
+    ensure_directories(output_path)
+    with open(output_path, 'wb') as f:
+        pickle.dump(vectors, f)
+    logging.info(f"Saved document vectors to {output_path}")
+
 
 
 # Configure root logger once
@@ -113,63 +168,6 @@ def ensure_directories(path: Path) -> None:
     if not path.parent.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
 
-
-def load_word2vec_model(google_path: Path) -> KeyedVectors:
-    logger.info("Loading pre-trained Google News Word2Vec model...")
-    return KeyedVectors.load_word2vec_format(str(google_path), binary=True)
-
-
-def load_finetuned_word2vec(
-    base_dir: Path, google_path: Path, finetuned_path: Path
-) -> KeyedVectors:
-    logger.info("Fine-tuning Word2Vec model...")
-    aux.fine_tune_word2vec(str(base_dir), str(google_path), str(finetuned_path))
-    logger.info("Loading fine-tuned Word2Vec model...")
-    return KeyedVectors.load_word2vec_format(str(finetuned_path), binary=True)
-
-
-def load_fasttext_model(fasttext_path: Path) -> Any:
-    logger.info("Loading FastText model...")
-    if not fasttext_path.exists():
-        fasttext.util.download_model('en', if_exists='ignore')
-        downloaded = Path("cc.en.300.bin")
-        downloaded.rename(fasttext_path)
-    return fasttext.load_model(str(fasttext_path))
-
-
-def load_glove_index(glove_file: Path) -> Dict[str, Any]:
-    logger.info("Loading GloVe embeddings...")
-    return aux.load_glove_embeddings(str(glove_file))
-
-
-def process_with_embedding_model(
-    model: Union[KeyedVectors, Any], input_dir: Path
-) -> Dict[str, Any]:
-    logger.info(f"Processing directory {input_dir} with embedding model...")
-
-    return process_pdf_directory(str(input_dir), model, aux.simple_tokenize, model.vector_size)
-
-
-def process_with_glove(
-    glove_index: Dict[str, Any], input_dir: Path
-) -> Dict[str, Any]:
-    logger.info(f"Processing directory {input_dir} with GloVe embeddings...")
-    corpus_vectors: Dict[str, Any] = {}
-    for txt_file in tqdm(input_dir.rglob("*.txt")):
-        doc_id = str(txt_file.parent)
-        vector = aux.create_vector_representation(str(txt_file), glove_index)
-        if vector is not None:
-            corpus_vectors[doc_id] = vector
-    return corpus_vectors
-
-
-def save_vectors(vectors: Dict[str, Any], output_path: Path) -> None:
-    ensure_directories(output_path)
-    with open(output_path, 'wb') as f:
-        pickle.dump(vectors, f)
-    logger.info(f"Saved document vectors to {output_path}")
-
-
 def main():
     args = parse_args()
 
@@ -178,7 +176,8 @@ def main():
         'word2vec': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"),
         'word2vec_finetuned': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"),
         'fasttext': Path("../02-data/03-VSM/03-Fasttext/cc.en.300.bin"),
-        'glove': Path("../02-data/03-VSM/02-Glove/glove.6B/glove.6B.100d.txt")
+        'glove': Path("../02-data/03-VSM/02-Glove/glove.6B/glove.6B.100d.txt"),
+        'idf_cache' : Path("../02-data/03-VSM/idf_cache_path.pkl")
     }
     finetuned_path = Path(
         "../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin"
@@ -199,11 +198,11 @@ def main():
 
     # Model loading dispatch
     loaders = {
-        'word2vec': lambda: load_word2vec_model(paths['word2vec']),
+        'word2vec': lambda: aux.load_word2vec_model(paths['word2vec']),
         'word2vec_finetuned':
-            lambda: load_finetuned_word2vec(args.input_dir, paths['word2vec'], finetuned_path),
-        'fasttext': lambda: load_fasttext_model(paths['fasttext']),
-        'glove': lambda: load_glove_index(paths['glove'])
+            lambda: aux.load_finetuned_word2vec(args.input_dir, paths['word2vec'], finetuned_path),
+        'fasttext': lambda: aux.load_fasttext_model(paths['fasttext']),
+        'glove': lambda: aux.load_glove_index(paths['glove'])
     }
 
     try:
@@ -216,7 +215,7 @@ def main():
     if args.model == 'glove':
         vectors = process_with_glove(model_or_index, args.input_dir)
     else:
-        vectors = process_with_embedding_model(model_or_index, args.input_dir)
+        vectors = process_with_embedding_model(model_or_index, args.input_dir, paths['idf_cache'])
 
     # Save results
     try:

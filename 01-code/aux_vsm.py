@@ -8,6 +8,38 @@ import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 from typing import List, Dict, Any
 from pathlib import Path
+import logging
+from typing import Any, Dict, Union
+import fasttext.util
+
+
+def get_or_build_idf(
+    texts: List[str],
+    cache_path: str
+) -> Dict[str, float]:
+    """
+    Returns an IDF dictionary, either by loading it from cache_path
+    or by fitting on the provided texts and then caching it.
+
+    Args:
+        texts (List[str]): The corpus of raw documents.
+        cache_path (str): Path to load/save the IDF dict.
+
+    Returns:
+        Dict[str, float]: Mapping from term to inverse document frequency.
+    """
+    if os.path.exists(cache_path):
+        logging.info(f"Loading cached IDF dictionary from {cache_path}...")
+        with open(cache_path, "rb") as f:
+            idf_dict = pickle.load(f)
+    else:
+        logging.info("Fitting TF‑IDF vectorizer on the corpus...")
+        _, idf_dict = fit_tfidf(texts)
+        logging.info(f"Caching IDF dictionary to {cache_path}...")
+        with open(cache_path, "wb") as f:
+            pickle.dump(idf_dict, f)
+    return idf_dict
+
 
 def build_corpus(text_files_dir):
     nltk.download('punkt')  # Ensure tokenization models are downloaded
@@ -189,3 +221,36 @@ def simple_tokenize(text: str) -> List[str]:
     tokens = [token.lower() for token in tokens if token.isalpha()]
 
     return tokens
+
+
+
+##############DATA LOADERS###############
+
+
+
+def load_word2vec_model(google_path: Path) -> KeyedVectors:
+    logging.info("Loading pre-trained Google News Word2Vec model...")
+    return KeyedVectors.load_word2vec_format(str(google_path), binary=True)
+
+def load_finetuned_word2vec(
+    base_dir: Path, google_path: Path, finetuned_path: Path
+) -> KeyedVectors:
+    logging.info("Fine-tuning Word2Vec model...")
+    fine_tune_word2vec(str(base_dir), str(google_path), str(finetuned_path))
+    logging.info("Loading fine-tuned Word2Vec model...")
+    return KeyedVectors.load_word2vec_format(str(finetuned_path), binary=True)
+
+
+def load_fasttext_model(fasttext_path: Path) -> Any:
+    logging.info("Loading FastText model...")
+    if not fasttext_path.exists():
+        fasttext.util.download_model('en', if_exists='ignore')
+        downloaded = Path("cc.en.300.bin")
+        downloaded.rename(fasttext_path)
+    return fasttext.load_model(str(fasttext_path))
+
+
+def load_glove_index(glove_file: Path) -> Dict[str, Any]:
+    logging.info("Loading GloVe embeddings...")
+    return load_glove_embeddings(str(glove_file))
+
