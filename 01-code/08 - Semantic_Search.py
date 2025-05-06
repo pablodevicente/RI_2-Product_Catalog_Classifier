@@ -6,27 +6,28 @@ import argparse
 import logging
 import pickle
 from pathlib import Path
-from typing import Any, Dict, Union
 from typing import Any, Callable, Dict, List, Union
 import numpy as np
 from gensim.models import KeyedVectors
 from pathlib import Path
 import logging
+from sklearn.metrics.pairwise import cosine_similarity
 
 logger = logging.getLogger(__name__)
 from gensim.models import KeyedVectors
 import fasttext
 import fasttext.util
-from tqdm import tqdm
 from typing import List, Dict, Any, Tuple
-from sklearn.feature_extraction.text import TfidfVectorizer
-from typing import Any, Dict, Union
+# Split text into sentences (you can use nltk or a basic split)
+import nltk
 
+nltk.download('punkt')
+from nltk.tokenize import sent_tokenize
 
 def embed_query(
     model,
     query: str,
-    idf_cache: ,
+    idf_cached:  Dict[str, float],
     tokenize_fn,
     topn_synonyms: int = 10,
     min_sim: float = 0.65,
@@ -40,10 +41,7 @@ def embed_query(
 
     Returns a dict containing the original query and its vector.
     """
-    # 1. Load IDF cache and model vector_size
     vector_size = model.vector_size
-
-    # 2. Tokenize
     tokens = tokenize_fn(query)
 
     # 3. Gather and filter synonyms for each token
@@ -51,7 +49,7 @@ def embed_query(
     for t in tokens:
         try:
             sims = model.most_similar(t, topn=topn_synonyms)
-            filtered = filter_expansion_candidates(sims, idf_dict, min_sim, min_idf)
+            filtered = filter_expansion_candidates(sims, idf_cached, min_sim, min_idf)
             expansions.extend(filtered)
         except KeyError:
             continue
@@ -63,7 +61,7 @@ def embed_query(
     vector = aux.tfidf_weighted_avg_embedding(
         doc_tokens=all_tokens,
         model=model,
-        idf_dict=idf_dict,
+        idf_dict=idf_cached,
         vector_size=vector_size
     )
 
@@ -100,8 +98,6 @@ def filter_expansion_candidates(
     return filtered_terms
 
 
-
-
 def retrieve_top_k_documents(
     query_vector: np.ndarray,
     corpus_vectors: Dict[str, np.ndarray],
@@ -127,27 +123,40 @@ def retrieve_top_k_documents(
     return [(doc_ids[i], similarities[i]) for i in top_indices]
 
 
-
 # Configure root logger once
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     paths = {
-        'word2vec': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin")
-        'idf_cache': Path("../02-data/03-VSM/idf_cache_path.pkl")
-        'file' : Path("../02-data/00-testing/batteries-non-rechargable-primary/1cr2")
+        'word2vec': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"),
+        'idf_cache': Path("../02-data/03-VSM/idf_cache_path.pkl"),
+        'file' : Path("../02-data/00-testing/batteries-non-rechargable-primary/1cr2/1cr2.txt"),
+        'output_path' : Path("../02-data/00-testing/batteries-non-rechargable-primary/1cr2/sentence_expansions.txt")
     }
+
     model = aux.load_word2vec_model(paths['word2vec'])
     texts = ["placeholder","data"]
     idf_dict = aux.get_or_build_idf(texts,str(paths['idf_cache']))
 
-    result = embed_query(
-        model=model,
-        query="battery of 500w",
-        idf_cache=idf_dict,
-        tokenize_fn=aux.simple_tokenize
-    )
+    file_path = paths["file"]
+    text = file_path.read_text(encoding='utf-8')
+
+    output_file = paths["output_path"]
+
+    sentences = sent_tokenize(text)
+
+    with output_file.open("w", encoding='utf-8') as f_out:
+        for sentence in sentences:
+            result = embed_query(
+                model=model,
+                query=sentence,
+                idf_cached=idf_dict,
+                tokenize_fn=aux.simple_tokenize
+            )
+            expansion = result["expansions"]
+            f_out.write(f"{sentence} ||| {expansion}\n")
+
     print("Query:", result['query'])
     print("Vector shape:", result['vector'].shape)
     print("Expansions: ", result['expansions'])
