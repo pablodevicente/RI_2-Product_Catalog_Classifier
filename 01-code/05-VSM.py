@@ -14,34 +14,6 @@ from tqdm import tqdm
 from typing import List, Dict, Any, Tuple
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-def get_or_build_idf(
-    texts: List[str],
-    cache_path: str
-) -> Dict[str, float]:
-    """
-    Returns an IDF dictionary, either by loading it from cache_path
-    or by fitting on the provided texts and then caching it.
-
-    Args:
-        texts (List[str]): The corpus of raw documents.
-        cache_path (str): Path to load/save the IDF dict.
-
-    Returns:
-        Dict[str, float]: Mapping from term to inverse document frequency.
-    """
-    if os.path.exists(cache_path):
-        logging.info(f"Loading cached IDF dictionary from {cache_path}...")
-        with open(cache_path, "rb") as f:
-            idf_dict = pickle.load(f)
-    else:
-        logging.info("Fitting TF‑IDF vectorizer on the corpus...")
-        _, idf_dict = aux.fit_tfidf(texts)
-        logging.info(f"Caching IDF dictionary to {cache_path}...")
-        with open(cache_path, "wb") as f:
-            pickle.dump(idf_dict, f)
-    return idf_dict
-
-
 def process_pdf_directory(
     directory: str,
     model: Any,
@@ -65,39 +37,40 @@ def process_pdf_directory(
     """
     logging.info(f"Scanning directory for corpus: {directory}")
 
-    # 1. Gather all documents for TF‑IDF fitting
-    all_texts: List[str] = []
-    doc_paths: List[Tuple[str, str]] = []  # (doc_id, txt_path)
-    for root, _, _ in os.walk(directory):
-        file_name = os.path.basename(root)
-        txt_path = os.path.join(root, f"{file_name}.txt")
-        if os.path.isfile(txt_path):
-            with open(txt_path, 'r', encoding='utf-8') as f:
-                text = f.read()
-            all_texts.append(text)
-            doc_paths.append((root, txt_path))
+    # 1. Build or load IDF dictionary
+    idf_dict = get_or_build_idf(directory,idf_cache_path)
 
-    # 2. Build or load IDF dictionary
-    idf_dict = get_or_build_idf(all_texts, idf_cache_path)
-
-    # 3. Compute TF‑IDF‑weighted embeddings per document
+    # 2. Compute TF‑IDF‑weighted embeddings per document
     corpus_vectors: Dict[str, np.ndarray] = {}
     logging.info("Computing TF‑IDF‑weighted embeddings for each document...")
-    for doc_id, txt_path in doc_paths:
-        with open(txt_path, 'r', encoding='utf-8') as f:
-            raw_text = f.read()
-        tokens = tokenize_fn(raw_text)
 
-        vec = aux.tfidf_weighted_avg_embedding(
-            doc_tokens=tokens,
-            model=model,
-            idf_dict=idf_dict,
-            vector_size=vector_size
-        )
-        corpus_vectors[doc_id] = vec
+    for root, dirs, files in os.walk(directory):
+        folder_name = Path(root).name
+        expected_txt = f"{folder_name}.txt"
 
-    logging.info(f"Processed {len(corpus_vectors)} documents successfully.")
+        if expected_txt in files:
+            txt_path = Path(root) / expected_txt
+            try:
+                with open(txt_path, 'r', encoding='utf-8') as f:
+                    raw_text = f.read()
+
+                tokens = tokenize_fn(raw_text)
+                logging.debug(f"File {txt_path} contains {len(tokens)} tokens")
+
+                vec = aux.tfidf_weighted_avg_embedding(
+                    doc_tokens=tokens,
+                    model=model,
+                    idf_dict=idf_dict,
+                    vector_size=vector_size
+                )
+
+                corpus_vectors[folder_name] = vec
+
+            except Exception as e:
+                logging.warning(f"Failed processing {txt_path}: {e}")
+
     return corpus_vectors
+
 
 def process_with_embedding_model(
     model: Union[KeyedVectors, Any], input_dir: Path, idf_cache_path : Path
@@ -105,8 +78,6 @@ def process_with_embedding_model(
     logging.info(f"Processing directory {input_dir} with embedding model...")
 
     return process_pdf_directory(str(input_dir), model, str(idf_cache_path), aux.simple_tokenize, model.vector_size)
-
-
 
 def process_with_glove(
     glove_index: Dict[str, Any], input_dir: Path

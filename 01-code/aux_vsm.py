@@ -11,10 +11,15 @@ from pathlib import Path
 import logging
 from typing import Any, Dict, Union
 import fasttext.util
+from typing import List, Dict, Any, Tuple
+
+##############################
+### Build tf-idf
+##############################
 
 
 def get_or_build_idf(
-    texts: List[str],
+    directory: str,
     cache_path: str
 ) -> Dict[str, float]:
     """
@@ -22,7 +27,7 @@ def get_or_build_idf(
     or by fitting on the provided texts and then caching it.
 
     Args:
-        texts (List[str]): The corpus of raw documents.
+        directory (str): Path to the corpus
         cache_path (str): Path to load/save the IDF dict.
 
     Returns:
@@ -32,15 +37,43 @@ def get_or_build_idf(
         logging.info(f"Loading cached IDF dictionary from {cache_path}...")
         with open(cache_path, "rb") as f:
             idf_dict = pickle.load(f)
-    else:
+    else: ## the tf-idf matrix does not exist, create one
+        # 1. Gather all documents for TF‑IDF fitting
+        all_texts: List[str] = []
+        doc_paths: List[Tuple[str, str]] = []  # (doc_id, txt_path)
+        for root, _, _ in os.walk(directory):
+            file_name = os.path.basename(root)
+            txt_path = os.path.join(root, f"{file_name}.txt")
+            if os.path.isfile(txt_path):
+                with open(txt_path, 'r', encoding='utf-8') as f:
+                    text = f.read()
+                all_texts.append(text)
+                doc_paths.append((root, txt_path))
+
         logging.info("Fitting TF‑IDF vectorizer on the corpus...")
-        _, idf_dict = fit_tfidf(texts)
+        _, idf_dict = fit_tfidf(all_texts)
         logging.info(f"Caching IDF dictionary to {cache_path}...")
         with open(cache_path, "wb") as f:
             pickle.dump(idf_dict, f)
     return idf_dict
 
 
+def fit_tfidf(corpus: List[str]) -> (TfidfVectorizer, Dict[str, float]):
+    """
+    Fit a TfidfVectorizer on the full corpus and return both
+    the fitted vectorizer and a word->idf lookup dict.
+    """
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(corpus)
+    feature_names = vectorizer.get_feature_names_out()
+    idf_values     = vectorizer.idf_
+    idf_dict = {word: idf_values[idx] for idx, word in enumerate(feature_names)}
+    return vectorizer, idf_dict
+
+
+##############################
+# for word2vec finetuned
+##############################
 def build_corpus(text_files_dir):
     nltk.download('punkt')  # Ensure tokenization models are downloaded
 
@@ -91,7 +124,10 @@ def fine_tune_word2vec(text_files_dir,pretrained_model_path, output_path):
 
     model.wv.save_word2vec_format(output_path, binary=True)
 
+##############################
 # Load GloVe embeddings into a dictionary
+##############################
+
 def load_glove_embeddings(file_path):
     embeddings_index = {}
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -122,13 +158,6 @@ def create_vector_representation(file_path, embeddings_index):
         else:
             return None
 
-def load_vectors_pickle(input_path):
-    with open(input_path, 'rb') as f:
-        return pickle.load(f)  # This will return a dictionary
-
-def save_vectors_pickle(vectors_dict, output_path):
-    with open(output_path, 'wb') as f:
-        pickle.dump(vectors_dict, f)
 
 
 ## tf-idf functions
@@ -154,17 +183,6 @@ def load_all_texts(input_dir: Path):
 
     return text_data
 
-def fit_tfidf(corpus: List[str]) -> (TfidfVectorizer, Dict[str, float]):
-    """
-    Fit a TfidfVectorizer on the full corpus and return both
-    the fitted vectorizer and a word->idf lookup dict.
-    """
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(corpus)
-    feature_names = vectorizer.get_feature_names_out()
-    idf_values     = vectorizer.idf_
-    idf_dict = {word: idf_values[idx] for idx, word in enumerate(feature_names)}
-    return vectorizer, idf_dict
 
 def tfidf_weighted_avg_embedding(
     doc_tokens: List[str],
@@ -224,8 +242,9 @@ def simple_tokenize(text: str) -> List[str]:
 
 
 
-##############DATA LOADERS###############
-
+################################
+## Data loaders
+################################
 
 
 def load_word2vec_model(google_path: Path) -> KeyedVectors:
@@ -254,3 +273,10 @@ def load_glove_index(glove_file: Path) -> Dict[str, Any]:
     logging.info("Loading GloVe embeddings...")
     return load_glove_embeddings(str(glove_file))
 
+def load_vectors_pickle(input_path):
+    with open(input_path, 'rb') as f:
+        return pickle.load(f)  # This will return a dictionary
+
+def save_vectors_pickle(vectors_dict, output_path):
+    with open(output_path, 'wb') as f:
+        pickle.dump(vectors_dict, f)
