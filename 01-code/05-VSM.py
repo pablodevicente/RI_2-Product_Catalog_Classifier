@@ -192,6 +192,8 @@ def process_with_embedding_model(
     else:
         return build_chunked_corpus_vectors(input_dir, model, str(idf_cache_path), aux.simple_tokenize, model.vector_size)
 
+
+## This could be refactored into the previous function -- more clean .-- dont wanna do it, i am not using glove in the end so...
 def process_with_glove(
     glove_index: Dict[str, Any], input_dir: Path
 ) -> Dict[str, Any]:
@@ -296,7 +298,7 @@ def main():
         logger.error(f"Failed to load model: {e}")
         return
 
-    # Processing dispatch
+    # Processing dispatch -- should refactor this
     if args.model == 'glove':
         vectors = process_with_glove(model_or_index, args.input_dir)
     else:
