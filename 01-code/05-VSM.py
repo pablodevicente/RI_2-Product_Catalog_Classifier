@@ -14,6 +14,116 @@ from tqdm import tqdm
 from typing import List, Dict, Any, Tuple
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+import os
+import logging
+from pathlib import Path
+from typing import Dict, List, Any
+import numpy as np
+
+
+def chunk_tokens(
+        tokens: List[str],
+        min_chunk_size: int = 600,
+        max_chunks: int = 5,
+        overlap_ratio: float = 0.5
+) -> List[List[str]]:
+    """
+    Split `tokens` into up to `max_chunks` overlapping chunks of at least `min_chunk_size`.
+    Overlap between chunks is controlled by `overlap_ratio` (e.g. 0.5 for 50% overlap).
+    """
+    total = len(tokens)
+    if total == 0:
+        return []
+
+    # If document is short, return it as a single chunk
+    if total <= min_chunk_size:
+        return [tokens]
+
+    stride = int(min_chunk_size * (1 - overlap_ratio))
+    chunks: List[List[str]] = []
+    start = 0
+
+    while start < total and len(chunks) < max_chunks:
+        end = min(start + min_chunk_size, total)
+        chunks.append(tokens[start:end])
+        logging.debug(f"Created chunk {len(chunks)}: tokens[{start}:{end}]")
+        start += stride
+
+    return chunks
+
+
+def build_chunked_corpus_vectors(
+        directory: Path,
+        model: Any,
+        idf_cache_path: str,
+        tokenize_fn: callable,
+        vector_size: int
+) -> Dict[str, List[np.ndarray]]:
+    """
+    Walk through `directory` recursively. For each folder named XXX containing XXX.txt,
+    read and tokenize the text, split into overlapping chunks, embed each chunk,
+    and store all chunk vectors under the folder name.
+
+    Returns:
+        corpus_vectors: mapping from document ID (folder name) to list of chunk vectors.
+    """
+    corpus_vectors: Dict[str, List[np.ndarray]] = {}
+    idf_dict = aux.get_or_build_idf(str(directory),idf_cache_path)
+
+    for root, _, files in os.walk(directory):
+        folder = Path(root).name
+        txt_filename = f"{folder}.txt"
+
+        if txt_filename not in files:
+            continue  # no matching .txt here
+
+        txt_path = Path(root) / txt_filename
+        try:
+            logging.debug(f"Processing document '{folder}' at {txt_path}")
+            raw_text = txt_path.read_text(encoding="utf-8")
+        except Exception as e:
+            logging.warning(f"Could not read {txt_path}: {e}")
+            continue
+
+        # Tokenize
+        try:
+            tokens = tokenize_fn(raw_text)
+            logging.debug(f"Tokenized '{folder}': {len(tokens)} tokens")
+        except Exception as e:
+            logging.warning(f"Tokenization failed for {txt_path}: {e}")
+            continue
+
+        # Split into overlapping chunks
+        chunks = chunk_tokens(tokens)
+        if not chunks:
+            logging.warning(f"No chunks generated for {folder}, skipping.")
+            continue
+        logging.info(f"Generated {len(chunks)} chunks for '{folder}'")
+
+        # Embed each chunk
+        vectors: List[np.ndarray] = []
+        for idx, chunk in enumerate(chunks, start=1):
+            try:
+                vec = aux.tfidf_weighted_avg_embedding(
+                    doc_tokens=chunk,
+                    model=model,
+                    idf_dict=idf_dict,
+                    vector_size=vector_size
+                )
+                vectors.append(vec)
+                logging.debug(f"Embedded chunk {idx} of '{folder}'")
+            except Exception as e:
+                logging.error(f"Embedding failed for chunk {idx} of {folder}: {e}")
+
+        if vectors:
+            corpus_vectors[folder] = vectors
+            logging.info(f"Stored {len(vectors)} vectors for document '{folder}'")
+        else:
+            logging.warning(f"No vectors stored for '{folder}' due to embedding errors")
+
+    return corpus_vectors
+
+
 def process_pdf_directory(
     directory: str,
     model: Any,
@@ -38,7 +148,7 @@ def process_pdf_directory(
     logging.info(f"Scanning directory for corpus: {directory}")
 
     # 1. Build or load IDF dictionary
-    idf_dict = get_or_build_idf(directory,idf_cache_path)
+    idf_dict = aux.get_or_build_idf(directory,idf_cache_path)
 
     # 2. Compute TF‑IDF‑weighted embeddings per document
     corpus_vectors: Dict[str, np.ndarray] = {}
@@ -73,11 +183,14 @@ def process_pdf_directory(
 
 
 def process_with_embedding_model(
-    model: Union[KeyedVectors, Any], input_dir: Path, idf_cache_path : Path
+    model: Union[KeyedVectors, Any], input_dir: Path, idf_cache_path : Path, chunks : int
 ) -> Dict[str, Any]:
     logging.info(f"Processing directory {input_dir} with embedding model...")
 
-    return process_pdf_directory(str(input_dir), model, str(idf_cache_path), aux.simple_tokenize, model.vector_size)
+    if chunks == 0:
+        return process_pdf_directory(str(input_dir), model, str(idf_cache_path), aux.simple_tokenize, model.vector_size)
+    else:
+        return build_chunked_corpus_vectors(input_dir, model, str(idf_cache_path), aux.simple_tokenize, model.vector_size)
 
 def process_with_glove(
     glove_index: Dict[str, Any], input_dir: Path
@@ -91,14 +204,15 @@ def process_with_glove(
             corpus_vectors[doc_id] = vector
     return corpus_vectors
 
-
 def save_vectors(vectors: Dict[str, Any], output_path: Path) -> None:
     ensure_directories(output_path)
     with open(output_path, 'wb') as f:
         pickle.dump(vectors, f)
     logging.info(f"Saved document vectors to {output_path}")
 
-
+def ensure_directories(path: Path) -> None:
+    if not path.parent.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
 
 # Configure root logger once
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -135,10 +249,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def ensure_directories(path: Path) -> None:
-    if not path.parent.exists():
-        path.parent.mkdir(parents=True, exist_ok=True)
-
 def main():
     args = parse_args()
 
@@ -161,10 +271,14 @@ def main():
         'fasttext': '03-Fasttext',
         'glove': '02-Glove'
     }
+
+    # 1 for Multi-vector embedding and 0 for single-vector embedding
+    chunks = 1 #yes
+
     output_file = (
         args.output_dir
         / model_dir_map[args.model]
-        / f"{args.model}-{args.size}.pkl"
+        / f"{args.model}-{args.size}-{chunks}.pkl"
     )
 
     # Model loading dispatch
@@ -186,7 +300,7 @@ def main():
     if args.model == 'glove':
         vectors = process_with_glove(model_or_index, args.input_dir)
     else:
-        vectors = process_with_embedding_model(model_or_index, args.input_dir, paths['idf_cache'])
+        vectors = process_with_embedding_model(model_or_index, args.input_dir, paths['idf_cache'],chunks)
 
     # Save results
     try:

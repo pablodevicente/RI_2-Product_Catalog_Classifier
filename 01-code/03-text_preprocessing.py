@@ -25,13 +25,11 @@ def process_txt(folder_path):
         required_files = {"text.txt", "tables.txt", "images_to_txt.txt"}
 
         if required_files.intersection(set(files)):
-            logging.info(f"Processing folder: {root}")
-
             try:
                 concat_file_path = aux.concat_txt(root, required_files)
                 aux.process_nlp(concat_file_path)
                 # cleanup_txt_files(concat_file_path,root)  # Cleanup files in the same directory
-                logging.info(f"Successfully processed {root}")
+                logging.debug(f"Successfully processed {root}")
 
             except Exception as e:
                 logging.error(f"Error processing {root}: {e}")
@@ -54,12 +52,12 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
     logger = logging.getLogger(__name__)
 
-    parser = argparse.ArgumentParser(description="Process PDFs and extract text")
+    parser = argparse.ArgumentParser(description="Process text files into a single file")
     parser.add_argument(
         '--pdf_path',
         type=str,
         default="../02-data/00-testing/",
-        help="Path to the directory containing PDF files"
+        help="Path to the directory containing text files"
     )
 
     args = parser.parse_args()

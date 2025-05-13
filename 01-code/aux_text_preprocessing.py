@@ -85,12 +85,12 @@ def process_nlp(path: str):
             if isinstance(result, str) and result.strip():  # Ensure it's a valid non-empty string
                 preprocessed_text = result
         except Exception as e:
-            logging.info(f"Skipping {func.__name__} due to error: {e}")
+            logging.error(f"Skipping {func.__name__} due to error: {e}")
 
     try:
         with open(path, "w", encoding="utf-8") as output_file:
             output_file.write(preprocessed_text)
-        logging.info(f"Successfully saved preprocessed text to {path}")
+        logging.debug(f"Successfully saved preprocessed text to {path}")
     except Exception as e:
         logging.error(f"Error saving processed text: {e}")
 
