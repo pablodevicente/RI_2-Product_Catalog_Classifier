@@ -28,7 +28,7 @@ from nltk.tokenize import sent_tokenize
 def filter_expansion_candidates(
     sims: List[Tuple[str, float]],
     idf: Dict[str, float],
-    min_sim: float = 0.6,
+    min_sim: float = 0.8,
     min_idf: float = 1.0
 ) -> List[str]:
     """
@@ -125,12 +125,12 @@ def embed_query(
         all_tokens = list(dict.fromkeys(original_tokens + expansions))
 
     else:
-        expansions = ["placeholder","shut-it"]
+        expansions = []
         original_tokens = tokenize_fn(query)
         all_tokens = list(dict.fromkeys(original_tokens))
 
 
-    # 3. Compute TF-IDF weighted average embedding
+    # 3. Compute TF-IDF weighted average embedding (with expanded terms)
     vector = aux.tfidf_weighted_avg_embedding(
         doc_tokens=all_tokens,
         model=model,
@@ -144,32 +144,6 @@ def embed_query(
         "expansions": expansions,
     }
 
-
-def retrieve_top_k_documents(
-    query_vector: np.ndarray,
-    corpus_vectors: Dict[str, np.ndarray],
-    top_k: int = 10
-) -> List[Tuple[str, float]]:
-    """
-    Ranks and retrieves top-k most similar documents based on cosine similarity.
-
-    Args:
-        query_vector (np.ndarray): The embedded query vector.
-        corpus_vectors (Dict[str, np.ndarray]): Mapping from doc IDs to vectors.
-        top_k (int): Number of top documents to retrieve.
-
-    Returns:
-        List[Tuple[str, float]]: List of (doc_id, similarity score), ranked.
-    """
-    doc_ids = list(corpus_vectors.keys())
-    matrix = np.array([corpus_vectors[doc_id] for doc_id in doc_ids])
-
-    similarities = cosine_similarity(query_vector.reshape(1, -1), matrix)[0]
-    top_indices = np.argsort(similarities)[::-1][:top_k]
-
-    return [(doc_ids[i], similarities[i]) for i in top_indices]
-
-
 # Configure root logger once
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -180,33 +154,27 @@ if __name__ == '__main__':
         'idf_cache': Path("../02-data/03-VSM/idf_cache_path.pkl"),
         'word2vec_vsm' : Path("../02-data/03-VSM/01-Word2Vec/word2vec-4-50-4-150.pkl"),
         'file' : Path("../02-data/00-testing/batteries-non-rechargable-primary/1cr2/1cr2.txt"),
-        'output_path' : Path("../02-data/00-testing/batteries-non-rechargable-primary/1cr2/sentence_expansions.txt")
+        'output_path' : Path("../02-data/00-testing/batteries-non-rechargable-primary/1cr2/sentence_expansions.txt"),
+        'pdf_folder' : Path("../02-data/00-testing/")
     }
-
+    ## load model and idf dictionary.
     model = aux.load_word2vec_model(paths['word2vec'])
-    texts = ["placeholder","data"]
-    idf_dict = aux.get_or_build_idf(texts,str(paths['idf_cache']))
+    idf_dict = aux.get_or_build_idf(str(paths["pdf_folder"]),str(paths['idf_cache']))
 
-    file_path = paths["file"]
-    text = file_path.read_text(encoding='utf-8')
-
-    output_file = paths["output_path"]
-
-    sentences = sent_tokenize(text)
+    ## transform the query into its vector
     query = "cylindrical object with  metallic appearance the object has  diameter of approximately 10 mm and  length of about 20 mm"
-
-    result = embed_query(
+    query_info = embed_query(
         model=model,
         query=query,
         idf_cached=idf_dict,
         tokenize_fn=aux.simple_tokenize
     )
 
-    vsm_path = paths["word2vec_vsm"]
-    with vsm_path.open("rb") as f:
+    ## Open the vsm space you wanna look into
+    with paths["word2vec_vsm"].open("rb") as f:
         corpus_vectors: Dict[str, np.ndarray] = pickle.load(f)
 
-    top_k_results = retrieve_top_k_documents(result["vector"],corpus_vectors,top_k=10)
+    top_k_results = retrieve_top_k_documents(query_info["vector"],corpus_vectors,top_k=10)
     for doc_id, score in top_k_results:
         print(f"{doc_id:30s} → {score:.4f}")
 
