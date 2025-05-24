@@ -3,7 +3,6 @@ import logging
 import text_preprocessing as txtp
 import re
 
-
 def concat_txt(folder, required_files):
     """Concatenates contents of the found files into a single text file."""
     file_name = os.path.basename(folder)
@@ -34,7 +33,6 @@ def remove_isolated_letters(text: str):
     - str: The cleaned text without single-letter words.
     """
     return re.sub(r'\b[a-zA-Z]\b', '', text)  # Removes standalone letters
-
 
 def remove_random_numbers(text: str):
     """
@@ -97,7 +95,7 @@ def process_nlp(path: str):
 def cleanup_txt_files(concat_file_path, folder_path):
     """
     Deletes 'text.txt', 'tables.txt', 'images_to_txt.txt' and any '.jpg' or '.png' files
-    from the given folder after they have been concatenated into 'pdf.txt'.
+    from the given folder after they have been concateSnated into 'pdf.txt'.
 
     Parameters:
     - concat_file_path (str): Path to the concatenated 'pdf.txt' file.
