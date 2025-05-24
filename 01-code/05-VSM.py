@@ -155,8 +155,10 @@ def process_pdf_directory(
     logging.info("Computing TF‑IDF‑weighted embeddings for each document...")
 
     for root, dirs, files in os.walk(directory):
-        folder_name = Path(root).name
-        expected_txt = f"{folder_name}.txt"
+        folder = Path(root)
+        parent = folder.name
+        grandparent = folder.parent.name
+        expected_txt = f"{parent}.txt"
 
         if expected_txt in files:
             txt_path = Path(root) / expected_txt
@@ -174,7 +176,8 @@ def process_pdf_directory(
                     vector_size=vector_size
                 )
 
-                corpus_vectors[folder_name] = vec
+                key = f"{grandparent}/{parent}/{expected_txt}"
+                corpus_vectors[key] = vec
 
             except Exception as e:
                 logging.warning(f"Failed processing {txt_path}: {e}")
@@ -207,9 +210,22 @@ def process_with_glove(
     return corpus_vectors
 
 def save_vectors(vectors: Dict[str, Any], output_path: Path) -> None:
+    """
+    Save a dict of document vectors, but rewrite each key k so that
+    k is the full, absolute filesystem path to the document.
+    """
     ensure_directories(output_path)
+
+    new_vectors: Dict[str, Any] = {}
+    for key, vec in vectors.items():
+        p = Path(key)
+        # turn into an absolute path string
+        full_path = str(p.resolve())
+        new_vectors[full_path] = vec
+
     with open(output_path, 'wb') as f:
-        pickle.dump(vectors, f)
+        pickle.dump(new_vectors, f)
+
     logging.info(f"Saved document vectors to {output_path}")
 
 def ensure_directories(path: Path) -> None:
@@ -275,7 +291,7 @@ def main():
     }
 
     # 1 for Multi-vector embedding and 0 for single-vector embedding
-    chunks = 1 #yes
+    chunks = 0 #yes
 
     output_file = (
         args.output_dir
