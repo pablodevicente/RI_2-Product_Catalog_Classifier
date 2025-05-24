@@ -263,10 +263,55 @@ def rerank(paths, query, top_k, mode="bm25-vsm"):
 
     # first bm25 and then rerank based on vsm
     if mode=="bm25-vsm":
-        pass
+        """
+        1) Get top_k docs from BM25
+        2) Rerank those same docs by VSM scores
+        Returns a list of dicts with keys:
+          - rank
+          - doc_id
+          - bm25_score
+          - vsm_score
+          - path (Path object)
+        """
+        # --- 1) BM25 shortlist ---
+        top_bm25: List[Dict[str, Any]] = aux_bm25.run_bm25_query(paths, query, top_k=top_k)
+        bm25_ids = [doc["doc_id"] for doc in top_bm25]
+        bm25_scores = {doc["doc_id"]: doc["score"] for doc in top_bm25}
+
+        # --- 2) VSM scores over that same shortlist ---
+        # We call run_word2vec_query with a slightly larger k to be sure we fetch
+        # all we need, then filter down to our BM25 set.
+        vsm_output: Dict[str, Any] = aux_vsm.run_word2vec_query(paths, query, top_k=len(bm25_ids))
+        vsm_results: List[Dict[str, Any]] = vsm_output.get("results", [])
+        # Map each doc_id to its VSM score (ignore anything outside bm25_ids)
+        vsm_scores = {
+            doc["doc_id"]: doc["score"]
+            for doc in vsm_results
+            if doc["doc_id"] in bm25_ids
+        }
+
+        # --- 3) Combine & resort by VSM score ---
+        reranked = sorted(
+            bm25_ids,
+            key=lambda did: vsm_scores.get(did, float("-inf")),
+            reverse=True
+        )[:top_k]
+
+        # --- 4) Build final result list ---
+        out: List[Dict[str, Any]] = []
+        for rank, did in enumerate(reranked, start=1):
+            out.append({
+                "rank": rank,
+                "doc_id": did,
+                "bm25_score": bm25_scores.get(did, 0.0),
+                "vsm_score": vsm_scores.get(did, 0.0)
+            })
+
+        return out
+
 
     # first vsm and then rerank based on bm25
-    else:
+    else: ## not working. a pain in the ass
         # 1. Run VSM to get a list of file-paths (or strings) of your top-K VSM docs:
         top_k_vsm = aux_vsm.run_word2vec_query(paths, query, top_k=100)
         vsm_ids = [r["doc_id"] for r in top_k_vsm["results"]]

@@ -150,29 +150,36 @@ def query_bm25(
 
     logger.info("Querying BM25 for: '%s'", query)
     q_tokens = bm25s.tokenize(query, stopwords="en")
+    single_q = q_tokens[0]  # List[str] as required by get_scores()
 
     mapping_path = retriever_path.with_name(retriever_path.name + "_filenames.json")
     file_names = json.loads(mapping_path.read_text(encoding="utf-8"))
 
     results: List[Dict[str, Any]] = []
 
-    if vsm_ids is not None:
-        doc_ids, scores = retriever.retrieve(q_tokens, k=200)
-        scored = sorted(
-            ((idx, scores[idx]) for idx in vsm_ids),
-            key=lambda x: x[1],
-            reverse=True
-        )[:k]
+    if vsm_ids:
+        # get_scores returns a numpy array of length |corpus|
+        all_scores = retriever.get_scores(single_q)
 
-        for rank, (idx, score) in enumerate(scored, start=1):
-            path = Path(file_names[str(idx)])
+        # build list of (doc_id, score) only for those you passed in
+        subset = [(doc_id, float(all_scores[doc_id])) for doc_id in vsm_ids]
+
+        # sort by score descending
+        subset.sort(key=lambda x: x[1], reverse=True)
+
+        # if you still want at most k results:
+        subset = subset[:k]
+
+        # now format your results exactly as before
+        for rank, (idx, score) in enumerate(subset, start=1):
+            path = Path(file_names[idx])
             parent = path.parent.name
             grandparent = path.parent.parent.name
 
             results.append({
                 "rank": rank,
                 "doc_id": idx,
-                "score": float(score),
+                "score": score,
                 "text": corpus[idx] if corpus else None,
                 "grandparent": grandparent,
                 "parent": parent

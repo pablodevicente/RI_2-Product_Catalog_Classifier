@@ -58,7 +58,16 @@ def main():
         )
         aux_hybrid.print_documents(top_k_rrf, top_k=top_k, ranking="RRF")
 
-        aux_hybrid.rerank(paths, query, top_k=top_k,mode="vsm-bm25")
+        results = aux_hybrid.rerank(paths, query, top_k=top_k,mode="bm25-vsm")
+        #aux_hybrid.rerank(paths, query, top_k=top_k,mode="vsm-bm25")
+
+        for doc in results:
+            print(
+                f"{doc['rank']:2d} | id={doc['doc_id']:4d} "
+                f"| bm25={doc['bm25_score']:.4f} "
+                f"| vsm={doc['vsm_score']:.4f} "
+                f"| path={doc['path'].name}"
+            )
 
 
     except Exception as e:
