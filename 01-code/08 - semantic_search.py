@@ -35,7 +35,7 @@ def main():
     top_k = 20
 
     try:
-        top_k_vsm = aux_vsm.run_word2vec_query(paths, query, top_k=top_k)
+        top_k_vsm = aux_vsm.run_word2vec_query(paths, query, top_k=top_k,use_expansion=True)
         top_k_bm25 = aux_bm25.run_bm25_query(paths, query, top_k=top_k)
 
         aux_vsm.print_documents(top_k_vsm, top_k=top_k)
@@ -58,17 +58,10 @@ def main():
         )
         aux_hybrid.print_documents(top_k_rrf, top_k=top_k, ranking="RRF")
 
-        results = aux_hybrid.rerank(paths, query, top_k=top_k,mode="bm25-vsm")
+        top_k_reranked = aux_hybrid.rerank(paths, query, top_k=top_k,mode="bm25-vsm")
         #aux_hybrid.rerank(paths, query, top_k=top_k,mode="vsm-bm25")
 
-        for doc in results:
-            print(
-                f"{doc['rank']:2d} | id={doc['doc_id']:4d} "
-                f"| bm25={doc['bm25_score']:.4f} "
-                f"| vsm={doc['vsm_score']:.4f} "
-                f"| path={doc['path'].name}"
-            )
-
+        aux_hybrid.print_documents(top_k_reranked,top_k,"bm25 + vsm")
 
     except Exception as e:
         logging.error("Application error: %s", e, exc_info=True)

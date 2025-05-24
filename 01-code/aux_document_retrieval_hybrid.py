@@ -226,88 +226,90 @@ def rrf(
 
 def print_documents(document_list: List[Dict[str, Any]], top_k: int, ranking: str) -> None:
     """
-    Prints the top_k entries from document_list, auto‐detecting whether
-    each entry is from hybrid fusion (combined_score) or RRF fusion (rrf_score).
+    Prints the top_k entries from document_list, auto‑detecting whether
+    each entry uses RRF fusion, hybrid fusion (combined_score), or a plain
+    BM25‑VSM rerank (bm25_score + vsm_score).
     """
 
     logger.info(f"--- Showing top {top_k} results for {ranking} ranking ---")
 
     for rank, entry in enumerate(document_list[:top_k], start=1):
-        # Common metadata
-        gp = entry.get("vsm_grandparent") or entry.get("bm25_grandparent") or "—"
-        p = entry.get("vsm_parent") or entry.get("bm25_parent") or "—"
+        # Common metadata: try rerank fields first, then legacy keys
+        gp = entry.get("grandparent") or entry.get("vsm_grandparent") or entry.get("bm25_grandparent") or "—"
+        p  = entry.get("parent")      or entry.get("vsm_parent")       or entry.get("bm25_parent")       or "—"
 
         if "rrf_score" in entry:
-
-            # RRF‐style
+            # RRF fusion
             logger.info(
                 f"{rank}. {gp} : {p} "
                 f"(RRF score: {entry['rrf_score']:.6f}, "
                 f"VSM component: {entry['rrf_vsm']:.6f}, "
                 f"BM25 component: {entry['rrf_bm25']:.6f})"
             )
-        elif "combined_score" in entry:
 
-            # Hybrid‐style
+        elif "combined_score" in entry:
+            # Hybrid fusion
             logger.info(
                 f"{rank}. {gp} : {p} "
                 f"(combined: {entry['combined_score']:.4f}, "
                 f"VSM: {entry['vsm_norm']:.4f}, "
                 f"BM25: {entry['bm25_norm']:.4f})"
             )
+
+        elif "bm25_score" in entry and "vsm_score" in entry:
+            # Plain BM25-VSM rerank
+            doc_id = entry.get("doc_id", "—")
+            path   = entry.get("path") or "—"
+            logger.info(
+                f"{rank}. {gp} : {p} "
+                f"(BM25: {entry['bm25_score']:.4f}, VSM: {entry['vsm_score']:.4f}) "
+                f"[doc_id: {doc_id}, path: {path}]"
+            )
+
         else:
-            # Fallback: just show whatever keys we have
+            # Fallback: just dump the entry
             logger.info(f"{rank}. {gp} : {p} | data: {entry}")
 
 def rerank(paths, query, top_k, mode="bm25-vsm"):
 
     # first bm25 and then rerank based on vsm
-    if mode=="bm25-vsm":
-        """
-        1) Get top_k docs from BM25
-        2) Rerank those same docs by VSM scores
-        Returns a list of dicts with keys:
-          - rank
-          - doc_id
-          - bm25_score
-          - vsm_score
-          - path (Path object)
-        """
-        # --- 1) BM25 shortlist ---
-        top_bm25: List[Dict[str, Any]] = aux_bm25.run_bm25_query(paths, query, top_k=top_k)
+    if mode == "bm25-vsm":
+        # 1) BM25 shortlist
+        top_bm25 = aux_bm25.run_bm25_query(paths, query, top_k=top_k)
         bm25_ids = [doc["doc_id"] for doc in top_bm25]
         bm25_scores = {doc["doc_id"]: doc["score"] for doc in top_bm25}
+        bm25_parents = {doc["doc_id"]: doc.get("parent") for doc in top_bm25}
+        bm25_grandparents = {doc["doc_id"]: doc.get("grandparent") for doc in top_bm25}
 
-        # --- 2) VSM scores over that same shortlist ---
-        # We call run_word2vec_query with a slightly larger k to be sure we fetch
-        # all we need, then filter down to our BM25 set.
-        vsm_output: Dict[str, Any] = aux_vsm.run_word2vec_query(paths, query, top_k=len(bm25_ids))
-        vsm_results: List[Dict[str, Any]] = vsm_output.get("results", [])
-        # Map each doc_id to its VSM score (ignore anything outside bm25_ids)
-        vsm_scores = {
-            doc["doc_id"]: doc["score"]
-            for doc in vsm_results
-            if doc["doc_id"] in bm25_ids
-        }
+        # 2) VSM scores for BM25 shortlist
+        vsm_output = aux_vsm.run_word2vec_query(
+            paths, query, top_k=100, use_expansion=True
+        )
+        vsm_results = vsm_output.get("results", [])
+        # Build full-map with a default score (e.g. very low) for missing docs
+        default_score = float("-inf")
+        vsm_scores = {did: default_score for did in bm25_ids}
+        for doc in vsm_results:
+            did = doc["doc_id"]
+            if did in vsm_scores:
+                vsm_scores[did] = doc["score"]
 
-        # --- 3) Combine & resort by VSM score ---
-        reranked = sorted(
-            bm25_ids,
-            key=lambda did: vsm_scores.get(did, float("-inf")),
-            reverse=True
-        )[:top_k]
+        # 3) Sort by VSM (descending)
+        sorted_ids = sorted(bm25_ids, key=lambda did: vsm_scores[did], reverse=True)
 
-        # --- 4) Build final result list ---
-        out: List[Dict[str, Any]] = []
-        for rank, did in enumerate(reranked, start=1):
-            out.append({
+        # 4) Build the final list of dicts
+        reranked = []
+        for rank, did in enumerate(sorted_ids, start=1):
+            reranked.append({
                 "rank": rank,
                 "doc_id": did,
-                "bm25_score": bm25_scores.get(did, 0.0),
-                "vsm_score": vsm_scores.get(did, 0.0)
+                "bm25_score": bm25_scores[did],
+                "vsm_score": vsm_scores[did],
+                "parent": bm25_parents[did],
+                "grandparent": bm25_grandparents[did],
             })
 
-        return out
+        return reranked
 
 
     # first vsm and then rerank based on bm25
