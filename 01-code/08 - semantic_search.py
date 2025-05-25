@@ -37,7 +37,7 @@ def main():
 
     results_df = pd.DataFrame()
 
-    try:
+    try:    #i am changing the methods for convenience sake
         top_k_vsm = aux_vsm.run_word2vec_query(paths, query, top_k=top_k,use_expansion=True,multivector=True)
         top_k_bm25 = aux_bm25.run_bm25_query(paths, query, top_k=top_k)
 
