@@ -2,7 +2,7 @@ import aux_document_retrieval_bm25 as aux_bm25
 import aux_document_retrieval_vsm as aux_vsm
 import aux_semantic_search as aux_semantics
 import aux_document_retrieval_hybrid as aux_hybrid
-
+import pandas as pd
 from pathlib import Path
 import logging
 import nltk
@@ -24,7 +24,8 @@ def main():
     paths = {
         'word2vec': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"),
         'idf_cache': Path("../02-data/03-VSM/idf_cache_path.pkl"),
-        'word2vec_vsm': Path("../02-data/03-VSM/01-Word2Vec/word2vec-4-50-4-150-0.pkl"),
+        'word2vec_vsm_multivector': Path("../02-data/03-VSM/01-Word2Vec/word2vec-4-50-4-150-1.pkl"),
+        'word2vec_vsm_singlevector': Path("../02-data/03-VSM/01-Word2Vec/word2vec-4-50-4-150-0.pkl"),
         'file': Path("../02-data/00-testing/batteries-non-rechargable-primary/1cr2/1cr2.txt"),
         'output_path': Path("../02-data/00-testing/batteries-non-rechargable-primary/1cr2/sentence_expansions.txt"),
         'pdf_folder': Path("../02-data/00-testing/"),
@@ -34,12 +35,15 @@ def main():
     query = "this battery contains positive temperature coefficient element"
     top_k = 20
 
+    results_df = pd.DataFrame()
+
     try:
-        top_k_vsm = aux_vsm.run_word2vec_query(paths, query, top_k=top_k,use_expansion=True)
+        top_k_vsm = aux_vsm.run_word2vec_query(paths, query, top_k=top_k,use_expansion=True,multivector=True)
         top_k_bm25 = aux_bm25.run_bm25_query(paths, query, top_k=top_k)
 
         aux_vsm.print_documents(top_k_vsm, top_k=top_k)
         aux_bm25.print_documents(top_k_bm25, top_k=top_k)
+        # aux_hybrid.results_to_dataframe(top_k_vsm,ranking="vsm",)
 
         top_k_hybrid = aux_hybrid.hybrid_retrieval(
             top_k_vsm,
@@ -51,6 +55,7 @@ def main():
         )
         aux_hybrid.print_documents(top_k_hybrid, top_k=top_k, ranking="hybrid")
 
+        # Reciprocal rank function is guided by the ranking position and not the score.
         top_k_rrf = aux_hybrid.rrf(
             top_k_vsm["results"],
             top_k_bm25,

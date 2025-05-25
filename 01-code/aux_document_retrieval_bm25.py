@@ -73,11 +73,9 @@ def create_bm25_index(
 
     retriever_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Save model and metadata
     retriever.save(str(retriever_path))
     retriever.save(str(retriever_path) + "_corpus", corpus=corpus)
 
-    # Save file mapping
     mapping_path = retriever_path.with_name(retriever_path.name + "_filenames.json")
     with mapping_path.open("w", encoding="utf-8") as f:
         json.dump(file_mapping, f)
@@ -157,20 +155,13 @@ def query_bm25(
 
     results: List[Dict[str, Any]] = []
 
-    if vsm_ids:
-        # get_scores returns a numpy array of length |corpus|
+    if vsm_ids: ## does not work -- refactor
+
         all_scores = retriever.get_scores(single_q)
-
-        # build list of (doc_id, score) only for those you passed in
         subset = [(doc_id, float(all_scores[doc_id])) for doc_id in vsm_ids]
-
-        # sort by score descending
         subset.sort(key=lambda x: x[1], reverse=True)
-
-        # if you still want at most k results:
         subset = subset[:k]
 
-        # now format your results exactly as before
         for rank, (idx, score) in enumerate(subset, start=1):
             path = Path(file_names[idx])
             parent = path.parent.name

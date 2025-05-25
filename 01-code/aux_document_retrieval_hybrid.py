@@ -1,7 +1,8 @@
-from typing import List, Dict, Any, Literal
+from typing import List, Dict, Any, Literal, Optional
 import logging
 import aux_document_retrieval_vsm as aux_vsm
 import aux_document_retrieval_bm25 as aux_bm25
+import pandas as pd
 
 # Module-level logger
 logger = logging.getLogger(__name__)
@@ -138,21 +139,18 @@ def hybrid_retrieval(
         fused.append({
             "doc_id": doc_id,
 
-            # VSM side
             "vsm_rank": v.get("rank"),
             "vsm_score": v.get("score"),
             "vsm_parent": v.get("parent"),
             "vsm_grandparent": v.get("grandparent"),
             "vsm_norm": vsm_norm,
 
-            # BM25 side
             "bm25_rank": b.get("rank"),
             "bm25_score": b.get("score"),
             "bm25_parent": b.get("parent"),
             "bm25_grandparent": b.get("grandparent"),
             "bm25_norm": bm25_norm,
 
-            # final fused score
             "combined_score": vsm_norm * weight_vsm + bm25_norm * weight_bm25
         })
 
@@ -184,7 +182,6 @@ def rrf(
           - all side-specific metadata (prefixed vsm_ or bm25_)
           - rrf_vsm, rrf_bm25, rrf_score
     """
-    # Index by doc_id
     vsm_map  = {r["doc_id"]: r for r in vsm_results}
     bm25_map = {r["doc_id"]: r for r in bm25_results}
 
@@ -195,11 +192,9 @@ def rrf(
         v = vsm_map.get(doc_id, {})
         b = bm25_map.get(doc_id, {})
 
-        # get ranks (fall back to a large rank if missing)
         v_rank = v.get("rank", len(vsm_results) + 1)
         b_rank = b.get("rank", len(bm25_results) + 1)
 
-        # reciprocal components
         rrf_v = 1.0 / (v_rank + k)
         rrf_b = 1.0 / (b_rank + k)
         total_rrf = rrf_v + rrf_b
@@ -207,13 +202,10 @@ def rrf(
         fused.append({
             "doc_id":      doc_id,
 
-            # original VSM fields, if present
             **{f"vsm_{key}":  v.get(key) for key in ("rank","score","grandparent","parent")},
 
-            # original BM25 fields, if present
             **{f"bm25_{key}": b.get(key) for key in ("rank","score","grandparent","parent")},
 
-            # RRF components
             "rrf_vsm":     rrf_v,
             "rrf_bm25":    rrf_b,
             "rrf_score":   total_rrf,
@@ -282,9 +274,8 @@ def rerank(paths, query, top_k, mode="bm25-vsm"):
         bm25_grandparents = {doc["doc_id"]: doc.get("grandparent") for doc in top_bm25}
 
         # 2) VSM scores for BM25 shortlist
-        vsm_output = aux_vsm.run_word2vec_query(
-            paths, query, top_k=100, use_expansion=True
-        )
+        vsm_output = aux_vsm.run_word2vec_query(paths, query, top_k=100, use_expansion=True)
+
         vsm_results = vsm_output.get("results", [])
         # Build full-map with a default score (e.g. very low) for missing docs
         default_score = float("-inf")
@@ -297,7 +288,6 @@ def rerank(paths, query, top_k, mode="bm25-vsm"):
         # 3) Sort by VSM (descending)
         sorted_ids = sorted(bm25_ids, key=lambda did: vsm_scores[did], reverse=True)
 
-        # 4) Build the final list of dicts
         reranked = []
         for rank, did in enumerate(sorted_ids, start=1):
             reranked.append({
@@ -330,6 +320,55 @@ def rerank(paths, query, top_k, mode="bm25-vsm"):
 
         aux_bm25.print_documents(bm25_reranked, top_k=top_k)
 
+
+def results_to_dataframe(
+    document_list: List[Dict[str, Any]],
+    ranking: str,
+    existing_df: Optional[pd.DataFrame] = None
+) -> pd.DataFrame:
+    """
+    Convert a list of document result dicts into a pandas DataFrame and
+    optionally append to an existing DataFrame for iterative calls.
+
+    Args:
+        document_list: list of result dicts (as from retrieve functions)
+        ranking: string label of ranking method used
+        existing_df: optional DataFrame to append to
+
+    Returns:
+        A pandas DataFrame with columns:
+          model, ranking, rank, grandparent, parent,
+          bm25_score, vsm_score, combined_score,
+          rrf_score, rrf_vsm, rrf_bm25
+    """
+    rows = []
+    for entry in document_list:
+        if 'rrf_score' in entry:
+            model = 'rrf'
+        elif 'combined_score' in entry:
+            model = 'hybrid'
+        elif 'bm25_score' in entry and 'vsm_score' in entry:
+            model = 'bm25-vsm'
+        else:
+            model = 'unknown'
+
+        rows.append({
+            'model': model,
+            'ranking': ranking,
+            'rank': entry.get('rank'),
+            'grandparent': entry.get('grandparent'),
+            'parent': entry.get('parent'),
+            'bm25_score': entry.get('bm25_score'),
+            'vsm_score': entry.get('vsm_score'),
+            'combined_score': entry.get('combined_score'),
+            'rrf_score': entry.get('rrf_score'),
+            'rrf_vsm': entry.get('rrf_vsm'),
+            'rrf_bm25': entry.get('rrf_bm25')
+        })
+    new_df = pd.DataFrame(rows)
+    if existing_df is not None:
+        return pd.concat([existing_df, new_df], ignore_index=True)
+    return new_df
 
 
 if __name__ == '__main__':

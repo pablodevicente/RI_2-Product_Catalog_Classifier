@@ -72,6 +72,9 @@ def build_chunked_corpus_vectors(
 
     for root, _, files in os.walk(directory):
         folder = Path(root).name
+        label_dir = Path(root).parent.name
+        folder_struct = os.path.join(label_dir, folder)
+
         txt_filename = f"{folder}.txt"
 
         if txt_filename not in files:
@@ -98,7 +101,7 @@ def build_chunked_corpus_vectors(
         if not chunks:
             logging.warning(f"No chunks generated for {folder}, skipping.")
             continue
-        logging.info(f"Generated {len(chunks)} chunks for '{folder}'")
+        logging.debug(f"Generated {len(chunks)} chunks for '{folder}'")
 
         # Embed each chunk
         vectors: List[np.ndarray] = []
@@ -116,8 +119,8 @@ def build_chunked_corpus_vectors(
                 logging.error(f"Embedding failed for chunk {idx} of {folder}: {e}")
 
         if vectors:
-            corpus_vectors[folder] = vectors
-            logging.info(f"Stored {len(vectors)} vectors for document '{folder}'")
+            corpus_vectors[folder_struct] = vectors
+            logging.debug(f"Stored {len(vectors)} vectors for document '{folder}'")
         else:
             logging.warning(f"No vectors stored for '{folder}' due to embedding errors")
 
@@ -185,9 +188,8 @@ def process_pdf_directory(
     return corpus_vectors
 
 
-def process_with_embedding_model(
-    model: Union[KeyedVectors, Any], input_dir: Path, idf_cache_path : Path, chunks : int
-) -> Dict[str, Any]:
+def process_with_embedding_model(model: Union[KeyedVectors, Any], input_dir: Path, idf_cache_path : Path, chunks : int) -> Dict[str, Any]:
+
     logging.info(f"Processing directory {input_dir} with embedding model...")
 
     if chunks == 0:
@@ -209,7 +211,7 @@ def process_with_glove(
             corpus_vectors[doc_id] = vector
     return corpus_vectors
 
-def save_vectors(vectors: Dict[str, Any], output_path: Path) -> None:
+def save_vectors(vectors: Dict[str, Any], output_path: Path, input_dir: Path) -> None:
     """
     Save a dict of document vectors, but rewrite each key k so that
     k is the full, absolute filesystem path to the document.
@@ -218,10 +220,9 @@ def save_vectors(vectors: Dict[str, Any], output_path: Path) -> None:
 
     new_vectors: Dict[str, Any] = {}
     for key, vec in vectors.items():
-        p = Path(key)
-        # turn into an absolute path string
-        full_path = str(p.resolve())
+        full_path = os.path.join(input_dir,key)
         new_vectors[full_path] = vec
+        logging.debug(f"Saved vector for document '{key}' with path {full_path}")
 
     with open(output_path, 'wb') as f:
         pickle.dump(new_vectors, f)
@@ -270,7 +271,6 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
 
-    # Define model-specific paths
     paths = {
         'word2vec': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"),
         'word2vec_finetuned': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"),
@@ -291,7 +291,7 @@ def main():
     }
 
     # 1 for Multi-vector embedding and 0 for single-vector embedding
-    chunks = 0 #yes
+    chunks = 1
 
     output_file = (
         args.output_dir
@@ -302,8 +302,7 @@ def main():
     # Model loading dispatch
     loaders = {
         'word2vec': lambda: aux.load_word2vec_model(paths['word2vec']),
-        'word2vec_finetuned':
-            lambda: aux.load_finetuned_word2vec(args.input_dir, paths['word2vec'], finetuned_path),
+        'word2vec_finetuned': lambda: aux.load_finetuned_word2vec(args.input_dir, paths['word2vec'], finetuned_path),
         'fasttext': lambda: aux.load_fasttext_model(paths['fasttext']),
         'glove': lambda: aux.load_glove_index(paths['glove'])
     }
@@ -322,7 +321,7 @@ def main():
 
     # Save results
     try:
-        save_vectors(vectors, output_file)
+        save_vectors(vectors, output_file,args.input_dir)
     except Exception as e:
         logger.error(f"Failed to save vectors: {e}")
 

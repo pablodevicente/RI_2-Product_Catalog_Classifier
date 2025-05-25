@@ -1,8 +1,8 @@
 import logging
 import pickle
 from pathlib import Path
-from typing import List, Tuple, Dict, Any, Optional
-
+from typing import List, Tuple, Dict, Any, Optional, Union
+from dataclasses import dataclass, field
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -15,6 +15,16 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
+
+@dataclass
+class ChunkEntry:
+    doc_id: str
+    full_path: str
+    vector: np.ndarray
+    parent: str
+    grandparent: str
+    score: float = field(default=None)
+    idx: int = field(default=None)
 
 def embed_query(
     model: Any,
@@ -75,76 +85,124 @@ def embed_query(
         "expansions": expansions
     }
 
-
 def retrieve_top_k_documents(
     query_vector: np.ndarray,
-    corpus_vectors: Dict[str, np.ndarray],
+    corpus_vectors: Dict[str, Union[np.ndarray, List[np.ndarray]]],  # key=path, value=vector or list of chunk vectors
     top_k: int = 10
 ) -> List[Dict[str, Any]]:
     """
-    Retrieve top-k most similar document vectors by cosine similarity.
+    Retrieve top-k most similar documents by cosine similarity.
+    Supports both single-vector (one embedding per document) and
+    multi-vector (list of chunk embeddings per document) setups.
 
-    Args:
-        query_vector: Query embedding.
-        corpus_vectors: Mapping doc_id -> embedding array.
-        top_k: Number of results to return.
-
-    Returns:
-        List of dicts with keys: doc_id, score.
+    Returns list of dicts with keys:
+      - rank
+      - doc_id       (document folder name)
+      - score        (max cosine similarity)
+      - parent       (folder name)
+      - grandparent  (folder's parent)
     """
-    doc_ids = list(corpus_vectors.keys())
-    matrix = np.vstack([corpus_vectors[i] for i in doc_ids])
-    sims = cosine_similarity(query_vector.reshape(1, -1), matrix)[0]
-    top_idx = np.argsort(sims)[::-1][:top_k]
-    results: List[Dict[str, Any]] = []
+    # Detect multi-vector: any value is a list/tuple with multiple vectors
+    multi_vector = any(isinstance(v, (list, tuple)) and len(v) > 1 for v in corpus_vectors.values())
 
-    for rank, idx in enumerate(top_idx, start=1):
-        file_path = Path(doc_ids[idx])
-        parent = file_path.parent.name
-        grandparent = file_path.parent.parent.name
+    # Build chunk entries with metadata
+    entries: List[ChunkEntry] = []
+    for path, vec_or_list in corpus_vectors.items():
+        p = Path(path)
+        parent = p.name
+        grandparent = p.parent.name
+        if multi_vector and isinstance(vec_or_list, (list, tuple)):
+            # multiple chunk vectors under one document
+            for i, vec in enumerate(vec_or_list):
+                entries.append(ChunkEntry(
+                    doc_id=parent,
+                    full_path=path,
+                    vector=vec,
+                    parent=parent,
+                    grandparent=grandparent,
+                    idx=i
+                ))
+        else:
+            # single vector per document
+            doc_id = p.stem
+            entries.append(ChunkEntry(
+                doc_id=doc_id,
+                full_path=path,
+                vector=vec_or_list,
+                parent=parent,
+                grandparent=grandparent,
+                idx=0
+            ))
+
+    # Compute cosine similarities for all entries
+    matrix = np.vstack([e.vector for e in entries])
+    sims = cosine_similarity(query_vector.reshape(1, -1), matrix)[0]
+
+    for i, entry in enumerate(entries):
+        entry.score = float(sims[i])
+
+    # Aggregate best chunk per document
+    best_per_doc: Dict[str, ChunkEntry] = {}
+    for entry in entries:
+        if entry.doc_id not in best_per_doc or entry.score > best_per_doc[entry.doc_id].score:
+            best_per_doc[entry.doc_id] = entry
+
+    top_docs = sorted(
+        best_per_doc.values(),
+        key=lambda e: e.score,
+        reverse=True
+    )[:top_k]
+
+    results: List[Dict[str, Any]] = []
+    for rank, entry in enumerate(top_docs, start=1):
         results.append({
             "rank": rank,
-            "doc_id": idx,
-            "score": float(sims[idx]),
-            "grandparent": grandparent,
-            "parent": parent
+            "doc_id": entry.doc_id,
+            "score": entry.score,
+            "parent": entry.parent,
+            "grandparent": entry.grandparent
         })
-    logger.info("Top-%d documents retrieved", top_k)
+
+    logger.info(f"Top-%d documents retrieved (multi-vector={multi_vector})", top_k)
     return results
 
-
-def run_word2vec_query(
+def load_word2vec_resources(
     paths: Dict[str, Path],
+    use_multivector: bool = True
+) -> Dict[str, Any]:
+    """
+    Load model, idf, and corpus_vectors once.
+    Returns a dict with keys 'model', 'idf', and 'corpus_vectors'.
+    """
+    model = aux_vsm.load_word2vec_model(paths['word2vec'])
+    idf_dict = aux_vsm.get_or_build_idf(
+        str(paths['pdf_folder']),
+        str(paths['idf_cache'])
+    )
+    vec_key = 'word2vec_vsm_multivector' if use_multivector else 'word2vec_vsm_singlevector'
+    with paths[vec_key].open('rb') as f:
+        corpus_vectors: Dict[str, np.ndarray] = pickle.load(f)
+
+    return {
+        'model': model,
+        'idf': idf_dict,
+        'corpus_vectors': corpus_vectors
+    }
+
+def run_word2vec_query_preloaded(
+    resources: Dict[str, Any],
     query: str,
     top_k: int = 10,
     use_expansion: bool = True
 ) -> Dict[str, Any]:
     """
-    Perform a Word2Vec-based semantic retrieval and return structured results.
-
-    Args:
-        paths: Dict containing keys:
-            - 'word2vec': Path to binary model
-            - 'idf_cache': Path for IDF cache
-            - 'word2vec_vsm': Path to pickle of corpus vectors
-            - 'pdf_folder': Path to corpus for building IDF
-        query: Raw query string.
-        top_k: Number of top documents to return.
-        use_expansion: Whether to include expansion terms.
-
-    Returns:
-        List of result dicts with fields: rank, doc_id, score.
+    resources: output of load_word2vec_resources()
+    Just embed & score — no file I/O.
     """
-    logger.info("Running Word2Vec query: '%s'", query)
+    model = resources['model']
+    idf_dict = resources['idf']
+    corpus_vectors = resources['corpus_vectors']
 
-    # Load resources
-    model = aux_vsm.load_word2vec_model(paths['word2vec'])
-    idf_dict = aux_vsm.get_or_build_idf(str(paths['pdf_folder']), str(paths['idf_cache']))
-
-    with paths['word2vec_vsm'].open('rb') as f:
-        corpus_vectors: Dict[str, np.ndarray] = pickle.load(f)
-
-    # Embed query
     q_info = embed_query(
         model=model,
         query=query,
@@ -153,10 +211,8 @@ def run_word2vec_query(
         use_expansion=use_expansion
     )
 
-    # Retrieve results
     results = retrieve_top_k_documents(q_info['vector'], corpus_vectors, top_k)
 
-    # Wrap and return
     return {
         "query_info": q_info,
         "results": results
