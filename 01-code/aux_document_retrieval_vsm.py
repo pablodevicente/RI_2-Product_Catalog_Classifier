@@ -26,145 +26,39 @@ class ChunkEntry:
     score: float = field(default=None)
     idx: int = field(default=None)
 
-def embed_query(
-    model: Any,
-    query: str,
-    idf_cached: Dict[str, float],
-    tokenize_fn: Any,
-    use_expansion: bool = True,
-    topn_synonyms: int = 10,
-    min_sim: float = 0.65,
-    min_idf: float = 1.2
-) -> Dict[str, Any]:
+@dataclass
+class QueryEmbeddingResult:
+    query: str
+    vector: np.ndarray
+    tokens: List[str]
+    expansions: List[str]
+
+@dataclass
+class RetrievedDocument:
+    """Metadatos y puntuación de un documento recuperado."""
+    rank: int
+    doc_id: str
+    score: float
+    parent: str
+    grandparent: str
+
+@dataclass
+class TopKDocumentsResult:
+    """Resultado de la recuperación top-k."""
+    top_k: int
+    multi_vector: bool
+    documents: List[RetrievedDocument]
+
+@dataclass
+class Word2VecQueryResult:
     """
-    Compute a TF-IDF weighted embedding for the query, optionally expanding terms.
-
-    Args:
-        model: Word2Vec-like model with attributes .vector_size.
-        query: Raw query string.
-        idf_cached: Mapping term -> IDF score.
-        tokenize_fn: Function to tokenize the query string.
-        use_expansion: Whether to include similar terms.
-        topn_synonyms: Number of similar terms per token.
-        min_sim: Similarity threshold for expansions.
-        min_idf: IDF threshold for expansions.
-
-    Returns:
-        Dict containing:
-          - query: original query string
-          - vector: numpy array embedding
-          - tokens: list of tokens used
-          - expansions: list of expansion terms
+    Resultado completo de una consulta Word2Vec pre-cargada.
+    - query_info: información detallada de la query y embeddings.
+    - results: documentos recuperados con sus metadatos y puntuaciones.
     """
-    # Tokenize original query
-    original_tokens = tokenize_fn(query)
-    tokens: List[str] = original_tokens.copy()
-    expansions: List[str] = []
+    query_info: QueryEmbeddingResult
+    results: TopKDocumentsResult
 
-    if use_expansion:
-        expansions = aux_semantic_search.expand_query_terms_vsm(
-            original_tokens, model, idf_cached,
-            topn_synonyms, min_sim, min_idf
-        )
-        # merge tokens and expansions, dedupe
-        tokens = list(dict.fromkeys(original_tokens + expansions))
-
-    # Compute TF-IDF weighted average embedding
-    vector = aux_vsm.tfidf_weighted_avg_embedding(
-        doc_tokens=tokens,
-        model=model,
-        idf_dict=idf_cached,
-        vector_size=model.vector_size
-    )
-
-    logger.info("Query embedding computed: %d dims", vector.shape[0])
-    return {
-        "query": query,
-        "vector": vector,
-        "tokens": tokens,
-        "expansions": expansions
-    }
-
-def retrieve_top_k_documents(
-    query_vector: np.ndarray,
-    corpus_vectors: Dict[str, Union[np.ndarray, List[np.ndarray]]],  # key=path, value=vector or list of chunk vectors
-    top_k: int = 10
-) -> List[Dict[str, Any]]:
-    """
-    Retrieve top-k most similar documents by cosine similarity.
-    Supports both single-vector (one embedding per document) and
-    multi-vector (list of chunk embeddings per document) setups.
-
-    Returns list of dicts with keys:
-      - rank
-      - doc_id       (document folder name)
-      - score        (max cosine similarity)
-      - parent       (folder name)
-      - grandparent  (folder's parent)
-    """
-    # Detect multi-vector: any value is a list/tuple with multiple vectors
-    multi_vector = any(isinstance(v, (list, tuple)) and len(v) > 1 for v in corpus_vectors.values())
-
-    # Build chunk entries with metadata
-    entries: List[ChunkEntry] = []
-    for path, vec_or_list in corpus_vectors.items():
-        p = Path(path)
-        parent = p.name
-        grandparent = p.parent.name
-        if multi_vector and isinstance(vec_or_list, (list, tuple)):
-            # multiple chunk vectors under one document
-            for i, vec in enumerate(vec_or_list):
-                entries.append(ChunkEntry(
-                    doc_id=parent,
-                    full_path=path,
-                    vector=vec,
-                    parent=parent,
-                    grandparent=grandparent,
-                    idx=i
-                ))
-        else:
-            # single vector per document
-            doc_id = p.stem
-            entries.append(ChunkEntry(
-                doc_id=doc_id,
-                full_path=path,
-                vector=vec_or_list,
-                parent=parent,
-                grandparent=grandparent,
-                idx=0
-            ))
-
-    # Compute cosine similarities for all entries
-    matrix = np.vstack([e.vector for e in entries])
-    sims = cosine_similarity(query_vector.reshape(1, -1), matrix)[0]
-
-    for i, entry in enumerate(entries):
-        entry.score = float(sims[i])
-
-    # Aggregate best chunk per document
-    best_per_doc: Dict[str, ChunkEntry] = {}
-    for entry in entries:
-        if entry.doc_id not in best_per_doc or entry.score > best_per_doc[entry.doc_id].score:
-            best_per_doc[entry.doc_id] = entry
-
-    top_docs = sorted(
-        best_per_doc.values(),
-        key=lambda e: e.score,
-        reverse=True
-    )[:top_k]
-
-    results: List[Dict[str, Any]] = []
-    for rank, entry in enumerate(top_docs, start=1):
-        results.append({
-            "rank": rank,
-            "doc_id": entry.doc_id,
-            "score": entry.score,
-            "parent": entry.parent,
-            "grandparent": entry.grandparent
-        })
-
-    logger.info(f"Top-%d documents retrieved (multi-vector={multi_vector})", top_k)
-    return results
 
 def load_word2vec_resources(
     paths: Dict[str, Path],
@@ -194,10 +88,18 @@ def run_word2vec_query_preloaded(
     query: str,
     top_k: int = 10,
     use_expansion: bool = True
-) -> Dict[str, Any]:
+) -> Word2VecQueryResult:
     """
-    resources: output of load_word2vec_resources()
-    Just embed & score — no file I/O.
+    Ejecuta consulta Word2Vec usando recursos cargados, devolviendo objetos tipados.
+
+    Args:
+        resources: salida de load_word2vec_resources().
+        query: cadena de consulta.
+        top_k: número de documentos a recuperar.
+        use_expansion: si se expande la query con sinónimos.
+
+    Returns:
+        Word2VecQueryResult con query_info y resultados tipados.
     """
     model = resources['model']
     idf_dict = resources['idf']
@@ -211,13 +113,154 @@ def run_word2vec_query_preloaded(
         use_expansion=use_expansion
     )
 
-    results = retrieve_top_k_documents(q_info['vector'], corpus_vectors, top_k)
+    topk_results = retrieve_top_k_documents(
+        query_vector=q_info.vector,
+        corpus_vectors=corpus_vectors,
+        top_k=top_k
+    )
 
-    return {
-        "query_info": q_info,
-        "results": results
-    }
+    return Word2VecQueryResult(
+        query_info=q_info,
+        results=topk_results
+    )
 
+def embed_query(
+        model: Any,
+        query: str,
+        idf_cached: Dict[str, float],
+        tokenize_fn: Any,
+        use_expansion: bool = True,
+        topn_synonyms: int = 10,
+        min_sim: float = 0.65,
+        min_idf: float = 1.2
+) -> QueryEmbeddingResult:
+    """
+    Compute a TF-IDF weighted embedding for the query, optionally expanding terms,
+    and devuelve un QueryEmbeddingResult.
+
+    Args:
+        model: Word2Vec-like model with .vector_size.
+        query: Raw query string.
+        idf_cached: Mapping term -> IDF score.
+        tokenize_fn: Function to tokenize the query string.
+        use_expansion: Si se añaden términos similares.
+        topn_synonyms: Nº de sinónimos a extraer.
+        min_sim: Umbral de similitud para expansiones.
+        min_idf: Umbral de IDF para expansiones.
+
+    Returns:
+        QueryEmbeddingResult con todos los datos.
+    """
+    original_tokens = tokenize_fn(query)
+    tokens = original_tokens.copy()
+    expansions: List[str] = []
+
+    if use_expansion:
+        expansions = aux_semantic_search.expand_query_terms_vsm(
+            original_tokens, model, idf_cached,
+            topn_synonyms, min_sim, min_idf
+        )
+        # merge y dedupe
+        tokens = list(dict.fromkeys(original_tokens + expansions))
+
+    vector = aux_vsm.tfidf_weighted_avg_embedding(
+        doc_tokens=tokens,
+        model=model,
+        idf_dict=idf_cached,
+        vector_size=model.vector_size
+    )
+
+    logger.info("Query embedding computed: %d dims", vector.shape[0])
+
+    return QueryEmbeddingResult(
+        query=query,
+        vector=vector,
+        tokens=tokens,
+        expansions=expansions
+    )
+
+def retrieve_top_k_documents(
+    query_vector: np.ndarray,
+    corpus_vectors: Dict[str, Union[np.ndarray, List[np.ndarray]]],  # key=path, value=vector o lista de vectores
+    top_k: int = 10
+) -> TopKDocumentsResult:
+    """
+    Recupera los top-k documentos más similares por similitud de coseno.
+    Soporta representaciones por documento único o por chunks múltiples.
+
+    Args:
+        query_vector: Embedding de la consulta.
+        corpus_vectors: Mapa path -> vector único o lista de vectors por chunks.
+        top_k: número de documentos a devolver.
+
+    Returns:
+        TopKDocumentsResult con la lista de documentos ordenada.
+    """
+    multi_vector = any(
+        isinstance(v, (list, tuple)) and len(v) > 1
+        for v in corpus_vectors.values()
+    )
+
+    entries: List[ChunkEntry] = []
+    for path, vec_or_list in corpus_vectors.items():
+        p = Path(path)
+        parent = p.name
+        grandparent = p.parent.name
+        if multi_vector and isinstance(vec_or_list, (list, tuple)):
+            for vec in vec_or_list:
+                entries.append(ChunkEntry(
+                    doc_id=parent,
+                    vector=vec,
+                    parent=parent,
+                    grandparent=grandparent,
+                    full_path=str(p)
+                ))
+        else:
+            entries.append(ChunkEntry(
+                doc_id=p.stem,
+                vector=vec_or_list,
+                parent=parent,
+                grandparent=grandparent,
+                full_path=str(p)
+            ))
+
+    matrix = np.vstack([e.vector for e in entries])
+    sims = cosine_similarity(query_vector.reshape(1, -1), matrix)[0]
+    for i, entry in enumerate(entries):
+        entry.score = float(sims[i])
+
+    best_per_doc: Dict[str, ChunkEntry] = {}
+    for entry in entries:
+        if (entry.doc_id not in best_per_doc
+            or entry.score > best_per_doc[entry.doc_id].score):
+            best_per_doc[entry.doc_id] = entry
+
+    sorted_best = sorted(
+        best_per_doc.values(),
+        key=lambda e: e.score,
+        reverse=True
+    )[:top_k]
+
+    documents = [
+        RetrievedDocument(
+            rank=idx+1,
+            doc_id=entry.doc_id,
+            score=entry.score,
+            parent=entry.parent,
+            grandparent=entry.grandparent
+        )
+        for idx, entry in enumerate(sorted_best)
+    ]
+
+    logger.info(f"Top-%d documents retrieved (multi-vector=%s)",
+                top_k, multi_vector)
+    return TopKDocumentsResult(
+        top_k=top_k,
+        multi_vector=multi_vector,
+        documents=documents
+    )
+
+## desfasado -- refactor
 def print_documents(top_k_vsm: Dict[str, Any], top_k: int = 5):
     """
     Expects top_k_vsm to be a dict with:

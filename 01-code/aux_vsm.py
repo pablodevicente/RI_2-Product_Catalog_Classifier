@@ -34,7 +34,7 @@ def get_or_build_idf(
         Dict[str, float]: Mapping from term to inverse document frequency.
     """
     if os.path.exists(cache_path):
-        logging.info(f"Loading cached IDF dictionary from {cache_path}...")
+        logging.info(f"Loading cached IDF dictionary from {cache_path}... \n")
         with open(cache_path, "rb") as f:
             idf_dict = pickle.load(f)
     else: ## the tf-idf matrix does not exist, create one
@@ -248,7 +248,7 @@ def simple_tokenize(text: str) -> List[str]:
 
 
 def load_word2vec_model(google_path: Path) -> KeyedVectors:
-    logging.info("Loading pre-trained Google News Word2Vec model...")
+    logging.info("Loading pre-trained Google News Word2Vec model...\n")
     return KeyedVectors.load_word2vec_format(str(google_path), binary=True)
 
 def load_finetuned_word2vec(
