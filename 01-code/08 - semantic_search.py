@@ -38,7 +38,26 @@ def main():
     results_df = pd.DataFrame()
 
     try:    #i am changing the methods for convenience sake
-        top_k_vsm = aux_vsm.run_word2vec_query(paths, query, top_k=top_k,use_expansion=True,multivector=True)
+        #top_k_vsm = aux_vsm.run_word2vec_query(paths, query, top_k=top_k,use_expansion=True,multivector=True)
+
+        #---------------------------------seems much more complicated than the line up top, but its modular
+        top_k = 20
+        use_expansion = True
+
+        resources = aux_vsm.load_word2vec_resources(
+            paths,
+            use_multivector=False
+        )
+        query_runner = lambda q: aux_vsm.run_word2vec_query_preloaded(
+            resources=resources,
+            query=q,
+            top_k=top_k,
+            use_expansion=use_expansion
+        )
+        top_k_vsm = query_runner(query)
+        # -----------------------------------------------------------------------------------------
+
+
         top_k_bm25 = aux_bm25.run_bm25_query(paths, query, top_k=top_k)
 
         aux_vsm.print_documents(top_k_vsm, top_k=top_k)

@@ -39,8 +39,8 @@ class RetrievedDocument:
     rank: int
     doc_id: str
     score: float
-    parent: str
-    grandparent: str
+    doc_name: str
+    label: str
 
 @dataclass
 class TopKDocumentsResult:
@@ -246,8 +246,8 @@ def retrieve_top_k_documents(
             rank=idx+1,
             doc_id=entry.doc_id,
             score=entry.score,
-            parent=entry.parent,
-            grandparent=entry.grandparent
+            doc_name=entry.parent,
+            label=entry.grandparent
         )
         for idx, entry in enumerate(sorted_best)
     ]
