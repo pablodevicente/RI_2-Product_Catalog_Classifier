@@ -54,24 +54,20 @@ def evaluate_queries(
 
     elif method == "bm25":
         if resources is None:
+
             retriever_path = paths["retriever"]
+
             if not retriever_path.exists():
-                logger.info("Creating BM25 index...")
-                resources = aux_bm25.create_bm25_index(
-                    paths["pdf_folder"],
-                    retriever_path
-                )
+                resources = aux_bm25.create_bm25_index(paths["pdf_folder"],retriever_path)
             else:
                 logger.info("Loading BM25 model from %s", retriever_path)
-                resources = bm25s.BM25.load(
-                    str(retriever_path),
-                    load_corpus=True
-                )
+                resources = bm25s.BM25.load(str(retriever_path),load_corpus=True)
+
         corpus = getattr(resources, "corpus", None)
 
         # Now query_bm25 returns a List[BM25Result]
         query_runner = lambda q: aux_bm25.query_bm25(
-            retriever_path=paths["retriever"],
+            retriever_path=retriever_path,
             retriever=resources,
             query=q,
             k=top_k,
@@ -103,7 +99,7 @@ def evaluate_queries(
                 )
             else:  # bm25
                 df = (
-                    df_raw.loc[:, ["rank", "doc_id", "doc_name", "label", "score"]]
+                    df_raw.loc[:, ["rank", "doc_id", "label", "score"]]
                 )
 
             df = df.set_index("rank")
@@ -118,7 +114,7 @@ def evaluate_queries(
             if method == "vsm":
                 match = df[df["doc_id"] == doc.doc]
             else:  # for BM25, match on doc_name
-                match = df[df["doc_name"] == doc.doc]
+                match = df[df["doc_id"] == doc.doc]
 
             matched_rank  = int(match.index[0])         if not match.empty else None
             matched_score = float(match["score"].iloc[0]) if not match.empty else None
@@ -423,3 +419,72 @@ def compute_query_run_stats(
     df_score_stats = pd.DataFrame([stats])
 
     return {'per_record': df_per_record, 'top_counts': df_top_counts, 'score_stats': df_score_stats}
+
+import numpy as np
+def rrf_df(
+    vsm_df: pd.DataFrame,
+    bm25_df: pd.DataFrame,
+    k: float = 60.0
+) -> pd.DataFrame:
+    """
+    Reciprocal Rank Fusion (RRF) combining VSM and BM25 DataFrames,
+    merging via 'doc_name'. Guards missing columns gracefully.
+
+    Expects:
+      vsm_df: DataFrame with columns ['doc_id','doc_name','rank','score',...]
+      bm25_df: DataFrame with columns ['doc_name','doc_id','rank','score',...]
+    Returns:
+      DataFrame with fused scores, side-specific metadata, keyed by doc_name.
+    """
+    # Prepare VSM DataFrame
+    df_v = vsm_df.copy()
+    # Ensure 'doc_name' exists in VSM
+    if 'doc_name' not in df_v and 'doc_id' in df_v:
+        df_v['doc_name'] = df_v['doc_id']
+    # Rename VSM columns
+    if 'rank' in df_v:
+        df_v = df_v.rename(columns={'rank': 'vsm_rank'})
+    else:
+        df_v['vsm_rank'] = np.nan
+    if 'score' in df_v:
+        df_v = df_v.rename(columns={'score': 'vsm_score'})
+    else:
+        df_v['vsm_score'] = np.nan
+
+    # Prepare BM25 DataFrame
+    df_b = bm25_df.copy()
+    # Ensure 'doc_name' exists
+    if 'doc_name' not in df_b and 'doc_id' in df_b:
+        df_b['doc_name'] = df_b['doc_id']
+    # Rename BM25 columns
+    if 'rank' in df_b:
+        df_b = df_b.rename(columns={'rank': 'bm25_rank'})
+    else:
+        df_b['bm25_rank'] = np.nan
+    if 'score' in df_b:
+        df_b = df_b.rename(columns={'score': 'bm25_score'})
+    else:
+        df_b['bm25_score'] = np.nan
+
+    # Merge on 'doc_name'
+    merged = pd.merge(df_v, df_b, on='doc_name', how='outer')
+
+    # Compute default fill values
+    max_vsm = df_v['vsm_rank'].max(skipna=True)
+    max_bm25 = df_b['bm25_rank'].max(skipna=True)
+    default_vsm = (max_vsm + 1) if not np.isnan(max_vsm) else 1
+    default_bm25 = (max_bm25 + 1) if not np.isnan(max_bm25) else 1
+
+    # Fill missing ranks
+    merged['vsm_rank'] = merged['vsm_rank'].fillna(default_vsm)
+    merged['bm25_rank'] = merged['bm25_rank'].fillna(default_bm25)
+
+    # Compute RRF components
+    merged['rrf_vsm'] = 1.0 / (merged['vsm_rank'] + k)
+    merged['rrf_bm25'] = 1.0 / (merged['bm25_rank'] + k)
+    merged['rrf_score'] = merged['rrf_vsm'] + merged['rrf_bm25']
+
+    # Sort descending by fused score
+    result_df = merged.sort_values('rrf_score', ascending=False).reset_index(drop=True)
+    return result_df
+

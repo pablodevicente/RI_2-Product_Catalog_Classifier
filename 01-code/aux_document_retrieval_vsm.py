@@ -2,63 +2,17 @@ import logging
 import pickle
 from pathlib import Path
 from typing import List, Tuple, Dict, Any, Optional, Union
-from dataclasses import dataclass, field
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-
+from dataclass import ChunkEntry,QueryEmbeddingResult,RetrievedDocument,TopKDocumentsResult,Word2VecQueryResult
 import aux_vsm
 import aux_semantic_search
 
-# Module-level logger
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-
-@dataclass
-class ChunkEntry:
-    doc_id: str
-    full_path: str
-    vector: np.ndarray
-    parent: str
-    grandparent: str
-    score: float = field(default=None)
-    idx: int = field(default=None)
-
-@dataclass
-class QueryEmbeddingResult:
-    query: str
-    vector: np.ndarray
-    tokens: List[str]
-    expansions: List[str]
-
-@dataclass
-class RetrievedDocument:
-    """Metadatos y puntuación de un documento recuperado."""
-    rank: int
-    doc_id: str
-    score: float
-    doc_name: str
-    label: str
-
-@dataclass
-class TopKDocumentsResult:
-    """Resultado de la recuperación top-k."""
-    top_k: int
-    multi_vector: bool
-    documents: List[RetrievedDocument]
-
-@dataclass
-class Word2VecQueryResult:
-    """
-    Resultado completo de una consulta Word2Vec pre-cargada.
-    - query_info: información detallada de la query y embeddings.
-    - results: documentos recuperados con sus metadatos y puntuaciones.
-    """
-    query_info: QueryEmbeddingResult
-    results: TopKDocumentsResult
-
 
 def load_word2vec_resources(
     paths: Dict[str, Path],
@@ -216,6 +170,8 @@ def retrieve_top_k_documents(
                     full_path=str(p)
                 ))
         else:
+            ##because of bad coding and not wanting to re-do how i package the vectors (05-vsm)
+            grandparent = p.parent.parent.name
             entries.append(ChunkEntry(
                 doc_id=p.stem,
                 vector=vec_or_list,
@@ -246,7 +202,6 @@ def retrieve_top_k_documents(
             rank=idx+1,
             doc_id=entry.doc_id,
             score=entry.score,
-            doc_name=entry.parent,
             label=entry.grandparent
         )
         for idx, entry in enumerate(sorted_best)

@@ -3,36 +3,15 @@ import json
 import logging
 from pathlib import Path
 from typing import List, Tuple, Dict, Optional, Any
-from dataclasses import dataclass
 from typing import Optional
 import bm25s
+from dataclass import BM25QueryResult,RetrievedDocument,RetrievedDocument,TopKDocumentsResult
 
-# Configure module-level logger
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-
-@dataclass
-class BM25Result:
-    rank: int
-    doc_id: int
-    score: float
-    text: Optional[str]
-    doc_name: str
-    label: str
-
-    def to_dict(self) -> dict:
-        return {
-            "rank": self.rank,
-            "doc_id": self.doc_id,
-            "doc_name": self.doc_name,
-            "label": self.label,
-            "score": self.score,
-            "text": self.text
-        }
-
 
 def load_corpus_bm25(corpus_path: Path) -> Tuple[List[str], List[str]]:
     """
@@ -78,6 +57,7 @@ def create_bm25_index(
     Returns:
         A fitted BM25 retriever instance.
     """
+    logger.info("Creating BM25 index...")
     if not input_path.exists() or not input_path.is_dir():
         raise FileNotFoundError(f"Invalid input path: {input_path}")
 
@@ -109,7 +89,7 @@ def run_bm25_query(
     query: str,
     top_k: int = 10,
     vsm_ids: Optional[List[int]] = None
-) -> List[dict]:
+) -> BM25QueryResult:
     """
     Load or build BM25 index, execute query, and return top-k results.
     Optionally limit to a subset of doc IDs.
@@ -125,77 +105,83 @@ def run_bm25_query(
 
     corpus = getattr(retriever, "corpus", None)
 
-    results = query_bm25(
+    topk_results = retrieve_top_k_documents(
         retriever_path=retriever_path,
         retriever=retriever,
         query=query,
-        k=top_k,
+        top_k=top_k,
         corpus=corpus,
         vsm_ids=vsm_ids
     )
 
-    return [r.to_dict() for r in results]
+    return BM25QueryResult(
+        query_info=query,
+        results=topk_results
+    )
 
-def query_bm25(
+def retrieve_top_k_documents(
     retriever_path: Path,
     retriever: bm25s.BM25,
     query: str,
-    k: int = 5,
+    top_k: int = 5,
     corpus: Optional[List[str]] = None,
     vsm_ids: Optional[List[int]] = None
-) -> List[BM25Result]:
+) -> TopKDocumentsResult:
     """
     Query BM25 index and return top-k results as BM25Result instances.
     Optionally restrict to a subset of document indices.
     """
-    if not query:
-        raise ValueError("Query string is empty.")
-
     logger.info("Querying BM25 for: '%s'", query)
-    q_tokens = bm25s.tokenize(query, stopwords="en")
 
+    q_tokens = bm25s.tokenize(query, stopwords="en")
     mapping_path = retriever_path.with_name(retriever_path.name + "_filenames.json")
     file_names = json.loads(mapping_path.read_text(encoding="utf-8"))
 
-    results: List[BM25Result] = []
+    documents: list[RetrievedDocument] = []
 
-    if vsm_ids:
+    if vsm_ids: ##this is for bm25 + vsm rankings
         logger.info("Restricting query to candidate VSM IDs")
         all_scores = retriever.get_scores(q_tokens[0])  # BM25 expects List[str]
         subset = sorted(
             [(doc_id, float(all_scores[doc_id])) for doc_id in vsm_ids],
             key=lambda x: x[1],
             reverse=True
-        )[:k]
+        )[:top_k]
 
         for rank, (doc_id, score) in enumerate(subset, start=1):
             path = Path(file_names[doc_id])
-            results.append(BM25Result(
-                rank=rank,
-                doc_id=doc_id,
-                score=score,
-                text=corpus[doc_id] if corpus else None,
-                doc_name=path.parent.name,
-                label=path.parent.parent.name
-            ))
+
+            documents.append(
+                RetrievedDocument(
+                    rank=rank + 1,
+                    doc_id=path.parent.name,
+                    score=score,
+                    label=path.parent.parent.name
+                )
+            )
     else:
-        doc_ids, scores = retriever.retrieve(q_tokens, k=k)
+        #this line retrieves top_k elements. much easier than vsm
+        doc_ids, scores = retriever.retrieve(q_tokens, k=top_k)
         for rank in range(doc_ids.shape[1]):
-            doc_id = int(doc_ids[0, rank])
+            doc_idx = int(doc_ids[0, rank])
             score = float(scores[0, rank])
-            path = Path(file_names[doc_id])
-            results.append(BM25Result(
-                rank=rank + 1,
-                doc_id=doc_id,
-                score=score,
-                text=corpus[doc_id] if corpus else None,
-                doc_name=path.parent.name,
-                label=path.parent.parent.name
-            ))
+            path = Path(file_names[doc_idx])
 
-    logger.info("Retrieved %d results", len(results))
-    return results
+            documents.append(
+                RetrievedDocument(
+                    rank=rank + 1,
+                    doc_id=path.parent.name,
+                    score=score,
+                    label=path.parent.parent.name
+                )
+            )
 
+    logger.info("Retrieved %d results", len(documents))
+
+    return TopKDocumentsResult(
+        top_k=top_k,
+        documents=documents
+    )
 
 def print_documents(top_k_bm25,top_k=5):
 
@@ -203,7 +189,7 @@ def print_documents(top_k_bm25,top_k=5):
     for document_k in top_k_bm25[:top_k]:
 
         rank = document_k["rank"]
-        score = document_k["score"]
+        score = document_k["bm25_score"]
         grandparent = document_k["grandparent"]
         parent = document_k["parent"]
 
