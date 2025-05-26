@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import aux_document_retrieval_bm25 as aux_bm25
 import aux_document_retrieval_vsm as aux_vsm
 import aux_document_retrieval_hybrid as aux_hybrid
-
+import dataclass as data
 import aux_semantic_search as aux_semantics
 import bm25s
 
@@ -420,71 +420,58 @@ def compute_query_run_stats(
 
     return {'per_record': df_per_record, 'top_counts': df_top_counts, 'score_stats': df_score_stats}
 
-import numpy as np
-def rrf_df(
-    vsm_df: pd.DataFrame,
-    bm25_df: pd.DataFrame,
-    k: float = 60.0
-) -> pd.DataFrame:
+def rrf_from_dfs(
+    dfs: List[pd.DataFrame],
+    rrf_k: int = 60,
+    top_k: int = 10,
+    multi_vector: bool = True
+) -> data.RRFQueryResult:
     """
-    Reciprocal Rank Fusion (RRF) combining VSM and BM25 DataFrames,
-    merging via 'doc_name'. Guards missing columns gracefully.
+    Reciprocal Rank Fusion over multiple pandas DataFrames.
 
-    Expects:
-      vsm_df: DataFrame with columns ['doc_id','doc_name','rank','score',...]
-      bm25_df: DataFrame with columns ['doc_name','doc_id','rank','score',...]
-    Returns:
-      DataFrame with fused scores, side-specific metadata, keyed by doc_name.
+    :param dfs: list of DataFrames, each with columns
+                ['rank', 'score', 'label', 'doc_id']
+    :param rrf_k: the k parameter in RRF (defaults to 60)
+    :param top_k: how many fused docs to return
+    :param multi_vector: flag to store in TopKDocumentsResult
+    :returns: RRFQueryResult(results=TopKDocumentsResult(...))
     """
-    # Prepare VSM DataFrame
-    df_v = vsm_df.copy()
-    # Ensure 'doc_name' exists in VSM
-    if 'doc_name' not in df_v and 'doc_id' in df_v:
-        df_v['doc_name'] = df_v['doc_id']
-    # Rename VSM columns
-    if 'rank' in df_v:
-        df_v = df_v.rename(columns={'rank': 'vsm_rank'})
-    else:
-        df_v['vsm_rank'] = np.nan
-    if 'score' in df_v:
-        df_v = df_v.rename(columns={'score': 'vsm_score'})
-    else:
-        df_v['vsm_score'] = np.nan
+    # for each DataFrame, compute the 1/(rrf_k + rank) contribution
+    contribs = []
+    for df in dfs:
+        tmp = pd.DataFrame({
+            "doc_id": df["doc_id"],
+            "rrf": 1.0 / (rrf_k + df["rank"]),
+            "label": df["label"],
+        })
+        contribs.append(tmp)
 
-    # Prepare BM25 DataFrame
-    df_b = bm25_df.copy()
-    # Ensure 'doc_name' exists
-    if 'doc_name' not in df_b and 'doc_id' in df_b:
-        df_b['doc_name'] = df_b['doc_id']
-    # Rename BM25 columns
-    if 'rank' in df_b:
-        df_b = df_b.rename(columns={'rank': 'bm25_rank'})
-    else:
-        df_b['bm25_rank'] = np.nan
-    if 'score' in df_b:
-        df_b = df_b.rename(columns={'score': 'bm25_score'})
-    else:
-        df_b['bm25_score'] = np.nan
+    # stack and sum per doc_id (and grab a label)
+    all_contrib = pd.concat(contribs, ignore_index=True)
+    summed = (
+        all_contrib
+        .groupby(["doc_id", "label"], as_index=False)
+        .agg(rrf_score=("rrf", "sum"))
+    )
 
-    # Merge on 'doc_name'
-    merged = pd.merge(df_v, df_b, on='doc_name', how='outer')
+    # pick top_k by that fused score
+    top = summed.nlargest(top_k, "rrf_score").reset_index(drop=True)
 
-    # Compute default fill values
-    max_vsm = df_v['vsm_rank'].max(skipna=True)
-    max_bm25 = df_b['bm25_rank'].max(skipna=True)
-    default_vsm = (max_vsm + 1) if not np.isnan(max_vsm) else 1
-    default_bm25 = (max_bm25 + 1) if not np.isnan(max_bm25) else 1
+    # build RetrievedDocument list
+    fused_docs = [
+        data.RetrievedDocument(
+            rank=i+1,
+            doc_id=row.doc_id,
+            score=row.rrf_score,
+            label=row.label
+        )
+        for i, row in top.iterrows()
+    ]
 
-    # Fill missing ranks
-    merged['vsm_rank'] = merged['vsm_rank'].fillna(default_vsm)
-    merged['bm25_rank'] = merged['bm25_rank'].fillna(default_bm25)
-
-    # Compute RRF components
-    merged['rrf_vsm'] = 1.0 / (merged['vsm_rank'] + k)
-    merged['rrf_bm25'] = 1.0 / (merged['bm25_rank'] + k)
-    merged['rrf_score'] = merged['rrf_vsm'] + merged['rrf_bm25']
-
-    # Sort descending by fused score
-    result_df = merged.sort_values('rrf_score', ascending=False).reset_index(drop=True)
-    return result_df
-
+    # wrap into TopKDocumentsResult and RRFQueryResult
+    topk_res = data.TopKDocumentsResult(
+        top_k=top_k,
+        documents=fused_docs,
+        multi_vector=multi_vector
+    )
+    return data.RRFQueryResult(results=topk_res)

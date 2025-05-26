@@ -56,6 +56,13 @@ class BM25QueryResult:
     query_info: str
     results: TopKDocumentsResult
 
+@dataclass
+class RRFQueryResult:
+    """
+    - results: documentos recuperados con sus metadatos y puntuaciones.
+    """
+    results: TopKDocumentsResult
+
 ## for managing multiple queries
 @dataclass
 class DocumentSection:
