@@ -9,7 +9,7 @@ import aux_document_retrieval_hybrid as aux_hybrid
 import dataclass as data
 import aux_semantic_search as aux_semantics
 import bm25s
-
+from dataclass import QueryResult, TopKDocumentsResult, RetrievedDocument
 
 @dataclass
 class DocumentSection:
@@ -425,7 +425,7 @@ def rrf_from_dfs(
     rrf_k: int = 60,
     top_k: int = 10,
     multi_vector: bool = True
-) -> data.RRFQueryResult:
+) -> data.QueryResult:
     """
     Reciprocal Rank Fusion over multiple pandas DataFrames.
 
@@ -474,4 +474,117 @@ def rrf_from_dfs(
         documents=fused_docs,
         multi_vector=multi_vector
     )
-    return data.RRFQueryResult(results=topk_res)
+    return data.QueryResult(results=topk_res)
+
+def hybrid_search(
+    bm25_results: List[Dict[str, Any]],
+    vsm_results: List[Dict[str, Any]],
+    weight_bm25: float,
+    weight_vsm:  float,
+    top_k:       int                   = 10,
+    norm_bm25:   Optional[aux_hybrid.ScoreNormMethod] = None,
+    norm_vsm:    Optional[aux_hybrid.ScoreNormMethod] = None,
+    multi_vector: bool                 = True
+) -> QueryResult:
+    """
+    Weighted hybrid search over BM25 + VSM.
+
+    :param bm25_results: list of dicts with at least ['doc_id','score','label']
+    :param vsm_results:  same structure as bm25_results
+    :param weight_bm25:  weight to apply to BM25 scores
+    :param weight_vsm:   weight to apply to VSM scores
+    :param top_k:        how many final docs to return
+    :param norm_bm25:    'minmax' or 'zscore' to normalize BM25, else raw
+    :param norm_vsm:     'minmax' or 'zscore' to normalize VSM, else raw
+    :param multi_vector: flag stored in TopKDocumentsResult
+    :returns:            TopKDocumentsResult with fused RetrievedDocument list
+    """
+    # 1) Normalize or copy raw
+    if norm_bm25 in ('minmax', 'zscore'):
+        aux_hybrid.normalize_scores(bm25_results, score_key='score', norm_key='bm25_norm', method=norm_bm25)
+    else:
+        for r in bm25_results:
+            r['bm25_norm'] = r.get('score', 0.0)
+
+    if norm_vsm in ('minmax', 'zscore'):
+        aux_hybrid.normalize_scores(vsm_results, score_key='score', norm_key='vsm_norm', method=norm_vsm)
+    else:
+        for r in vsm_results:
+            r['vsm_norm'] = r.get('score', 0.0)
+
+    # 2) Merge by doc_id, summing up if duplicates
+    merged: Dict[str, Dict[str, Any]] = {}
+    for r in bm25_results + vsm_results:
+        doc = merged.setdefault(r['doc_id'], {
+            'doc_id':   r['doc_id'],
+            'label':    r['label'],
+            'bm25_norm': 0.0,
+            'vsm_norm':  0.0,
+        })
+        # add whichever norm exists
+        doc['bm25_norm'] += r.get('bm25_norm', 0.0)
+        doc['vsm_norm']  += r.get('vsm_norm',  0.0)
+
+    # 3) Compute weighted hybrid score
+    for doc in merged.values():
+        doc['hybrid_score'] = weight_bm25 * doc['bm25_norm'] + weight_vsm * doc['vsm_norm']
+
+    # 4) Sort & take top_k
+    top = sorted(
+        merged.values(),
+        key=lambda d: d['hybrid_score'],
+        reverse=True
+    )[:top_k]
+
+    # 5) Build RetrievedDocument list
+    fused_docs = [
+        RetrievedDocument(
+            rank= idx + 1,
+            doc_id= d['doc_id'],
+            score= d['hybrid_score'],
+            label= d['label']
+        )
+        for idx, d in enumerate(top)
+    ]
+
+    # 6) Wrap into TopKDocumentsResult
+    topk_hybrid = TopKDocumentsResult(
+        top_k=       top_k,
+        documents=   fused_docs,
+        multi_vector=multi_vector
+    )
+
+    return QueryResult(
+        results=topk_hybrid,
+    )
+
+def run_hybrid_query(
+    paths: Dict[str, Path],
+    query: str,
+    top_k: int = 50,
+    use_multivector : bool = True
+) -> QueryResult:
+    # 1. BM25
+    bm25 = aux_bm25.run_bm25_query(paths, query, top_k=top_k)
+
+    # 2. VSM
+    resources = aux_vsm.load_word2vec_resources(paths,use_multivector=use_multivector)
+    vsm = aux_vsm.run_word2vec_query_preloaded(resources, query, top_k=top_k*2, use_expansion=False)
+    vsm_lookup = { d.doc_id: d.score for d in vsm.results.documents }
+
+    # 3. Build and 4. Rerank
+    drafts = []
+    for base in bm25.results.documents:
+        drafts.append(RetrievedDocument(
+            rank=0,
+            doc_id=base.doc_id,
+            label=base.label,
+            score=vsm_lookup.get(base.doc_id, 0.0)
+        ))
+    reranked = sorted(drafts, key=lambda d: d.score, reverse=True)
+    for i, d in enumerate(reranked, 1):
+        d.rank = i
+
+    # 5. Wrap
+    hybrid_topk = TopKDocumentsResult(top_k=top_k, documents=reranked, multi_vector=True)
+    return QueryResult(results=hybrid_topk)

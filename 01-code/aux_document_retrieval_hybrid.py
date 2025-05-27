@@ -274,7 +274,7 @@ def rerank(paths, query, top_k, mode="bm25-vsm"):
         bm25_grandparents = {doc["doc_id"]: doc.get("grandparent") for doc in top_bm25}
 
         # 2) VSM scores for BM25 shortlist
-        vsm_output = aux_vsm.run_word2vec_query(paths, query, top_k=100, use_expansion=True)
+        vsm_output = aux_vsm.run_word2vec_query_preloaded(paths, query, top_k=100, use_expansion=True)
 
         vsm_results = vsm_output.get("results", [])
         # Build full-map with a default score (e.g. very low) for missing docs
