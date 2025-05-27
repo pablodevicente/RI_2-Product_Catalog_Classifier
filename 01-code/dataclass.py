@@ -57,7 +57,7 @@ class BM25QueryResult:
     results: TopKDocumentsResult
 
 @dataclass
-class RRFQueryResult:
+class QueryResult:
     """
     - results: documentos recuperados con sus metadatos y puntuaciones.
     """
