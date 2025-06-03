@@ -1,0 +1,52 @@
+[
+  {
+    "doc":   "1cr2",
+    "label": "batteries-non-rechargable-primary",
+    "query": "i am looking for a battery with a lifespan of more than 7000 minutes at room temperature"
+  },
+  {
+    "doc":   "cpi-2212-85pm",
+    "label": "alarms-buzzers-and-sirens",
+    "query": "need a buzzer for the front door of my house"
+  },
+  {
+    "doc":   "non-document",
+    "label": "cable-ties-zip-ties",
+    "query": "looking for zipties of at least 30 cm in length"
+  },
+  {
+    "doc":   "non-document",
+    "label": "coaxial-cables-rf",
+    "query": "cable for data transfer with speeds up to 45kbps"
+  },
+  {
+    "doc":   "non-document",
+    "label": "controller-accesories",
+    "query": "temperature controller for an industrial setting"
+  },
+  {
+    "doc":   "non-document",
+    "label": "microphones",
+    "query": "i want a microphone with sensitivity for high frecuency sounds"
+  },
+  {
+    "doc":   "non-document",
+    "label": "printers-label-makers",
+    "query": "laser printer for small labels"
+  },
+  {
+    "doc":   "non-document",
+    "label": "speakers",
+    "query": "speaker capable of fitting in a 20x20cm encloser"
+  },
+  {
+    "doc":   "non-document",
+    "label": "batteries-non-rechargable-primary",
+    "query": "batterie using manganese as its primary component"
+  },
+  {
+    "doc":   "non-document",
+    "label": "speakers",
+    "query": "speaker replacement for a car"
+  }
+]
