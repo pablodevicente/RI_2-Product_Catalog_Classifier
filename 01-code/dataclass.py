@@ -36,6 +36,7 @@ class TopKDocumentsResult:
     documents: List[RetrievedDocument]
     multi_vector: Optional[bool] = None
 
+## I know they are reduntant, dont care.
 
 @dataclass
 class Word2VecQueryResult:

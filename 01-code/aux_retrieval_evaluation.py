@@ -10,6 +10,10 @@ import dataclass as data
 import aux_semantic_search as aux_semantics
 import bm25s
 from dataclass import QueryResult, TopKDocumentsResult, RetrievedDocument
+import matplotlib.pyplot as plt
+import pickle
+import seaborn as sns
+
 
 @dataclass
 class DocumentSection:
@@ -588,3 +592,447 @@ def run_hybrid_query(
     # 5. Wrap
     hybrid_topk = TopKDocumentsResult(top_k=top_k, documents=reranked, multi_vector=True)
     return QueryResult(results=hybrid_topk)
+
+
+# 3) DEFINE A FUNCTION TO PLOT Recall@5, @10, @20 FOR ALL DOCUMENTS
+# -------------------------------------------------------------------
+def plot_recall_for_documents(df, system_name):
+    """
+    For a single pandas DataFrame `df` (with columns
+    ['label_count_top_5','label_count_top_10','label_count_top_20']),
+    this function plots three lines:
+      - label_count_top_5   (Recall @ 5)
+      - label_count_top_10  (Recall @ 10)
+      - label_count_top_20  (Recall @ 20)
+
+    Horizontal axis: document index (1, 2, …, len(df))
+    Vertical axis: number of labels (range 0–20)
+    """
+    num_docs = len(df)
+    x = range(1, num_docs + 1)  # 1-based document indices
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(x, df['label_count_top_5'],  marker='o', label='Recall @ 5')
+    plt.plot(x, df['label_count_top_10'], marker='o', label='Recall @ 10')
+    plt.plot(x, df['label_count_top_20'], marker='o', label='Recall @ 20')
+
+    plt.xlabel('Document Index')
+    plt.ylabel('Recall (Count of Relevant Labels)')
+    plt.title(f'Recall@5, @10, @20 for {system_name} (All Documents)')
+    plt.ylim(0, 20)
+    plt.xticks(x)            # Show every document on the x-axis
+    plt.legend()
+    plt.grid(True, linestyle='--', linewidth=0.5)
+    plt.tight_layout()
+    plt.show()
+
+
+# 3) DEFINE THE FUNCTION TO PLOT A GIVEN "recall" COLUMN FOR ALL METHODS
+def plot_combined_recall(df_list, recall_col):
+    """
+    Plots the specified recall column (e.g., 'label_count_top_5')
+    for all ranking systems in df_list on a single chart.
+
+    Parameters:
+    - df_list: List of tuples [(name, DataFrame), ...]
+    - recall_col: str, one of ['label_count_top_5', 'label_count_top_10', 'label_count_top_20']
+    """
+    # Assume all DataFrames have the same number of rows (documents)
+    num_docs = len(df_list[0][1])
+    x = range(1, num_docs + 1)   # Document indices are 1-based
+
+    plt.figure(figsize=(10, 6))
+    for name, df in df_list:
+        plt.plot(
+            x,
+            df[recall_col],
+            marker='o',
+            label=name
+        )
+
+    plt.xlabel('Document Index')
+    plt.ylabel(f'Recall from column: {recall_col}')
+    plt.title(f'Combined Comparison of {recall_col} Across Ranking Systems')
+    # Set y-axis limit so it’s just above the max value found (for visual clarity)
+    plt.ylim(0, df_list[0][1][recall_col].max() + 1)
+    plt.xticks(x)  # Show every document index on the x-axis
+    plt.legend()
+    plt.grid(True, linestyle='--', linewidth=0.5)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_combined_rank(df_list, cap=50):
+    """
+    Plots the 'rank' column for all ranking systems in df_list on a single chart,
+    capping any rank > cap (and NaN) to the value of cap before plotting.
+
+    Parameters:
+    - df_list: list of tuples (name: str, DataFrame) where each DataFrame contains a 'rank' column.
+    - cap: int (default=50). Any rank value greater than cap, or NaN, will be replaced by cap.
+
+    This draws one line per ranking system:
+      • x-axis = document index (1, 2, …, N)
+      • y-axis = capped rank (position) for each document in that system
+    """
+    # Assume all DataFrames have the same number of rows (documents)
+    num_docs = len(df_list[0][1])
+    x = range(1, num_docs + 1)  # Document indices (1-based)
+
+    plt.figure(figsize=(10, 6))
+    for name, df in df_list:
+        # Ensure we don’t modify the original DataFrame:
+        rank_series = df['rank'].copy()
+
+        # Replace NaN with cap, then cap any value > cap
+        rank_capped = rank_series.fillna(cap).clip(upper=cap)
+
+        plt.plot(
+            x,
+            rank_capped,
+            marker='o',
+            label=name
+        )
+
+    plt.xlabel('Document Index')
+    plt.ylabel(f'Rank (capped at {cap})')
+    plt.title(f'Combined Comparison of Rank Across Ranking Systems (cap={cap})')
+    plt.xticks(x)  # Show every document index on the x-axis
+    plt.ylim(0, cap + 1)  # y-axis from 0 to cap+1 for clarity
+    plt.legend()
+    plt.grid(True, linestyle='--', linewidth=0.5)
+    plt.tight_layout()
+    plt.show()
+
+def load_rqe_hybrid_runs(start, end):
+    """
+    Iteratively loads pickle files named
+    '../02-data/06-Evaluation/ranking_query_evaluation_{i}.pkl' for i in [start, end],
+    and extracts the 'hybrid_statistics' DataFrame from each.
+
+    Parameters:
+    - start: int, starting index
+    - end:   int, ending index (inclusive)
+
+    Returns:
+    - List of pandas.DataFrame objects, each corresponding to the
+      'hybrid_statistics' DataFrame from ranking_query_evaluation_i.pkl.
+    """
+    hybrid_runs = []
+    for i in range(start, end + 1):
+
+        filename = f'../02-data/06-Evaluation/ranking_query_evaluation_{i}.pkl'
+        with open(filename, 'rb') as f:
+            rqe_dict = pickle.load(f)
+            # Extract the 'hybrid_statistics' DataFrame
+            hybrid_df = rqe_dict['hybrid_statistics']
+            hybrid_runs.append(hybrid_df)
+    return hybrid_runs
+
+
+def plot_hybrid_across_evaluations(hybrid_items, metric_col, labels=None, cap=50):
+    """
+    Plots a chosen metric column from multiple Hybrid results, where each element of `hybrid_items`
+    is either:
+      - a pandas.DataFrame already containing the Hybrid results, or
+      - a dict with key 'hybrid_statistics' whose value is the DataFrame we want.
+
+    Parameters:
+    ----------
+    hybrid_items : list of (pandas.DataFrame or dict)
+        Each item is either:
+          • A DataFrame corresponding to Hybrid results for one evaluation run, or
+          • A dict that has key 'hybrid_statistics' (the DataFrame of interest).
+        All Hybrid-DataFrames must have the same number of rows (same set of documents).
+
+    metric_col : str
+        The column name to plot:
+        e.g. 'label_count_top_5', 'label_count_top_10', 'label_count_top_20', or 'rank'.
+
+    labels : list of str or None
+        If provided, a list of the same length as `hybrid_items`, giving each curve a legend label
+        (e.g. ['Run 1', 'Run 2', …, 'Run 6']). If None, the function auto-generates: 'Eval_1', 'Eval_2', …
+
+    cap : int or None (default=50)
+        If not None, then any value in `metric_col` that is > cap or NaN will be replaced by cap before plotting.
+        For example, cap=50 forces all values >50 (and NaN) down to 50.
+
+    Behavior:
+    --------
+    - Checks each element in `hybrid_items`:
+        • If it’s a dict containing 'hybrid_statistics', it uses that DataFrame.
+        • Otherwise, it treats the element itself as the DataFrame.
+    - Expects all resulting DataFrames have the same # of rows.
+    - Draws one line per evaluation, plotting doc index (1…N) on x-axis and `metric_col` (capped) on y-axis.
+    """
+    # First, extract the DataFrame from each element
+    dfs = []
+    for idx, item in enumerate(hybrid_items):
+        if isinstance(item, dict):
+            if 'hybrid_statistics' not in item:
+                raise KeyError(f"Item {idx} is a dict but has no 'hybrid_statistics' key.")
+            dfs.append(item['hybrid_statistics'])
+        else:
+            # Assume item itself is a DataFrame
+            dfs.append(item)
+
+    # Check they all have the same number of rows
+    num_docs = len(dfs[0])
+    for idx, df in enumerate(dfs):
+        if len(df) != num_docs:
+            raise ValueError(f"DataFrame at index {idx} has {len(df)} rows, but expected {num_docs} rows.")
+
+    x = range(1, num_docs + 1)  # 1-based document indices
+
+    # Auto-generate labels if not provided
+    if labels is None:
+        labels = [f'Eval_{i + 1}' for i in range(len(dfs))]
+    if len(labels) != len(dfs):
+        raise ValueError("Length of 'labels' must match number of runs (len(hybrid_items)).")
+
+    plt.figure(figsize=(10, 6))
+
+    for df, lbl in zip(dfs, labels):
+        # Copy to avoid modifying original
+        series = df[metric_col].copy()
+
+        # If cap is specified, replace NaNs with cap and clip above cap
+        if cap is not None:
+            series = series.fillna(cap).clip(upper=cap)
+
+        plt.plot(
+            x,
+            series,
+            marker='o',
+            label=lbl
+        )
+
+    plt.xlabel('Document Index')
+    ylabel = metric_col
+    if cap is not None:
+        ylabel += f' (capped at {cap})'
+    plt.ylabel(ylabel)
+
+    plt.title(f'Hybrid: Comparison of "{metric_col}" Across {len(dfs)} Evaluations')
+    plt.xticks(x)  # Show every document index on the x-axis
+
+    # If plotting 'rank' and we've capped it, force the y-limit
+    if cap is not None and metric_col.lower().strip() == 'rank':
+        plt.ylim(0, cap + 1)
+
+    plt.legend()
+    plt.grid(True, linestyle='--', linewidth=0.5)
+    plt.tight_layout()
+    plt.show()
+
+def plot_hybrid_across_evaluations_sns(hybrid_items, metric_col, labels=None, cap=50):
+    """
+    Plots a chosen metric column from multiple Hybrid results using seaborn, where each element of `hybrid_items`
+    is either:
+      - a pandas.DataFrame already containing the Hybrid results, or
+      - a dict with key 'hybrid_statistics' whose value is the DataFrame we want.
+
+    Parameters:
+    ----------
+    hybrid_items : list of (pandas.DataFrame or dict)
+        Each item is either:
+          • A DataFrame corresponding to Hybrid results for one evaluation run, or
+          • A dict that has key 'hybrid_statistics' (the DataFrame of interest).
+        All Hybrid-DataFrames must have the same number of rows (same set of documents).
+
+    metric_col : str
+        The column name to plot:
+        e.g. 'label_count_top_5', 'label_count_top_10', 'label_count_top_20', or 'rank'.
+
+    labels : list of str or None
+        If provided, a list of the same length as `hybrid_items`, giving each curve a legend label
+        (e.g. ['Run 1', 'Run 2', …, 'Run 6']). If None, the function auto-generates: 'Eval_1', 'Eval_2', …
+
+    cap : int or None (default=50)
+        If not None, then any value in `metric_col` that is > cap or NaN will be replaced by cap before plotting.
+        For example, cap=50 forces all values >50 (and NaN) down to 50.
+
+    Behavior:
+    --------
+    - Checks each element in `hybrid_items`:
+        • If it’s a dict containing 'hybrid_statistics', it uses that DataFrame.
+        • Otherwise, it treats the element itself as the DataFrame.
+    - Expects all resulting DataFrames have the same # of rows.
+    - Draws one seaborn lineplot per evaluation, plotting doc index (1…N) on x-axis and `metric_col` (capped) on y-axis.
+    """
+
+    # 1) Extract the DataFrame from each element
+    dfs = []
+    for idx, item in enumerate(hybrid_items):
+        if isinstance(item, dict):
+            if 'hybrid_statistics' not in item:
+                raise KeyError(f"Item {idx} is a dict but has no 'hybrid_statistics' key.")
+            dfs.append(item['hybrid_statistics'])
+        else:
+            # Assume item itself is a DataFrame
+            dfs.append(item)
+
+    # 2) Verify all DataFrames have the same number of rows
+    num_docs = len(dfs[0])
+    for idx, df in enumerate(dfs):
+        if len(df) != num_docs:
+            raise ValueError(f"DataFrame at index {idx} has {len(df)} rows, but expected {num_docs} rows.")
+
+    x = range(1, num_docs + 1)  # 1-based document indices
+
+    # 3) Auto-generate labels if not provided
+    if labels is None:
+        labels = [f'Eval_{i + 1}' for i in range(len(dfs))]
+    if len(labels) != len(dfs):
+        raise ValueError("Length of 'labels' must match number of runs (len(hybrid_items)).")
+
+    # 4) Set up seaborn theme and palette
+    sns.set_theme(style="whitegrid", palette="Set2")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # 5) Plot each series with seaborn
+    for df, lbl in zip(dfs, labels):
+        # Copy to avoid modifying the original
+        series = df[metric_col].copy()
+
+        # If cap is specified, replace NaNs with cap and clip above cap
+        if cap is not None:
+            series = series.fillna(cap).clip(upper=cap)
+
+        # Use seaborn lineplot for each run
+        sns.lineplot(
+            x=list(x),
+            y=series,
+            marker="o",
+            label=lbl,
+            ax=ax
+        )
+
+    # 6) Labeling and formatting
+    ax.set_xlabel("Document Index")
+    ylabel = metric_col
+    if cap is not None:
+        ylabel += f" (capped at {cap})"
+    ax.set_ylabel(ylabel)
+    ax.set_title(f'Hybrid: Comparison of "{metric_col}" Across {len(dfs)} Evaluations')
+
+    ax.set_xticks(list(x))  # Show every document index on the x-axis
+
+    # If plotting 'rank' and we've capped it, force the y-limit
+    if cap is not None and metric_col.lower().strip() == 'rank':
+        ax.set_ylim(0, cap + 1)
+
+    ax.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+def run_all_models(query_list_documents: List[Any], paths: Dict[str, str], use_expansion: bool = True,
+                   use_multivector: bool = True, top_k : int = 50, norm_vsm: str = 'minmax', norm_bm25:str = 'zscore') -> Dict[str, Any]:
+    """
+    Function to run all retrieval models (BM25, RRF, Word2Vec, Hybrid) and compute statistics.
+
+    Args:
+    - query_list_documents: List of query documents containing query, doc, and label.
+    - paths: Dictionary of paths required for the models.
+    - use_expansion: Boolean flag for Word2Vec query expansion.
+    - use_multivector: Boolean flag for using multivector resources.
+
+    Returns:
+    - stats_data: Dictionary containing statistics data for each retrieval model.
+    """
+
+
+    vsm_records = []
+    bm25_records = []
+    rrf_records = []
+    hybrid_records = []
+    rerank_records = []
+
+    # Load resources for Word2Vec
+    resources = aux_vsm.load_word2vec_resources(paths, use_multivector=use_multivector)
+
+    logger = logging.getLogger(__name__)
+
+    # Run BM25 for each query
+    for section in query_list_documents:
+        bm25_result = aux_bm25.run_bm25_query(paths, section.query, top_k=top_k)
+        bm25_records.append({
+            "doc": section.doc,
+            "label": section.label,
+            "query": section.query,
+            "result": bm25_result
+        })
+
+    # Compute BM25 statistics
+    bm25_statistics = compute_query_run_stats(bm25_records)
+
+    # Run Word2Vec (VSM) for each query
+    for section in query_list_documents:
+        w2v_result = aux_vsm.run_word2vec_query_preloaded(resources, section.query, top_k=top_k,
+                                                          use_expansion=use_expansion)
+        vsm_records.append({
+            "doc": section.doc,
+            "label": section.label,
+            "query": section.query,
+            "result": w2v_result
+        })
+
+    # Compute VSM statistics
+    vsm_statistics = compute_query_run_stats(vsm_records)
+
+    # Run RRF using BM25 and VSM results
+    for i, section in enumerate(query_list_documents):
+        df_bm25 = pd.DataFrame([d.__dict__ for d in bm25_records[i]["result"].results.documents])
+        df_vsm = pd.DataFrame([d.__dict__ for d in vsm_records[i]["result"].results.documents])
+        rrf_result = rrf_from_dfs([df_bm25, df_vsm], rrf_k=60, top_k=top_k)
+        rrf_records.append({
+            "doc": section.doc,
+            "label": section.label,
+            "query": section.query,
+            "result": rrf_result
+        })
+
+    # Compute RRF statistics
+    rrf_statistics = compute_query_run_stats(rrf_records)
+
+    # Run Hybrid model (assuming it combines results from BM25 and Word2Vec)
+    for section in query_list_documents:
+        hybrid_result = hybrid_search(paths=paths, query=section.query, top_k=top_k,
+                                                       use_multivector=use_multivector,norm_bm25=norm_bm25,norm_vsm=norm_vsm)
+        hybrid_records.append({
+            "doc": section.doc,
+            "label": section.label,
+            "query": section.query,
+            "result": hybrid_result
+        })
+
+    # Compute Hybrid statistics
+    hybrid_statistics = compute_query_run_stats(hybrid_records)
+
+    # Run reranking model (assuming it reranks results from the Hybrid model)
+    top_k_rerank = 50  # Adjust top_k for reranking if needed
+    for section in query_list_documents:
+        rerank_results = run_hybrid_query(paths=paths, query=section.query, top_k=top_k_rerank,
+                                                        use_multivector=use_multivector)
+        rerank_records.append({
+            "doc": section.doc,
+            "label": section.label,
+            "query": section.query,
+            "result": rerank_results
+        })
+
+    # Compute rerank statistics
+    rerank_statistics = compute_query_run_stats(rerank_records)
+
+    # Construct stats_data dictionary
+    stats_data = {
+        'bm25_statistics': bm25_statistics['per_record'],
+        'vsm_statistics': vsm_statistics['per_record'],
+        'rrf_statistics': rrf_statistics['per_record'],
+        'hybrid_statistics': hybrid_statistics['per_record'],
+        'rerank_statistics': rerank_statistics['per_record']
+    }
+
+    return stats_data
