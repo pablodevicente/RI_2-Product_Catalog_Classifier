@@ -1,0 +1,23 @@
+### config.yml
+
+# Configuration for embedding vector generation
+paths:
+  word2vec: "../../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"
+  word2vec_finetuned_base: "../../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"
+  word2vec_finetuned_v2: "../../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin"
+  fasttext: "../../02-data/03-VSM/03-Fasttext/cc.en.300.bin"
+  glove: "../../02-data/03-VSM/02-Glove/glove.6B/glove.6B.100d.txt"
+  idf_cache: "../../02-data/03-VSM/idf_cache_path.pkl"
+
+model_dirs:
+  word2vec: "01-Word2Vec"
+  word2vec_finetuned: "01-Word2Vec" #this is just part of the output path
+  fasttext: "03-Fasttext"
+  glove: "02-Glove"
+
+# Default settings for vector generation
+defaults:
+  chunks: 1
+  input_dir: "../../02-data/00-testing/"
+  output_dir: "../../02-data/03-VSM/"
+  size: "4-50-4-150"

@@ -13,6 +13,7 @@ import fasttext
 from tqdm import tqdm
 from typing import List, Dict, Any, Tuple
 from sklearn.feature_extraction.text import TfidfVectorizer
+import yaml
 
 import os
 import logging
@@ -237,10 +238,26 @@ def ensure_directories(path: Path) -> None:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+def load_config(config_path: Path) -> dict:
+    with open(config_path, 'r') as f:
+        return yaml.safe_load(f)
 
-def parse_args() -> argparse.Namespace:
+
+def parse_initial_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=Path("config.yml"),
+        help="Path to YAML config file."
+    )
+    return parser.parse_known_args()[0]
+
+
+def parse_args(defaults: dict) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate document vectors using various embedding models."
+        description="Generate document vectors using various embedding models.",
+        parents=[argparse.ArgumentParser(add_help=False)]
     )
     parser.add_argument(
         "--model",
@@ -251,62 +268,63 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input-dir",
         type=Path,
-        default=Path("../02-data/00-testing/"),
+        default=Path(defaults['input_dir']),
         help="Directory with text files to process."
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("../02-data/03-VSM/"),
+        default=Path(defaults['output_dir']),
         help="Base directory for saving vector pickles."
     )
     parser.add_argument(
         "--size",
-        default="4-50-4-150",
+        default=defaults['size'],
         help="Descriptor tag for output filename."
+    )
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=defaults.get('config', Path('config.yml')),
+        help="Path to YAML config file."
     )
     return parser.parse_args()
 
-
 def main():
     args = parse_args()
+    cfg = load_config(args.config)
 
-    paths = {
-        'word2vec': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"),
-        'word2vec_finetuned': Path("../02-data/03-VSM/01-Word2Vec/word2vec-google-news-300.bin"),
-        'fasttext': Path("../02-data/03-VSM/03-Fasttext/cc.en.300.bin"),
-        'glove': Path("../02-data/03-VSM/02-Glove/glove.6B/glove.6B.100d.txt"),
-        'idf_cache' : Path("../02-data/03-VSM/idf_cache_path.pkl")
-    }
-    finetuned_path = Path(
-        "../02-data/03-VSM/01-Word2Vec/word2vec_finetuned-v2.bin"
-    )
+    # Resolve paths from config
+    paths = cfg['paths']
+    model_dirs = cfg['model_dirs']
+    chunks = cfg.get('defaults', {}).get('chunks', 1)
 
-    # Determine output pickle path
-    model_dir_map = {
-        'word2vec': '01-Word2Vec',
-        'word2vec_finetuned': '01-Word2Vec',
-        'fasttext': '03-Fasttext',
-        'glove': '02-Glove'
-    }
+    # Build full Path objects
+    paths = {k: Path(v) for k, v in paths.items()}
 
-    # 1 for Multi-vector embedding and 0 for single-vector embedding
-    chunks = 1
-
+    # Determine output path
     output_file = (
         args.output_dir
-        / model_dir_map[args.model]
+        / model_dirs[args.model]
         / f"{args.model}-{args.size}-{chunks}.pkl"
     )
 
-    # Model loading dispatch
+    # Ensure output directory exists
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # Dispatch loaders
     loaders = {
         'word2vec': lambda: aux.load_word2vec_model(paths['word2vec']),
-        'word2vec_finetuned': lambda: aux.load_finetuned_word2vec(args.input_dir, paths['word2vec'], finetuned_path),
+        'word2vec_finetuned': lambda: aux.load_finetuned_word2vec(
+            args.input_dir,
+            paths['word2vec_finetuned_base'],
+            paths['word2vec_finetuned_v2']
+        ),
         'fasttext': lambda: aux.load_fasttext_model(paths['fasttext']),
         'glove': lambda: aux.load_glove_index(paths['glove'])
     }
 
+    # Load models
     try:
         model_or_index = loaders[args.model]()
     except Exception as e:
