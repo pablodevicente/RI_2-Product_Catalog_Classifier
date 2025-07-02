@@ -37,8 +37,7 @@ def download(categories, debug=False):
 
         # Download the PDF and save it
         logger.debug(f"Downloading PDF from URL: {urls} to {save_folder}")
-        download_pdfs_from_page(urls, save_fogit reset --soft HEAD~1
-lder)
+        download_pdfs_from_page(urls, save_folder)
 
     logger.debug("Cleaning corrupted PDFs process initiated.")
 
