@@ -1,0 +1,10 @@
+# Configuration for classifier training and evaluation
+vector_files:
+  - "../../02-data/03-VSM/01-Word2Vec/word2vec-4-50-4-150.pkl"
+  - "../../02-data/03-VSM/02-Glove/glove-4-50-4-150.pkl"
+  - "../../02-data/03-VSM/03-Fasttext/fasttext-4-50-4-150.pkl"
+
+save_path: "../../02-data/04-Classifier/classifiers-4-50-4-150.csv"
+
+## Could be the same, could be different
+read_path: "../../02-data/04-Classifier/classifiers-4-50-4-150.csv"

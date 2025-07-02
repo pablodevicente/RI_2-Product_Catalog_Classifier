@@ -2,8 +2,8 @@ import pandas as pd
 import ast
 import matplotlib.pyplot as plt
 import seaborn as sns
-import json
-
+import yaml
+from pathlib import Path
 
 def load_results(file_path):
     """
@@ -161,10 +161,21 @@ def plot_accuracy(df):
     plt.show()
 
 
-# Example usage:
+# Load classifier config
+def load_cfg(path: Path) -> dict:
+    with open(path, 'r') as f:
+        return yaml.safe_load(f)
+
+
+
 if __name__ == '__main__':
+
+    cfg = load_cfg(Path("config.yml"))
+
+    read_path = Path(cfg['read_path'])
+
     # Replace 'results.csv' with the path to your CSV file.
-    df = pd.read_csv("../02-data/04-Classifier/classifiers-4-50-4-150.csv")
+    df = pd.read_csv(read_path)
 
     plot_accuracy(df)
 

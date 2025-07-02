@@ -15,6 +15,9 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score, learning_curve, validation_curve
 
 import matplotlib.pyplot as plt
+import yaml
+from pathlib import Path
+
 
 # Configure logging
 # Configure logging to both console and file
@@ -177,23 +180,31 @@ def train_and_evaluate_classifiers(doc_vectors, doc_paths, file_name, results):
         # Append the flat dictionary to your results list.
         results.append(result_record)
 
-if __name__ == "__main__":
-    files = ["../02-data/03-VSM/01-Word2Vec/word2vec-4-50-4-150.pkl",
-             "../02-data/03-VSM/02-Glove/glove-4-50-4-150.pkl",
-             "../02-data/03-VSM/03-Fasttext/fasttext-4-50-4-150.pkl"]
+# Load classifier config
+def load_cfg(path: Path) -> dict:
+    with open(path, 'r') as f:
+        return yaml.safe_load(f)
 
-    save_path = "../02-data/04-Classifier/classifiers-4-50-4-150.csv"
 
+def main(config_path: Path = Path("config.yml")):
+    cfg = load_cfg(config_path)
+
+
+    files = cfg['vector_files']
+    save_path = Path(cfg['save_path'])
     results = []
 
     for file_path in files:
         document_vectors = load_document_vectors(file_path)
-        if document_vectors is not None:
+        if document_vectors:
             doc_paths = list(document_vectors.keys())
             logging.info(f"=========== Training with VSM {file_path} ===========")
             train_and_evaluate_classifiers(document_vectors, doc_paths, os.path.basename(file_path), results)
 
     df_results = pd.DataFrame(results)
+    save_path.parent.mkdir(parents=True, exist_ok=True)
     df_results.to_csv(save_path, index=False)
     logging.info(f"Results saved to {save_path}")
 
+if __name__ == "__main__":
+    main()
