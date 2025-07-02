@@ -8,6 +8,7 @@ from transformers import BitsAndBytesConfig
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 import argparse
+import config
 
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -193,6 +194,8 @@ def main(pdf_path, classifier_model_path, llama_model, prompt_used, max_new_toke
 
 
 if __name__ == "__main__":
+
+    """ ## LEGACY, decided to implement a config file
     parser = argparse.ArgumentParser(description="Process images from a PDF and apply various filters")
     parser.add_argument('--pdf_path', type=str,
                         default="../02-data/00-testing/03-demo/ microphones",
@@ -211,9 +214,10 @@ if __name__ == "__main__":
                         help="Maximum number of new tokens for LLM generation")
 
     args = parser.parse_args()
+    """
 
-    main(pdf_path=args.pdf_path,
-         classifier_model_path=args.classifier_model_path,
-         llama_model=args.llama_model,
-         prompt_used=args.prompt_used,
-         max_new_tokens=args.max_new_tokens)
+    main(pdf_path=config.BASE_PATH,
+         classifier_model_path=config.IMAGE_CLASSIFIER,
+         llama_model=config.LLAMA_VISION,
+         prompt_used=config.PROMPT,
+         max_new_tokens=config.MAX_NEW_TOKENS)

@@ -7,6 +7,8 @@ import text_preprocessing as txtp
 import re
 import argparse
 import aux_text_preprocessing as aux
+import config
+
 
 def process_txt(folder_path):
     """
@@ -28,7 +30,9 @@ def process_txt(folder_path):
             try:
                 concat_file_path = aux.concat_txt(root, required_files)
                 aux.process_nlp(concat_file_path)
-                # cleanup_txt_files(concat_file_path,root)  # Cleanup files in the same directory
+
+                if config.CLEANUP:
+                    aux.cleanup_txt_files(concat_file_path,root)  # Cleanup files in the same directory
                 logging.debug(f"Successfully processed {root}")
 
             except Exception as e:
@@ -52,6 +56,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
     logger = logging.getLogger(__name__)
 
+    """ ## LEGACY, decided to implement a config file
     parser = argparse.ArgumentParser(description="Process text files into a single file")
     parser.add_argument(
         '--pdf_path',
@@ -59,6 +64,7 @@ if __name__ == "__main__":
         default="../02-data/00-testing/",
         help="Path to the directory containing text files"
     )
-
     args = parser.parse_args()
-    main(args.pdf_path)
+
+    """
+    main(config.BASE_PATH)

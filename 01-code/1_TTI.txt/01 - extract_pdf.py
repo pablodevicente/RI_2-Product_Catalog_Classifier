@@ -5,6 +5,7 @@ from tqdm import tqdm
 from aux_extract_pdf import process_pdf,preload_model
 import argparse
 import traceback
+import config
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
@@ -74,8 +75,8 @@ def main(base_path):
         base_path (str): The base path to the PDF folders.
     """
     # Preload models
-    table_gpt = "tablegpt/TableGPT2-7B"
-    qwn = "Qwen/Qwen2.5-7B-Instruct"
+    table_gpt = config.TABLE_GPT
+    qwn = config.QWN
     model_kwargs = preload_model(model_gpt=table_gpt, model_qwn=qwn)
 
     # Process folders
@@ -83,16 +84,5 @@ def main(base_path):
 
 
 if __name__ == "__main__":
-    # Argument parser for command-line arguments
-    parser = argparse.ArgumentParser(description="Extract and process PDF data.")
-    parser.add_argument(
-        "base_path",
-        type=str,
-        nargs="?",  # Makes the argument optional
-        default="../02-data/00-testing/03-demo",
-        help="The base path to the folder containing PDF files."
-    )
-    args = parser.parse_args()
-
     # Call the main function with the provided base path
-    main(args.base_path)
+    main(config.BASE_PATH)

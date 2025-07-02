@@ -12,18 +12,19 @@ import gc
 import os
 import sys
 import warnings
+import config
 
 ## TRAINS THE CLASSIFIER USED FOR DISCERNING REAL IMAGES TO PROCESS FROM LOGOS OR IRRELEVANT IMAGES
 
 warnings.filterwarnings("ignore", category=UserWarning, module="keras.src.trainers.data_adapters.py_dataset_adapter")
 
-log_file_path = '../02-data/02-classifier/00-model/tensorflow_rendezvous_logs.txt'
+log_file_path = config.LOG_CLASSIFIER
 sys.stderr = open(log_file_path, 'w')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Only capture errors, to avoid excessive logs
 
-train_dir = ('../02-data/02-classifier/train')
-valid_dir = '../02-data/02-classifier/valid'
-test_dir = '../02-data/02-classifier/test'
+train_dir = config.TRAIN_DIR
+valid_dir = config.VALID_DIR
+test_dir = config.TEST_DIR
 
 batch_size = 16
 epochs = 20
@@ -76,7 +77,7 @@ gc.collect()
 ## 3. Create conditions to check every iteration and train
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
 lr_scheduler = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=1)
-checkpoint_callback = ModelCheckpoint('../02-data/02-classifier/00-model/best_image_classifier.keras', monitor='val_accuracy',save_best_only=True,mode='max',verbose=1)
+checkpoint_callback = ModelCheckpoint(config.MODEL_CHECKPOINT, monitor='val_accuracy',save_best_only=True,mode='max',verbose=1)
 
 history = model.fit(
     train_generator,
@@ -100,8 +101,8 @@ test_loss, test_acc = model.evaluate(test_generator, verbose=2)
 print(f"Test accuracy: {test_acc}")
 
 # Evaluate the model on test data (using the best saved model)
-best_model = load_model('../02-data/02-classifier/00-model/best_image_classifier.keras')
+best_model = load_model(config.MODEL_CHECKPOINT)
 test_loss, test_acc = best_model.evaluate(test_generator, verbose=2)
 
 print(f"Test accuracy (best model): {test_acc}")
-model.save('../02-data/02-classifier/00-model/simple_image_classifier.keras')
+model.save(config.CLASSIFIER_SAVE)
