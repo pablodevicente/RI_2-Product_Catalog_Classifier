@@ -1,20 +1,10 @@
-import os
-import numpy as np
 import aux_vsm as aux
-import fasttext.util
 import argparse
-import logging
 import pickle
-from pathlib import Path
 from typing import Any, Dict, Union
-
 from gensim.models import KeyedVectors
-import fasttext
 from tqdm import tqdm
-from typing import List, Dict, Any, Tuple
-from sklearn.feature_extraction.text import TfidfVectorizer
 import yaml
-
 import os
 import logging
 from pathlib import Path
