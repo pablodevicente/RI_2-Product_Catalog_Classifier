@@ -13,6 +13,8 @@ from dataclass import QueryResult, TopKDocumentsResult, RetrievedDocument
 import matplotlib.pyplot as plt
 import pickle
 import seaborn as sns
+import numpy as np
+import itertools
 
 
 @dataclass
@@ -593,6 +595,35 @@ def run_hybrid_query(
     hybrid_topk = TopKDocumentsResult(top_k=top_k, documents=reranked, multi_vector=True)
     return QueryResult(results=hybrid_topk)
 
+def plot_rank_comparison(df1, df2, system_name1='System 1', system_name2='System 2'):
+    """
+    Plots the 'rank' column from two DataFrames (df1 and df2) as scatter plots.
+    Each point represents a document's rank value.
+
+    Args:
+        df1 (DataFrame): First system's data (with a 'rank' column).
+        df2 (DataFrame): Second system's data (with a 'rank' column).
+        system_name1 (str): Label for the first system.
+        system_name2 (str): Label for the second system.
+    """
+    num_docs = len(df1)
+    x = range(1, num_docs + 1)
+
+    plt.figure(figsize=(10, 6))
+    jitter = np.random.normal(0, 0.1, size=num_docs)  # small noise
+    plt.scatter(x, df1['rank'], color='blue', alpha=0.6, label=system_name1)
+    plt.scatter(x, df2['rank'] + jitter, color='red', alpha=0.6, label=system_name2)
+
+    plt.xlabel('Document Index')
+    plt.ylabel('Rank')
+    plt.title('Rank Comparison (All Documents)')
+    plt.ylim(0, 20)
+    plt.xticks(x)
+    plt.legend()
+    plt.grid(True, linestyle='--', linewidth=0.5)
+    plt.tight_layout()
+    plt.show()
+
 
 # 3) DEFINE A FUNCTION TO PLOT Recall@5, @10, @20 FOR ALL DOCUMENTS
 # -------------------------------------------------------------------
@@ -1036,3 +1067,111 @@ def run_all_models(query_list_documents: List[Any], paths: Dict[str, str], use_e
     }
 
     return stats_data
+
+def plot_recall_at_k_all_systems(
+    df_list, ks=[5, 10, 20], cmap='tab10', jitter=0.05, figsize=(10, 6), ax=None
+):
+    """
+    Plots Recall@k for multiple values of k on the same graph per system with consistent coloring,
+    adds slight jitter to overlapping lines and returns median Recall@k per system per k.
+
+    Parameters
+    ----------
+    df_list : list of (str, pd.DataFrame) or dict of {system_name: DataFrame}
+    ks : list of int
+    cmap : str or Colormap
+    jitter : float
+    figsize : tuple of (width, height)
+        Figure size in inches; only used if ax is None.
+    ax : matplotlib.axes.Axes, optional
+        Axes to plot on. If None, creates a new figure and axes with `figsize`.
+
+    Returns
+    -------
+    medians : dict[str, dict[int, float]]
+    """
+    # Normalize dict input
+    if isinstance(df_list, dict):
+        df_list = list(df_list.items())
+
+    # Validate columns
+    col_names = [f'label_count_top_{k}' for k in ks]
+    for system_name, df in df_list:
+        for col in col_names:
+            if col not in df.columns:
+                raise ValueError(f"DataFrame for '{system_name}' is missing column '{col}'")
+
+    # Ensure same length
+    lengths = [len(df) for _, df in df_list]
+    if len(set(lengths)) != 1:
+        raise ValueError("All DataFrames must have the same number of rows.")
+    num_docs = lengths[0]
+    x = np.arange(1, num_docs + 1)
+
+    # Create figure/axis if needed
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+
+    # Assign colors
+    cmap_obj = plt.get_cmap(cmap) if isinstance(cmap, str) else cmap
+    system_colors = {name: cmap_obj(i / max(1, len(df_list) - 1))
+                     for i, (name, _) in enumerate(df_list)}
+
+    medians = {}
+    for sys_idx, (system_name, df) in enumerate(df_list):
+        color = system_colors[system_name]
+        medians[system_name] = {}
+        for idx, k in enumerate(ks):
+            col = f'label_count_top_{k}'
+            # Apply vertical jitter
+            np.random.seed(sys_idx * 100 + k)
+            y = df[col].values + np.random.uniform(-jitter, jitter, size=num_docs)
+            label = system_name if idx == 0 else None
+            ax.plot(x, y, color=color, label=label, linestyle='-')
+            medians[system_name][k] = float(df[col].median())
+
+    ax.set_xlabel('Document Index')
+    ax.set_ylabel('Number of Relevant Labels Retrieved')
+    ax.set_ylim(0, max(ks) + 1)
+    ax.set_xticks(x)
+    ax.legend()
+    ax.grid(True, linestyle='--', linewidth=0.5)
+
+    # If user created the fig, they handle show/layout
+    if ax.figure:
+        plt.tight_layout()
+        plt.show()
+
+    return medians
+
+# i just wanna find a nice graph
+def compare_cmaps(
+    df_list,
+    ks=[5, 10, 20],
+    cmap_list=None,
+    jitter=0.05,
+    figsize=(6, 4)
+):
+    """
+    Generate one plot per colormap in cmap_list, with the plot titled by the cmap name.
+    """
+    if cmap_list is None:
+        cmap_list = ['tab10', 'tab20', 'tab20c_r', 'viridis', 'Set2']
+
+    results = {}
+    for cmap in cmap_list:
+        fig, ax = plt.subplots(figsize=figsize)
+        med = plot_recall_at_k_all_systems(
+            df_list,
+            ks=ks,
+            cmap=cmap,
+            jitter=jitter,
+            ax=ax
+        )
+        ax.set_title(f"Cmap: {cmap}")
+        ax.legend(title="Eval Strategies", bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+        plt.show()
+        results[cmap] = med
+    return results
+

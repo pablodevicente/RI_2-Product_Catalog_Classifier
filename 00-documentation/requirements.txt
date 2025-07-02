@@ -1,7 +1,0 @@
-PyMuPDF
-frontend
-pdfplumber
-logger
-bitsandbytes
-tensorflow
-numpy

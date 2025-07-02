@@ -49,4 +49,28 @@
     "label": "speakers",
     "query": "speaker replacement for a car"
   }
+  },
+  {
+    "doc":   "non-document",
+    "label": "speakers",
+    "query": "speaker replacement for a car"
+  }
+  },
+  {
+    "doc":   "non-document",
+    "label": "alarms-buzzers-and-sirens",
+    "query": "alarms with specifications measured at 253c humidity at 6070 under 86106 kpa pressure"
+  }
+  },
+  {
+    "doc":   "non-document",
+    "label": "alarms-buzzers-and-sirens",
+    "query": "alarm that can operate at a voltage range 8  to 15e"
+  }
+  },
+  {
+    "doc":   "non-document",
+    "label": "alarms-buzzers-and-sirens",
+    "query": "alarms with hand soldering and panel mount with 110 mm lead wires"
+  }
 ]

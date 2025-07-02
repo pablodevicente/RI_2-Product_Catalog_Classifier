@@ -1,10 +1,19 @@
 File,Classifier,Best Parameters,Accuracy
+Logistic Regression,"{'C': 10, 'max_iter': 500}",0.9545454545454546,
 word2vec-5-50.pkl,Logistic Regression,"{'C': 10, 'max_iter': 500}",0.9545454545454546
+SVM,"{'C': 10, 'kernel': 'rbf'}",0.9545454545454546,
 word2vec-5-50.pkl,SVM,"{'C': 10, 'kernel': 'rbf'}",0.9545454545454546
-word2vec-5-50.pkl,Random Forest,"{'max_depth': 20, 'n_estimators': 50}",0.9318181818181818
+Random Forest,"{'max_depth': None, 'n_estimators': 200}",0.9545454545454546,
+word2vec-5-50.pkl,Random Forest,"{'max_depth': None, 'n_estimators': 200}",0.9545454545454546
+Logistic Regression,"{'C': 10, 'max_iter': 500}",0.926829268292683,
 glove-5-50.pkl,Logistic Regression,"{'C': 10, 'max_iter': 500}",0.926829268292683
+SVM,"{'C': 10, 'kernel': 'linear'}",0.9512195121951219,
 glove-5-50.pkl,SVM,"{'C': 10, 'kernel': 'linear'}",0.9512195121951219
-glove-5-50.pkl,Random Forest,"{'max_depth': 20, 'n_estimators': 50}",0.8780487804878049
+Random Forest,"{'max_depth': 10, 'n_estimators': 50}",0.8292682926829268,
+glove-5-50.pkl,Random Forest,"{'max_depth': 10, 'n_estimators': 50}",0.8292682926829268
+Logistic Regression,"{'C': 10, 'max_iter': 500}",0.8048780487804879,
 fasttext-5-50.pkl,Logistic Regression,"{'C': 10, 'max_iter': 500}",0.8048780487804879
+SVM,"{'C': 10, 'kernel': 'rbf'}",0.8780487804878049,
 fasttext-5-50.pkl,SVM,"{'C': 10, 'kernel': 'rbf'}",0.8780487804878049
-fasttext-5-50.pkl,Random Forest,"{'max_depth': None, 'n_estimators': 200}",0.926829268292683
+Random Forest,"{'max_depth': 20, 'n_estimators': 100}",0.9512195121951219,
+fasttext-5-50.pkl,Random Forest,"{'max_depth': 20, 'n_estimators': 100}",0.9512195121951219
