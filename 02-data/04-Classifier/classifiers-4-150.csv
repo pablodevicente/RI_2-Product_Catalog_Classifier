@@ -1,0 +1,127 @@
+file_name,classifier,best_params,accuracy,train_class_distribution,test_class_distribution,mean_cosine_similarity_train,cross_val_accuracy,cross_val_std,confusion_matrix,classification_report
+word2vec-4-150.pkl,Logistic Regression,"{'C': 10, 'max_iter': 500}",0.9401709401709402,"{0: 118, 1: 116, 2: 108, 3: 123}","{0: 33, 1: 29, 2: 28, 3: 27}",0.8291399177642373,0.9483870967741936,0.02489427290922632,"[[32  1  0  0]
+ [ 0 27  2  0]
+ [ 0  1 26  1]
+ [ 0  1  1 25]]","                                   precision    recall  f1-score   support
+
+batteries-non-rechargable-primary       1.00      0.97      0.98        33
+            controller-accesories       0.90      0.93      0.92        29
+                      microphones       0.90      0.93      0.91        28
+                         speakers       0.96      0.93      0.94        27
+
+                         accuracy                           0.94       117
+                        macro avg       0.94      0.94      0.94       117
+                     weighted avg       0.94      0.94      0.94       117
+"
+word2vec-4-150.pkl,SVM,"{'C': 10, 'kernel': 'rbf'}",0.9487179487179487,"{0: 118, 1: 116, 2: 108, 3: 123}","{0: 33, 1: 29, 2: 28, 3: 27}",0.8291399177642373,0.9655913978494624,0.0158031596308592,"[[33  0  0  0]
+ [ 0 27  2  0]
+ [ 0  1 26  1]
+ [ 0  1  1 25]]","                                   precision    recall  f1-score   support
+
+batteries-non-rechargable-primary       1.00      1.00      1.00        33
+            controller-accesories       0.93      0.93      0.93        29
+                      microphones       0.90      0.93      0.91        28
+                         speakers       0.96      0.93      0.94        27
+
+                         accuracy                           0.95       117
+                        macro avg       0.95      0.95      0.95       117
+                     weighted avg       0.95      0.95      0.95       117
+"
+word2vec-4-150.pkl,Random Forest,"{'max_depth': None, 'n_estimators': 50}",0.9487179487179487,"{0: 118, 1: 116, 2: 108, 3: 123}","{0: 33, 1: 29, 2: 28, 3: 27}",0.8291399177642373,0.935483870967742,0.027202388474566734,"[[33  0  0  0]
+ [ 1 27  1  0]
+ [ 1  0 26  1]
+ [ 0  1  1 25]]","                                   precision    recall  f1-score   support
+
+batteries-non-rechargable-primary       0.94      1.00      0.97        33
+            controller-accesories       0.96      0.93      0.95        29
+                      microphones       0.93      0.93      0.93        28
+                         speakers       0.96      0.93      0.94        27
+
+                         accuracy                           0.95       117
+                        macro avg       0.95      0.95      0.95       117
+                     weighted avg       0.95      0.95      0.95       117
+"
+glove-4-150.pkl,Logistic Regression,"{'C': 10, 'max_iter': 500}",0.9557522123893806,"{0: 113, 1: 120, 2: 95, 3: 124}","{0: 36, 1: 25, 2: 26, 3: 26}",0.9706454873085022,0.949084249084249,0.008977473233041183,"[[36  0  0  0]
+ [ 1 22  1  1]
+ [ 0  1 25  0]
+ [ 0  0  1 25]]","                                   precision    recall  f1-score   support
+
+batteries-non-rechargable-primary       0.97      1.00      0.99        36
+            controller-accesories       0.96      0.88      0.92        25
+                      microphones       0.93      0.96      0.94        26
+                         speakers       0.96      0.96      0.96        26
+
+                         accuracy                           0.96       113
+                        macro avg       0.95      0.95      0.95       113
+                     weighted avg       0.96      0.96      0.96       113
+"
+glove-4-150.pkl,SVM,"{'C': 10, 'kernel': 'linear'}",0.9469026548672567,"{0: 113, 1: 120, 2: 95, 3: 124}","{0: 36, 1: 25, 2: 26, 3: 26}",0.9706454873085022,0.9535531135531136,0.00821420801177809,"[[36  0  0  0]
+ [ 1 22  1  1]
+ [ 0  1 24  1]
+ [ 0  0  1 25]]","                                   precision    recall  f1-score   support
+
+batteries-non-rechargable-primary       0.97      1.00      0.99        36
+            controller-accesories       0.96      0.88      0.92        25
+                      microphones       0.92      0.92      0.92        26
+                         speakers       0.93      0.96      0.94        26
+
+                         accuracy                           0.95       113
+                        macro avg       0.94      0.94      0.94       113
+                     weighted avg       0.95      0.95      0.95       113
+"
+glove-4-150.pkl,Random Forest,"{'max_depth': 20, 'n_estimators': 100}",0.9469026548672567,"{0: 113, 1: 120, 2: 95, 3: 124}","{0: 36, 1: 25, 2: 26, 3: 26}",0.9706454873085022,0.929059829059829,0.03892846024769692,"[[36  0  0  0]
+ [ 2 21  2  0]
+ [ 0  0 26  0]
+ [ 0  2  0 24]]","                                   precision    recall  f1-score   support
+
+batteries-non-rechargable-primary       0.95      1.00      0.97        36
+            controller-accesories       0.91      0.84      0.88        25
+                      microphones       0.93      1.00      0.96        26
+                         speakers       1.00      0.92      0.96        26
+
+                         accuracy                           0.95       113
+                        macro avg       0.95      0.94      0.94       113
+                     weighted avg       0.95      0.95      0.95       113
+"
+fasttext-4-150.pkl,Logistic Regression,"{'C': 10, 'max_iter': 500}",0.9292035398230089,"{0: 113, 1: 120, 2: 95, 3: 124}","{0: 36, 1: 25, 2: 26, 3: 26}",0.9129953980445862,0.918046398046398,0.01965931787124803,"[[36  0  0  0]
+ [ 1 22  0  2]
+ [ 2  2 21  1]
+ [ 0  0  0 26]]","                                   precision    recall  f1-score   support
+
+batteries-non-rechargable-primary       0.92      1.00      0.96        36
+            controller-accesories       0.92      0.88      0.90        25
+                      microphones       1.00      0.81      0.89        26
+                         speakers       0.90      1.00      0.95        26
+
+                         accuracy                           0.93       113
+                        macro avg       0.93      0.92      0.92       113
+                     weighted avg       0.93      0.93      0.93       113
+"
+fasttext-4-150.pkl,SVM,"{'C': 10, 'kernel': 'rbf'}",0.9557522123893806,"{0: 113, 1: 120, 2: 95, 3: 124}","{0: 36, 1: 25, 2: 26, 3: 26}",0.9129953980445862,0.9469108669108669,0.008189050472834353,"[[36  0  0  0]
+ [ 1 22  2  0]
+ [ 0  1 25  0]
+ [ 1  0  0 25]]","                                   precision    recall  f1-score   support
+
+batteries-non-rechargable-primary       0.95      1.00      0.97        36
+            controller-accesories       0.96      0.88      0.92        25
+                      microphones       0.93      0.96      0.94        26
+                         speakers       1.00      0.96      0.98        26
+
+                         accuracy                           0.96       113
+                        macro avg       0.96      0.95      0.95       113
+                     weighted avg       0.96      0.96      0.96       113
+"
+fasttext-4-150.pkl,Random Forest,"{'max_depth': 10, 'n_estimators': 100}",0.9823008849557522,"{0: 113, 1: 120, 2: 95, 3: 124}","{0: 36, 1: 25, 2: 26, 3: 26}",0.9129953980445862,0.9624175824175824,0.014951039047120224,"[[36  0  0  0]
+ [ 1 23  0  1]
+ [ 0  0 26  0]
+ [ 0  0  0 26]]","                                   precision    recall  f1-score   support
+
+batteries-non-rechargable-primary       0.97      1.00      0.99        36
+            controller-accesories       1.00      0.92      0.96        25
+                      microphones       1.00      1.00      1.00        26
+                         speakers       0.96      1.00      0.98        26
+
+                         accuracy                           0.98       113
+                        macro avg       0.98      0.98      0.98       113
+                     weighted avg       0.98      0.98      0.98       113
+"

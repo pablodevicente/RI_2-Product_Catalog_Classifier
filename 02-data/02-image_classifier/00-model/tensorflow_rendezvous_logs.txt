@@ -1,0 +1,4 @@
+/home/pablo/anaconda3/lib/python3.12/contextlib.py:158: UserWarning:
+
+Your input ran out of data; interrupting training. Make sure that your dataset or generator can generate at least `steps_per_epoch * epochs` batches. You may need to use the `.repeat()` function when building your dataset.
+
