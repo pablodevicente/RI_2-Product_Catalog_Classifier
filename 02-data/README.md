@@ -18,7 +18,8 @@ This section describes the example data and directory layout. Large or proprieta
     - `01-Word2Vec/` – Pretrained & finetuned Word2Vec binaries  
     - `02-Glove/` – GloVe embeddings  
     - `03-Fasttext/` – FastText embeddings  
-
+  - **04-classifier/** – _Not fully included_  
+    - `classifiers-4-150.csv` – Classifier data  
 ---
 
 ### What’s Included
