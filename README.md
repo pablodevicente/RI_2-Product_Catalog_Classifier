@@ -22,7 +22,7 @@ Our dataset comprises categorized product documentation sourced from the DigiKey
 
 Preserving all multimodal content—text, tables, and images—in a semantically coherent raw .txt format is essential for enabling meaningful embedding and classification tasks. By maintaining both the structure and the informational context of each document, we ensure that semantic signals from tabular and visual data are not lost during preprocessing. This enhances the representational quality of the dataset, making it more suitable for advanced downstream applications.
 
-We also explore how various embedding techniques are affected by corpus composition and formatting. Furthermore, we fine-tune an array of classifiers to determine the optimal configuration for document categorization, assessing performance across both traditional and neural methods.
+We also explore how various embedding techniques are affected by corpus composition and formatting. Furthermore, we fine-tune an array of classifiers to determine the optimal configuration for document categorization, assessing performance across traditional methods.
 
 
 ## Applications
