@@ -18,6 +18,13 @@ Technical documents like **Product Catalogues (PCs)** contain richly formatted i
 
 Our dataset comprises categorized product documentation sourced from the DigiKey platform. Each PDF has been validated and labeled according to product category, with approximately **100 documents per class**. The result is a diverse, well-structured corpus suitable for a wide range of **NLP and IR tasks** in the industrial domain.
 
+## Semantic Preservation for Downstream Tasks
+
+Preserving all multimodal content—text, tables, and images—in a semantically coherent raw .txt format is essential for enabling meaningful embedding and classification tasks. By maintaining both the structure and the informational context of each document, we ensure that semantic signals from tabular and visual data are not lost during preprocessing. This enhances the representational quality of the dataset, making it more suitable for advanced downstream applications.
+
+We also explore how various embedding techniques are affected by corpus composition and formatting. Furthermore, we fine-tune an array of classifiers to determine the optimal configuration for document categorization, assessing performance across both traditional and neural methods.
+
+
 ## Applications
 
 This dataset is designed to support tasks such as:
