@@ -6,6 +6,12 @@ The `01-code` directory contains the core scripts for each stage of the productâ
 
 ## 1. Download_Pdfs
 
+<p align="center">
+  <img src="../00-documentation/Figures/database_construction.png" 
+       alt="Processing Pipeline" 
+       width="1000" />
+</p>
+
 **Objective:**  
 Fetch and validate PDF catalogues from DigiKey product pages.
 
